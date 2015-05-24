@@ -1,3 +1,5 @@
-"""A place to store variables that the user can modify"""
+"""
+A place to store things that the user can modify
+"""
 
-ScreenResolution = (800, 600)
+SCREEN_RESOLUTION = (1024, 768)

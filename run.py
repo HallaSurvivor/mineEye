@@ -1,4 +1,6 @@
-"""Run the game"""
+"""
+Run the game.
+"""
 import pygame
 import config
 import spritenames as sn
@@ -6,7 +8,9 @@ import spritenames as sn
 
 pygame.init()
 
-screen = pygame.display.set_mode(config.ScreenResolution)
+screen = pygame.display.set_mode(config.SCREEN_RESOLUTION)
+
+background = sn.create_background(sn.load('background.png'))
 
 x = 0
 y = 0
@@ -15,7 +19,8 @@ clock = pygame.time.Clock()
 
 done = False
 while not done:
-    screen.fill((0, 0, 0))
+    #TODO: Make the background move instead of the HeroSprite. Watch videos of other games, the Hero is always centered
+    screen.blit(background, (0, 0))
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
