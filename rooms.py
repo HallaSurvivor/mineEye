@@ -67,14 +67,15 @@ class Room_01(Room):
     def __init__(self):
         super().__init__()
 
-        self.background = spritenames.create_background('background.png')
+        self.background = spritenames.create_background(spritenames.load('background.png'))
 
         room_array = [
-            #[x_coord, y_coord, picture],
-            []
+            #[x_coord, y_coord, picture, damage_player],
+            [100, 300, spritenames.load('stone.png'), False],
+            [400, 700, spritenames.load('spikes.png'), True]
         ]
         #TODO: Make some sort of parser to turn a txt file into a new room?
 
         for block in room_array:
-            wall = spritenames.Wall(block[0], block[1], block[2])
+            wall = spritenames.Wall(block[0], block[1], block[2], block[3])
             self.block_list.add(wall)
