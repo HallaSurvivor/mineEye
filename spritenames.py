@@ -14,6 +14,7 @@ import time
 
 _image_library = {}
 
+
 def load(imagename):
     """
     Retrieves previously loaded images from _image_library, and stores newly created ones there as they are called.
@@ -31,6 +32,7 @@ def load(imagename):
         _image_library[imagename] = image
 
     return image
+
 
 def create_background(background_tile):
     """
@@ -149,7 +151,7 @@ class Wall(pygame.sprite.Sprite):
 
     self.damage_player is True if the player is hurt on contact (spikes) but False otherwise
     """
-    def __init__(self, x, y, image):
+    def __init__(self, x, y, image, damage_player=False):
         """
         Create the wall and its location
         :param x: Int representing the x position of the wall's top left corner
@@ -164,4 +166,4 @@ class Wall(pygame.sprite.Sprite):
         self.rect.y = y
         self.rect.x = x
 
-        self.damage_player = False
+        self.damage_player = damage_player
