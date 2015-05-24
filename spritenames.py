@@ -62,8 +62,6 @@ class Hero(pygame.sprite.Sprite):
         .rect.y is the box's top left corner's y position
         .rect.x is the box's top left corner's x position
 
-    self.walls is the list of walls the Hero can collide with
-
     Thanks to those at programarcadegames.com for the basis of this code.
     """
     def __init__(self):
@@ -84,8 +82,6 @@ class Hero(pygame.sprite.Sprite):
         self.rect.x = 0
         self.rect.y = 0
 
-        self.walls = None
-
     def changespeed(self, x, y):
         """
         Changes the Hero's movement speed
@@ -95,33 +91,40 @@ class Hero(pygame.sprite.Sprite):
         self.change_x += x
         self.change_y += y
 
-    def update(self):
+    def damage(self, amount):
         """
-        Update the Hero's position and check for any collisions
+        Reduces the Hero's health based on an event.
+        :param amount: Int representing how much damage was taken
+        """
+        self.hp -= amount
+
+    def move(self, walls):
+        """
+        Changes the Hero's position based on change_x and change_y. Also detects collisions
+        :param walls: list of Wall objects in a given area with which the player can collide
         """
 
         self.rect.x += self.change_x
 
-        block_hit_list = pygame.sprite.spritecollide(self, self.walls, False)
+        block_hit_list = pygame.sprite.spritecollide(self, walls, False)
         for block in block_hit_list:
             if self.change_x > 0:
                 self.rect.right = block.rect.left
             else:
                 self.rect.left = block.rect.right
             if block.damage_player:
-                self.hp -= 5
+                self.damage(5)
 
         self.rect.y += self.change_y
 
-        block_hit_list = pygame.sprite.spritecollide(self, self.walls, False)
+        block_hit_list = pygame.sprite.spritecollide(self, walls, False)
         for block in block_hit_list:
             if self.change_y > 0:
                 self.rect.bottom = block.rect.top
             else:
                 self.rect.top = block.rect.bottom
             if block.damage_player:
-                self.hp -= 5
-
+                self.damage(5)
 
 class Wall(pygame.sprite.Sprite):
     """

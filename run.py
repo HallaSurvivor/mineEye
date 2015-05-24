@@ -32,7 +32,6 @@ wall_list.add(wall_2)
 all_sprites_list.add(wall_2)
 
 Hero = sn.Hero()
-Hero.walls = wall_list
 
 all_sprites_list.add(Hero)
 
@@ -79,7 +78,7 @@ while not done:
                 logger.debug("[DOWN] key released")
                 Hero.changespeed(0, -3)
 
-    all_sprites_list.update()
+    Hero.move(wall_list)
     all_sprites_list.draw(screen)
 
     pygame.display.flip()
