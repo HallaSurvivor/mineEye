@@ -2,45 +2,77 @@
 Run the game.
 """
 import pygame
+import logging
 import config
 import spritenames as sn
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 pygame.init()
-
 screen = pygame.display.set_mode(config.SCREEN_RESOLUTION)
-
 background = sn.create_background(sn.load('background.png'))
 
-x = 0
-y = 0
-
 clock = pygame.time.Clock()
+
+all_sprites_list = pygame.sprite.Group()
+wall_list = pygame.sprite.Group()
+
+wall_1 = sn.Wall(100, 300, sn.load('stone.png'))
+wall_list.add(wall_1)
+all_sprites_list.add(wall_1)
+
+wall_2 = sn.Wall(400, 700, sn.load('stone.png'))
+wall_list.add(wall_2)
+all_sprites_list.add(wall_2)
+
+Hero = sn.Hero()
+Hero.walls = wall_list
+
+all_sprites_list.add(Hero)
 
 done = False
 while not done:
     #TODO: Make the background move instead of the HeroSprite. Watch videos of other games, the Hero is always centered
+
     screen.blit(background, (0, 0))
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             done = True
 
-    pressed = pygame.key.get_pressed()
-    if pressed[pygame.K_UP] or pressed[pygame.K_w]:
-        y -= 3
-    if pressed[pygame.K_DOWN] or pressed[pygame.K_s]:
-        y += 3
-    if pressed[pygame.K_LEFT] or pressed[pygame.K_a]:
-        x -= 3
-    if pressed[pygame.K_RIGHT] or pressed[pygame.K_d]:
-        x += 3
-    if pressed[pygame.K_SPACE]:
-        y = 0
-        x = 0
+        elif event.type == pygame.KEYDOWN:
+            # Create the motion by changing the Hero's speed vector
+            if event.key == config.LEFT:
+                logger.debug("[LEFT] key pushed")
+                Hero.changespeed(-3, 0)
+            elif event.key == config.RIGHT:
+                logger.debug("[RIGHT] key pushed")
+                Hero.changespeed(3, 0)
+            elif event.key == config.UP:
+                logger.debug("[UP] key pushed")
+                Hero.changespeed(0, -3)  # Backwards because computer coords start in top left
+            elif event.key == config.DOWN:
+                logger.debug("[DOWN] key pushed")
+                Hero.changespeed(0, 3)  # Backwards because computer coords start in top left
 
-    screen.blit(sn.load('herosprite.png'), (x, y))
+        elif event.type == pygame.KEYUP:
+            # Cancel the motion by adding the opposite of the keydown situation
+            if event.key == config.LEFT:
+                logger.debug("[LEFT] key released")
+                Hero.changespeed(3, 0)
+            elif event.key == config.RIGHT:
+                logger.debug("[RIGHT] key released")
+                Hero.changespeed(-3, 0)
+            elif event.key == config.UP:
+                logger.debug("[UP] key released")
+                Hero.changespeed(0, 3)
+            elif event.key == config.DOWN:
+                logger.debug("[DOWN] key released")
+                Hero.changespeed(0, -3)
 
+    all_sprites_list.update()
+    all_sprites_list.draw(screen)
 
     pygame.display.flip()
     clock.tick(60)
