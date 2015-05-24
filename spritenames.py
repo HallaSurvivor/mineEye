@@ -27,7 +27,6 @@ def load(imagename):
 
     return image
 
-
 def create_background(background_tile):
     """
     Creates a surface made by tiling the background_tile image
@@ -54,6 +53,8 @@ class Hero(pygame.sprite.Sprite):
 
     self.image is the picture associated with the Hero, should be 48x48
 
+    self.hp is the Health remaining for the Hero.
+
     self.change_x is the Hero's movement speed in the x direction
     self.change_y is the Hero's movement speed in the y direction
 
@@ -72,6 +73,8 @@ class Hero(pygame.sprite.Sprite):
         super().__init__()
 
         self.image = load('herosprite.png')
+
+        self.hp = 50
 
         self.change_x = 0
         self.change_y = 0
@@ -105,6 +108,8 @@ class Hero(pygame.sprite.Sprite):
                 self.rect.right = block.rect.left
             else:
                 self.rect.left = block.rect.right
+            if block.damage_player:
+                self.hp -= 5
 
         self.rect.y += self.change_y
 
@@ -114,11 +119,15 @@ class Hero(pygame.sprite.Sprite):
                 self.rect.bottom = block.rect.top
             else:
                 self.rect.top = block.rect.bottom
+            if block.damage_player:
+                self.hp -= 5
 
 
 class Wall(pygame.sprite.Sprite):
     """
     Wall the Hero can collide with.
+
+    self.damage_player is True if the player is hurt on contact (spikes) but False otherwise
     """
     def __init__(self, x, y, image):
         """
@@ -134,3 +143,5 @@ class Wall(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.y = y
         self.rect.x = x
+
+        self.damage_player = False

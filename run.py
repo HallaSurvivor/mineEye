@@ -1,6 +1,7 @@
 """
 Run the game.
 """
+import os
 import pygame
 import logging
 import config
@@ -10,6 +11,9 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 pygame.init()
+
+HP_FONT = pygame.font.Font(os.path.join('Fonts', 'BLKCHCRY.TTF'), 32)
+
 screen = pygame.display.set_mode(config.SCREEN_RESOLUTION)
 background = sn.create_background(sn.load('background.png'))
 
@@ -22,7 +26,8 @@ wall_1 = sn.Wall(100, 300, sn.load('stone.png'))
 wall_list.add(wall_1)
 all_sprites_list.add(wall_1)
 
-wall_2 = sn.Wall(400, 700, sn.load('stone.png'))
+wall_2 = sn.Wall(400, 700, sn.load('spikes.png'))
+wall_2.damage_player = True
 wall_list.add(wall_2)
 all_sprites_list.add(wall_2)
 
@@ -36,6 +41,9 @@ while not done:
     #TODO: Make the background move instead of the HeroSprite. Watch videos of other games, the Hero is always centered
 
     screen.blit(background, (0, 0))
+
+    Hero_hp = HP_FONT.render("HP: {0}".format(Hero.hp), 1, (255, 255, 255))
+    screen.blit(Hero_hp, (0, 0))
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
