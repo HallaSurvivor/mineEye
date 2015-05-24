@@ -10,6 +10,7 @@ Defines the Wall class to represent a tile the Hero cannot move through
 import os
 import pygame
 import config
+import time
 
 _image_library = {}
 

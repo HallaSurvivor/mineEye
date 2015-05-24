@@ -6,6 +6,7 @@ import pygame
 import logging
 import config
 import spritenames as sn
+import time
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -34,7 +35,9 @@ all_sprites_list.add(wall_2)
 Hero = sn.Hero()
 
 all_sprites_list.add(Hero)
-
+#Vars for the timer
+displayTime = 0
+elapsed_time = time.strftime('%M:%S', time.gmtime(displayTime))
 done = False
 while not done:
     #TODO: Make the background move instead of the HeroSprite. Watch videos of other games, the Hero is always centered
@@ -43,6 +46,17 @@ while not done:
 
     Hero_hp = HP_FONT.render("HP: {0}".format(Hero.hp), 1, config.WHITE)
     screen.blit(Hero_hp, (0, 0))
+    #elapsed time of play
+    elapsed_time_display = HP_FONT.render("Elapsed Time: {0}".format(elapsed_time), 1, config.WHITE)
+    screen.blit(elapsed_time_display,(600,0))
+
+
+
+
+
+
+
+
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -83,3 +97,8 @@ while not done:
 
     pygame.display.flip()
     clock.tick(60)
+    #updates the timer after each run of the loop
+    displayTime += 1/60
+    print(displayTime)
+    elapsed_time = time.strftime('%M:%S', time.gmtime(displayTime))
+    screen.blit(elapsed_time_display,(600,0))
