@@ -99,6 +99,6 @@ while not done:
     clock.tick(60)
     #updates the timer after each run of the loop
     displayTime += 1/60
-    print(displayTime)
+
     elapsed_time = time.strftime('%M:%S', time.gmtime(displayTime))
     screen.blit(elapsed_time_display,(600,0))
