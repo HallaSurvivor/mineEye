@@ -81,13 +81,15 @@ class Hero(pygame.sprite.Sprite):
 
         self.hp = 50
 
+
+
         self.change_x = 0
         self.change_y = 0
 
         self.rect = self.image.get_rect()
-
-        self.rect.x = 0
-        self.rect.y = 0
+        #changed initial point from 0,0 to place hero on the block ledge--Brian 5/24/15
+        self.rect.x = 100
+        self.rect.y = 250
 
     def changespeed(self, x, y):
         """

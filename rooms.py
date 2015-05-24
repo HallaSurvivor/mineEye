@@ -68,11 +68,12 @@ class Room_01(Room):
         super().__init__()
 
         self.background = spritenames.create_background(spritenames.load('background.png'))
+        #modiffied by brian on 5/24 at 5:22pm to add more blocks to provide a surface upon which to test gravity
 
         room_array = [
             #[x_coord, y_coord, picture, damage_player],
             [100, 300, spritenames.load('stone.png'), False],
-            [400, 700, spritenames.load('spikes.png'), True]
+            [400, 700, spritenames.load('spikes.png'), True],[160, 300, spritenames.load('stone.png'), False],[220, 300, spritenames.load('stone.png'), False],[280, 300, spritenames.load('stone.png'), False],[40, 300, spritenames.load('stone.png'), False],[-20, 300, spritenames.load('stone.png'), False]
         ]
         #TODO: Make some sort of parser to turn a txt file into a new room?
 

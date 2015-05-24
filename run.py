@@ -28,8 +28,35 @@ all_sprites_list.add(Hero)
 #Vars for the timer
 displayTime = 0
 elapsed_time = time.strftime('%M:%S', time.gmtime(displayTime))
+#intro function that will allow us to have a start menu
+def intro():
+    intro = True
+    white = sn.create_background(sn.load('sand.jpg'))
+    screen.blit(white,(0,0))
+    welcome = HP_FONT.render("Welcome to mineEye! Press the up arrow to start!", 1, (config.BLACK))
+    screen.blit(welcome,(200,350))
+    pygame.display.update()
+
+    while intro:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+
+            if event.type ==pygame.KEYDOWN:
+                if event.key == config.UP:
+                    intro = False
+
+pygame.display.update()
+clock.tick(15)
+
+#calls start menu function
+intro()
+
+
 
 current_room = rooms.Room_01()
+
 
 done = False
 while not done:
@@ -41,7 +68,7 @@ while not done:
     screen.blit(Hero_hp, (0, 0))
     #elapsed time of play
     elapsed_time_display = HP_FONT.render("Elapsed Time: {0}".format(elapsed_time), 1, config.WHITE)
-    screen.blit(elapsed_time_display,(600,0))
+    screen.blit(elapsed_time_display,(720,0))
 
     # Check for events
     for event in pygame.event.get():
@@ -86,8 +113,11 @@ while not done:
     #updates the timer after each run of the loop
     displayTime += 1/60
     elapsed_time = time.strftime('%M:%S', time.gmtime(displayTime))
-    screen.blit(elapsed_time_display,(600,0))
+
+    #If the player's hp is zero, this blits a black background with red text telling the player of their loss, then sleeps for two seconds, and eventually exits the game
     if Hero.hp == 0:
+        black = sn.create_background(sn.load('blackbox.png'))
+        screen.blit(black,(0,0))
         you_lose = HP_FONT.render("You lose", 1, (255,0,0))
         screen.blit(you_lose,(400,300))
         pygame.display.update()
