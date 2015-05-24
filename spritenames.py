@@ -13,6 +13,7 @@ import config
 
 _image_library = {}
 
+
 def load(imagename):
     """
     Retrieves previously loaded images from _image_library, and stores newly created ones there as they are called.
@@ -30,6 +31,7 @@ def load(imagename):
         _image_library[imagename] = image
 
     return image
+
 
 def create_background(background_tile):
     """
