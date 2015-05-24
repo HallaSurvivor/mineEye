@@ -2,6 +2,10 @@
 Defines the load(imagename) function to import sprites into the game
 
 Defines the create_background(background_tile) function to create a tiled background
+
+Defines the Hero class to represent the hero (player)
+
+Defines the Wall class to represent a tile the Hero cannot move through
 """
 import os
 import pygame
@@ -106,6 +110,12 @@ class Hero(pygame.sprite.Sprite):
 
         self.rect.x += self.change_x
 
+        # Prevent moving offscreen
+        if self.rect.x > config.SCREEN_RESOLUTION[0] - self.image.get_width():
+            self.rect.x = config.SCREEN_RESOLUTION[0] - self.image.get_width()
+        elif self.rect.x < 0:
+            self.rect.x = 0
+
         block_hit_list = pygame.sprite.spritecollide(self, walls, False)
         for block in block_hit_list:
             if self.change_x > 0:
@@ -116,6 +126,12 @@ class Hero(pygame.sprite.Sprite):
                 self.damage(5)
 
         self.rect.y += self.change_y
+
+        # Prevent moving offscreen
+        if self.rect.y > config.SCREEN_RESOLUTION[1] - self.image.get_height():
+            self.rect.y = config.SCREEN_RESOLUTION[1] - self.image.get_height()
+        elif self.rect.y < 0:
+            self.rect.y = 0
 
         block_hit_list = pygame.sprite.spritecollide(self, walls, False)
         for block in block_hit_list:

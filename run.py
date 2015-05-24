@@ -41,7 +41,7 @@ while not done:
 
     screen.blit(background, (0, 0))
 
-    Hero_hp = HP_FONT.render("HP: {0}".format(Hero.hp), 1, (255, 255, 255))
+    Hero_hp = HP_FONT.render("HP: {0}".format(Hero.hp), 1, config.WHITE)
     screen.blit(Hero_hp, (0, 0))
 
     for event in pygame.event.get():
