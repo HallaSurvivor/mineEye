@@ -33,11 +33,17 @@ class Room(object):
     def __init__(self):
         """
         Set the blocklist and enemylist to be sprite groups, and the backgorund to be a surface.
+
+        room_array is a list of strings that will be rendered into the room
         """
         self.block_list = pygame.sprite.Group()
         self.enemy_list = pygame.sprite.Group()
 
         self.background = pygame.Surface(config.SCREEN_RESOLUTION)
+
+        self.room_array = None
+
+        self.array_parsed = False
 
     def update(self):
         """
@@ -52,9 +58,31 @@ class Room(object):
         :param screen: A pygame surface to blit everything onto.
         """
         screen.blit(self.background, (0, 0))
+        if not self.array_parsed:
+            self.parse_room_array()
+            self.array_parsed = True
 
         self.block_list.draw(screen)
         self.enemy_list.draw(screen)
+
+    def parse_room_array(self):
+        """
+        Turn the list of strings stored in every room into an array of walls and enemies.
+        """
+        x = 0
+        y = 0
+        for row in self.room_array:
+            for col in row:
+                if col == "S":
+                    wall = spritenames.Wall(x, y, spritenames.load('stone.png'))
+                    self.block_list.add(wall)
+
+                elif col == "P":
+                    wall = spritenames.Wall(x, y, spritenames.load('spikes.png'), True)
+                    self.block_list.add(wall)
+                x += 64
+            y += 64
+            x = 0
 
 
 class Room_01(Room):
@@ -68,15 +96,10 @@ class Room_01(Room):
         super().__init__()
 
         self.background = spritenames.create_background(spritenames.load('background.png'))
-        #modiffied by brian on 5/24 at 5:22pm to add more blocks to provide a surface upon which to test gravity
 
-        room_array = [
-            #[x_coord, y_coord, picture, damage_player],
-            [100, 300, spritenames.load('stone.png'), False],
-            [400, 700, spritenames.load('spikes.png'), True],[160, 300, spritenames.load('stone.png'), False],[220, 300, spritenames.load('stone.png'), False],[280, 300, spritenames.load('stone.png'), False],[40, 300, spritenames.load('stone.png'), False],[-20, 300, spritenames.load('stone.png'), False]
+        self.room_array = [
+            "SS  SSSSSSSSSSSS",
+            "S              S",
+            "S              S",
+            "SSSSSSSSSSSSS  S",
         ]
-        #TODO: Make some sort of parser to turn a txt file into a new room?
-
-        for block in room_array:
-            wall = spritenames.Wall(block[0], block[1], block[2], block[3])
-            self.block_list.add(wall)
