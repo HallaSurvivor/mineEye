@@ -103,10 +103,14 @@ class InGame(GameState):
         self.hero = sn.Hero()
         self.all_sprites_list.add(self.hero)
 
-        self.current_room = rooms.Room_01()
+        self.world = None
+        self.generate_world()
+
+        self.world.world_shift_x = 0
+        self.world.world_shift_y = 0
 
     def draw(self, screen):
-        self.current_room.draw(screen)
+        self.world.draw(screen)
         self.all_sprites_list.draw(screen)
 
         hero_hp = sn.load_font('BLKCHCRY.TTF', 32).render(
@@ -115,7 +119,7 @@ class InGame(GameState):
         screen.blit(hero_hp, (0, 0))
 
     def update(self):
-        self.hero.move(self.current_room.block_list)
+        self.hero.move(self.world.block_list, self.world)
 
         if self.hero.hp <= 0:
             self.manager.go_to(DeathScreen())
@@ -125,17 +129,6 @@ class InGame(GameState):
             if event.type == pygame.KEYDOWN:
                 # Create the motion by changing the Hero's speed vector
                 if event.key == config.LEFT:
-                    self.hero.changespeed(-3, 0)
-                elif event.key == config.RIGHT:
-                    self.hero.changespeed(3, 0)
-                elif event.key == config.UP:
-                    self.hero.changespeed(0, -3)  # Backwards because computer coords start in top left
-                elif event.key == config.DOWN:
-                    self.hero.changespeed(0, 3)  # Backwards because computer coords start in top left
-
-            elif event.type == pygame.KEYUP:
-                # Cancel the motion by adding the opposite of the keydown situation
-                if event.key == config.LEFT:
                     self.hero.changespeed(3, 0)
                 elif event.key == config.RIGHT:
                     self.hero.changespeed(-3, 0)
@@ -144,9 +137,30 @@ class InGame(GameState):
                 elif event.key == config.DOWN:
                     self.hero.changespeed(0, -3)
 
+            elif event.type == pygame.KEYUP:
+                # Cancel the motion by adding the opposite of the keydown situation
+                if event.key == config.LEFT:
+                    self.hero.changespeed(-3, 0)
+                elif event.key == config.RIGHT:
+                    self.hero.changespeed(3, 0)
+                elif event.key == config.UP:
+                    self.hero.changespeed(0, -3)
+                elif event.key == config.DOWN:
+                    self.hero.changespeed(0, 3)
+
     def die(self):
         self.manager.go_to(DeathScreen())
 
+    def generate_world(self):
+        """
+        TODO - make this generate a series of 50 rooms stacked together
+            take things into consideration such as:
+
+            not having a bunch of rooms going to the right in a row
+            size of door (1 tile vs 2 tiles)
+
+        """
+        self.world = rooms.Room_01()
 
 class DeathScreen(GameState):
     """

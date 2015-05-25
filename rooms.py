@@ -17,10 +17,16 @@ class Room(object):
 
     background is a pygame Surface that is displayed behind the level
 
+    world_shift_x represents how far to the left the world has moved to give a sense of motion
+    world_shift_y represents how far up the world has moved to give a sense of motion
+
     region is a value representing what part of the mine the hero is in.
         This effects color scheme, block types, potential enemies, etc.
 
-    TODO - make a key of what ascii characters corrosponds to which type of block and put it here
+    KEY for room_array:
+        S is stone
+        P is spike
+        D is door <- IMPORTANT, you need a door at the top and bottom to make the logic work
     """
 
     block_list = None
@@ -45,6 +51,9 @@ class Room(object):
 
         self.array_parsed = False
 
+        self.world_shift_x = 0
+        self.world_shift_y = 0
+
     def update(self):
         """
         Update everything in the room
@@ -58,9 +67,12 @@ class Room(object):
         :param screen: A pygame surface to blit everything onto.
         """
         screen.blit(self.background, (0, 0))
+
         if not self.array_parsed:
             self.parse_room_array()
             self.array_parsed = True
+
+        self.shift_world()
 
         self.block_list.draw(screen)
         self.enemy_list.draw(screen)
@@ -70,7 +82,7 @@ class Room(object):
         Turn the list of strings stored in every room into an array of walls and enemies.
         """
         x = 0
-        y = 0
+        y = 256
         for row in self.room_array:
             for col in row:
                 if col == "S":
@@ -83,6 +95,18 @@ class Room(object):
                 x += 64
             y += 64
             x = 0
+
+    def shift_world(self):
+        """
+        Shift everything in the world by world_shift_x and world_shift_y, which parallel the hero's movespeed
+        """
+        for block in self.block_list:
+            block.rect.x += self.world_shift_x
+            block.rect.y += self.world_shift_y
+
+        for enemy in self.enemy_list:
+            enemy.rect.x += self.world_shift_x
+            enemy.rect.y += self.world_shift_y
 
 
 class Room_01(Room):
@@ -98,8 +122,8 @@ class Room_01(Room):
         self.background = spritenames.create_background(spritenames.load('background.png'))
 
         self.room_array = [
-            "SS  SSSSSSSSSSSS",
-            "S              S",
-            "S              S",
-            "SSSSSSSSSSSSS  S",
+            "  SSDDSSSSSSSS  ",
+            "  S          P  ",
+            "  S          P  ",
+            "  SSSSSSSSSDDS  ",
         ]

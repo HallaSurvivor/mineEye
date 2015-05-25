@@ -10,7 +10,7 @@ Defines the Wall class to represent a tile the Hero cannot move through
 import os
 import pygame
 import config
-import time
+import constants
 
 _image_library = {}
 _font_library = {}
@@ -99,15 +99,11 @@ class Hero(pygame.sprite.Sprite):
 
         self.hp = 50
 
-
-
         self.change_x = 0
         self.change_y = 0
 
         self.rect = self.image.get_rect()
-        #changed initial point from 0,0 to place hero on the block ledge--Brian 5/24/15
-        self.rect.x = 100
-        self.rect.y = 250
+        self.rect.center = constants.CENTER
 
     def changespeed(self, x, y):
         """
@@ -125,50 +121,42 @@ class Hero(pygame.sprite.Sprite):
         """
         self.hp -= amount
 
-    def move(self, walls):
+    def move(self, walls, world):
         """
         Changes the Hero's position based on change_x and change_y. Also detects collisions
         :param walls: list of Wall objects in a given area with which the player can collide
+        :param world: the world that the player is moving in. generated through InGame()
         """
 
-        self.rect.x += self.change_x
-
-        # Prevent moving offscreen
-        if self.rect.x > config.SCREEN_RESOLUTION[0] - self.image.get_width():
-            self.rect.x = config.SCREEN_RESOLUTION[0] - self.image.get_width()
-        elif self.rect.x < 0:
-            self.rect.x = 0
+        world.world_shift_x = self.change_x
 
         block_hit_list = pygame.sprite.spritecollide(self, walls, False)
+
         for block in block_hit_list:
+            world.world_shift_x = 0
+
             if self.change_x > 0:
-                self.rect.right = block.rect.left
-            else:
                 self.rect.left = block.rect.right
+            elif self.change_x < 0:
+                self.rect.right = block.rect.left
+
             if block.damage_player:
                 self.damage(5)
 
-        self.rect.y += self.change_y
-
-        # Prevent moving offscreen
-        if self.rect.y > config.SCREEN_RESOLUTION[1] - self.image.get_height():
-            self.rect.y = config.SCREEN_RESOLUTION[1] - self.image.get_height()
-        elif self.rect.y < 0:
-            self.rect.y = 0
+        world.world_shift_y = self.change_y
 
         block_hit_list = pygame.sprite.spritecollide(self, walls, False)
+
         for block in block_hit_list:
+            world.world_shift_y = 0
+
             if self.change_y > 0:
-                self.rect.bottom = block.rect.top
-            else:
                 self.rect.top = block.rect.bottom
+            elif self.change_y < 0:
+                self.rect.bottom = block.rect.top
+
             if block.damage_player:
                 self.damage(5)
-
-    def die(self):
-        """
-        Cause a death animation when the Hero's health reaches 0.
-        """
 
 
 class Wall(pygame.sprite.Sprite):
