@@ -14,7 +14,6 @@ manager = gamestates.GameStateManager()
 
 done = False
 while not done:
-    #TODO: Make the background move instead of the HeroSprite. Watch videos of other games, the Hero is always centered
     clock.tick(60)
 
     if pygame.event.get(pygame.QUIT):
