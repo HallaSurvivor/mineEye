@@ -3,6 +3,7 @@ Store all the game states as classes that are instantiated.
 """
 import pygame
 import config
+import constants
 import spritenames as sn
 import rooms
 
@@ -71,9 +72,13 @@ class TitleScreen(GameState):
         background = sn.create_background(sn.load('sand.jpg'))
         screen.blit(background, (0, 0))
         welcome_text = sn.load_font('BLKCHCRY.TTF', 32).render(
-            "Welcome to mineEye! Press SPACE to begin!", 1, config.BLACK
+            "Welcome to mineEye! Press SPACE to begin!", 1, constants.BLACK
         )
-        screen.blit(welcome_text, (200, 350))
+        welcome_text_x = welcome_text.get_rect().width / 2
+        welcome_text_y = welcome_text.get_rect().height / 2
+        centered_pos = (constants.CENTER[0] - welcome_text_x, constants.CENTER[1] - welcome_text_y)
+
+        screen.blit(welcome_text, centered_pos)
 
     def update(self):
         pass
@@ -105,7 +110,7 @@ class InGame(GameState):
         self.all_sprites_list.draw(screen)
 
         hero_hp = sn.load_font('BLKCHCRY.TTF', 32).render(
-            "HP: {0}".format(self.hero.hp), 1, config.WHITE
+            "HP: {0}".format(self.hero.hp), 1, constants.WHITE
         )
         screen.blit(hero_hp, (0, 0))
 
@@ -150,13 +155,18 @@ class DeathScreen(GameState):
 
     def __init__(self):
         super().__init__()
+        self.manager = None
 
     def draw(self, screen):
-        screen.fill(config.BLACK)
+        screen.fill(constants.BLACK)
         death_text = sn.load_font("Melma.ttf", 32).render(
-            "You Died! \n Press any key to try again.", 1, config.RED
+            "You Died! \n Press any key to try again.", 1, constants.RED
         )
-        screen.blit(death_text, (200, 350))
+        death_text_x = death_text.get_rect().width / 2
+        death_text_y = death_text.get_rect().height / 2
+        centered_pos = (constants.CENTER[0] - death_text_x, constants.CENTER[1] - death_text_y)
+
+        screen.blit(death_text, centered_pos)
 
     def update(self):
         pass
