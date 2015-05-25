@@ -13,6 +13,7 @@ import config
 import time
 
 _image_library = {}
+_font_library = {}
 
 
 def load(imagename):
@@ -50,6 +51,23 @@ def create_background(background_tile):
             background.blit(background_tile, (i, n))
 
     return background
+
+
+def load_font(fontname, size):
+    """
+    Loads a font if it doesn't already exist, retrieves it from a dictionary if it does.
+    :param fontname: a string representing the name of the font to load, including extension
+    :param size: an int representing the size to make the loaded font
+    :returns font: a pygame font created from the font at fontname
+    """
+    global _font_library
+    font = _font_library.get((fontname, size))
+
+    if font is None:
+        font = pygame.font.Font(os.path.join('Fonts', fontname), size)
+        _font_library[(fontname, size)] = font
+
+    return font
 
 
 class Hero(pygame.sprite.Sprite):
@@ -146,6 +164,12 @@ class Hero(pygame.sprite.Sprite):
                 self.rect.top = block.rect.bottom
             if block.damage_player:
                 self.damage(5)
+
+    def die(self):
+        """
+        Cause a death animation when the Hero's health reaches 0.
+        """
+
 
 class Wall(pygame.sprite.Sprite):
     """

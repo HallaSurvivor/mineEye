@@ -7,6 +7,7 @@ SCREEN_RESOLUTION = (1024, 768)
 
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
+RED = (255, 0, 0)
 
 UP = pygame.K_UP
 LEFT = pygame.K_LEFT
