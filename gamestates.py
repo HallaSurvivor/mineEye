@@ -6,6 +6,7 @@ import config
 import constants
 import spritenames as sn
 import rooms
+import time
 
 class GameState(object):
     """
@@ -102,7 +103,7 @@ class InGame(GameState):
 
         self.hero = sn.Hero()
         self.all_sprites_list.add(self.hero)
-
+        self.display_Time = 0
         self.world = None
         self.generate_world()
 
@@ -118,6 +119,13 @@ class InGame(GameState):
         )
         screen.blit(hero_hp, (0, 0))
 
+
+        elapsed_time = time.strftime('%M:%S', time.gmtime(self.display_Time))
+        elapsed_time_display = sn.load_font('BLKCHCRY.TTF', 32).render("Elapsed Time: {0}".format(elapsed_time), 1, constants.WHITE)
+        screen.blit(elapsed_time_display,(768,0))
+        self.display_Time += 1/60
+
+
     def update(self):
         self.hero.move(self.world.block_list, self.world)
 
@@ -125,6 +133,7 @@ class InGame(GameState):
             self.manager.go_to(DeathScreen())
 
     def handle_events(self, events):
+
         for event in events:
             if event.type == pygame.KEYDOWN:
                 # Create the motion by changing the Hero's speed vector
@@ -147,6 +156,8 @@ class InGame(GameState):
                     self.hero.changespeed(0, -3)
                 elif event.key == config.DOWN:
                     self.hero.changespeed(0, 3)
+
+
 
     def die(self):
         self.manager.go_to(DeathScreen())
