@@ -8,6 +8,7 @@ import constants
 import spritenames as sn
 import rooms
 
+
 class GameState(object):
     """
     A superclass for all the states the game can be in.
@@ -50,7 +51,7 @@ class GameStateManager(object):
 
     def go_to(self, gamestate):
         """
-        change the game state to gamestate and add this class to the new gamestate's variables.
+        Change the game state to gamestate and add this class to the new gamestate's variables.
         """
         self.state = gamestate
         self.state.manager = self
@@ -75,16 +76,22 @@ class TitleScreen(GameState):
         welcome_text = sn.load_font('BLKCHCRY.TTF', 32).render(
             "Welcome to mineEye! Press SPACE or T to begin!", 1, constants.BLACK
         )
-        welcome_text_x = welcome_text.get_rect().width / 2
-        welcome_text_y = welcome_text.get_rect().height / 2
-        centered_pos = (constants.CENTER[0] - welcome_text_x, constants.CENTER[1] - welcome_text_y)
+        welcome_rect = welcome_text.get_rect()
+        welcome_rect.centerx = screen.get_rect().centerx
+        welcome_rect.centery = screen.get_rect().centery
 
-        screen.blit(welcome_text, centered_pos)
+        screen.blit(welcome_text, welcome_rect)
 
     def update(self):
         pass
 
     def handle_events(self, events):
+        """
+        Wait for a keystroke to move forward with the game. Space will go to a timerless game, whereas T will go to
+        a timed game.
+
+        Overwrites the default handle_events from the parent GameState class.
+        """
         for e in events:
             if e.type == pygame.KEYDOWN and e.key == pygame.K_SPACE:
                 self.manager.go_to(InGame())
@@ -186,8 +193,6 @@ class InGame(GameState):
                     self.hero.changespeed(0, -3)
                 elif event.key == config.DOWN:
                     self.hero.changespeed(0, 3)
-
-
 
     def die(self):
         self.manager.go_to(DeathScreen())

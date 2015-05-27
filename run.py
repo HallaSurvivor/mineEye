@@ -23,5 +23,4 @@ while not done:
     manager.state.update()
     manager.state.draw(screen)
 
-
     pygame.display.flip()
