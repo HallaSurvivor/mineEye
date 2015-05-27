@@ -5,6 +5,8 @@ import pygame
 
 SCREEN_RESOLUTION = (1024, 768)
 
+PLAY_MUSIC = True
+
 UP = pygame.K_UP
 LEFT = pygame.K_LEFT
 DOWN = pygame.K_DOWN

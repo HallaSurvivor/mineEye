@@ -29,8 +29,11 @@ def load(imagename):
     image = _image_library.get(imagename)
 
     if image is None:
-        image = pygame.image.load(os.path.join("Sprites", imagename))
-        _image_library[imagename] = image
+        try:
+            image = pygame.image.load(os.path.join("Sprites", imagename))
+            _image_library[imagename] = image
+        except:
+            raise FileNotFoundError
 
     return image
 
@@ -64,11 +67,27 @@ def load_font(fontname, size):
     font = _font_library.get((fontname, size))
 
     if font is None:
-        font = pygame.font.Font(os.path.join('Fonts', fontname), size)
-        _font_library[(fontname, size)] = font
+        try:
+            font = pygame.font.Font(os.path.join('Fonts', fontname), size)
+            _font_library[(fontname, size)] = font
+        except:
+            raise FileNotFoundError
 
     return font
 
+
+def play_music(musicname):
+    """
+    Load a pygame music object from a music file and play it if config.PLAY_MUSIC is True.
+    :param musicname: The name of the music file to be loaded and played, including extension.
+        must be located in /Music
+    """
+    try:
+        pygame.mixer.music.stop()  # Stop any previously playing music
+        pygame.mixer.music.load(os.path.join('Music', musicname))
+        pygame.mixer.music.play()
+    except:
+        raise FileNotFoundError
 
 class Hero(pygame.sprite.Sprite):
     """

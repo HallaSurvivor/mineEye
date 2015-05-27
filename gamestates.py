@@ -12,7 +12,12 @@ import rooms
 class GameState(object):
     """
     A superclass for all the states the game can be in.
+
+    musicfile is a string representing the name of background music to be played.
     """
+
+    musicfile = None
+
     def __init__(self):
         pass
 
@@ -52,15 +57,22 @@ class GameStateManager(object):
     def go_to(self, gamestate):
         """
         Change the game state to gamestate and add this class to the new gamestate's variables.
+
+        If the new gamestate has a music file associated with it, play that music.
         """
         self.state = gamestate
         self.state.manager = self
+
+        if gamestate.musicfile:
+            sn.play_music(gamestate.musicfile)
 
 
 class TitleScreen(GameState):
     """
     The title screen game state.
     """
+
+    musicfile = 'O_Fortuna.mp3'
 
     def __init__(self):
         super().__init__()
@@ -103,6 +115,8 @@ class InGame(GameState):
     """
     A game state for moving and falling through the mine
     """
+
+    musicfile = 'Pathetique.mp3'
 
     def __init__(self, timer=False):
         """
@@ -208,10 +222,13 @@ class InGame(GameState):
         """
         self.world = rooms.Room_01()
 
+
 class DeathScreen(GameState):
     """
     A game state for showing the hero's death.
     """
+
+    musicfile = 'Raven.mp3'
 
     def __init__(self):
         super().__init__()
