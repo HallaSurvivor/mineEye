@@ -9,3 +9,5 @@ UP = pygame.K_UP
 LEFT = pygame.K_LEFT
 DOWN = pygame.K_DOWN
 RIGHT = pygame.K_RIGHT
+
+PAUSE = pygame.K_ESCAPE

@@ -73,7 +73,7 @@ class TitleScreen(GameState):
         background = sn.create_background(sn.load('sand.jpg'))
         screen.blit(background, (0, 0))
         welcome_text = sn.load_font('BLKCHCRY.TTF', 32).render(
-            "Welcome to mineEye! Press SPACE to begin!", 1, constants.BLACK
+            "Welcome to mineEye! Press SPACE or T to begin!", 1, constants.BLACK
         )
         welcome_text_x = welcome_text.get_rect().width / 2
         welcome_text_y = welcome_text.get_rect().height / 2
@@ -88,6 +88,8 @@ class TitleScreen(GameState):
         for e in events:
             if e.type == pygame.KEYDOWN and e.key == pygame.K_SPACE:
                 self.manager.go_to(InGame())
+            elif e.type == pygame.KEYDOWN and e.key == pygame.K_t:
+                self.manager.go_to(InGame(timer=True))
 
 
 class InGame(GameState):
@@ -95,7 +97,11 @@ class InGame(GameState):
     A game state for moving and falling through the mine
     """
 
-    def __init__(self):
+    def __init__(self, timer=False):
+        """
+        Instantiate the primary Game State.
+        :param timer: A boolean. True if a timer is to be displayed in the top right, False if not.
+        """
         super().__init__()
         self.manager = None
 
@@ -110,7 +116,18 @@ class InGame(GameState):
         self.world.world_shift_x = 0
         self.world.world_shift_y = 0
 
+        self.timer = timer
+
     def draw(self, screen):
+        """
+        Overwrites draw in the GameState class. Draws all of the blocks and enemies in the levels in this
+        game state to the screen.
+
+        Additionally, a HUD is displayed at the top of the screen, showing:
+            the Hero's HP
+            the
+        :param screen: The pygame screen on which to draw.
+        """
         self.world.draw(screen)
         self.all_sprites_list.draw(screen)
 
@@ -119,22 +136,31 @@ class InGame(GameState):
         )
         screen.blit(hero_hp, (0, 0))
 
-        elapsed_time = datetime.datetime.now() - self.start_time
-        formatted_elapsed_time = elapsed_time.total_seconds()
-        elapsed_time_display = sn.load_font('BLKCHCRY.TTF', 20).render(
-            "{ElapsedTime}".format(ElapsedTime=formatted_elapsed_time), 1, constants.WHITE
-        )
-        screen.blit(elapsed_time_display, (950, 0))
-
+        if self.timer:
+            elapsed_time = datetime.datetime.now() - self.start_time
+            formatted_elapsed_time = elapsed_time.total_seconds()
+            elapsed_time_display = sn.load_font('BLKCHCRY.TTF', 20).render(
+                "{ElapsedTime}".format(ElapsedTime=formatted_elapsed_time), 1, constants.WHITE
+            )
+            screen.blit(elapsed_time_display, (950, 0))
 
     def update(self):
+        """
+        Redraw all of the blocks and enemies in their updated positions as the player interacts with the world,
+        items drop, enemies move, etc.
+        """
         self.hero.move(self.world.block_list, self.world)
 
         if self.hero.hp <= 0:
             self.manager.go_to(DeathScreen())
 
     def handle_events(self, events):
-
+        """
+        Parse all of the events that pygame registers inside the class.
+        These events include:
+            key presses
+        :param events: a list of pygame events, get via pygame.event.get()
+        """
         for event in events:
             if event.type == pygame.KEYDOWN:
                 # Create the motion by changing the Hero's speed vector
@@ -146,6 +172,9 @@ class InGame(GameState):
                     self.hero.changespeed(0, 3)
                 elif event.key == config.DOWN:
                     self.hero.changespeed(0, -3)
+                # Quit to TitleScreen (eventually pause menu) if the user presses escape
+                elif event.key == config.PAUSE:
+                    self.manager.go_to(TitleScreen())
 
             elif event.type == pygame.KEYUP:
                 # Cancel the motion by adding the opposite of the keydown situation
