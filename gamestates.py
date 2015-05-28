@@ -5,8 +5,9 @@ import datetime
 import pygame
 import config
 import constants
-import spritenames as sn
+import helpers as h
 import rooms
+from hero import Hero
 
 
 class GameState(object):
@@ -64,7 +65,7 @@ class GameStateManager(object):
         self.state.manager = self
 
         if gamestate.musicfile:
-            sn.play_music(gamestate.musicfile)
+            h.play_music(gamestate.musicfile)
 
 
 class TitleScreen(GameState):
@@ -83,9 +84,9 @@ class TitleScreen(GameState):
         Draw a TitleScreen with text telling the user to press SPACE to begin
         :param screen: The pygame screen on which to draw
         """
-        background = sn.create_background(sn.load('sand.jpg'))
+        background = h.create_background(h.load('sand.jpg'))
         screen.blit(background, (0, 0))
-        welcome_text = sn.load_font('BLKCHCRY.TTF', 32).render(
+        welcome_text = h.load_font('BLKCHCRY.TTF', 32).render(
             "Welcome to mineEye! Press SPACE or T to begin!", 1, constants.BLACK
         )
         welcome_rect = welcome_text.get_rect()
@@ -128,7 +129,7 @@ class InGame(GameState):
 
         self.all_sprites_list = pygame.sprite.Group()
 
-        self.hero = sn.Hero()
+        self.hero = Hero()
         self.all_sprites_list.add(self.hero)
         self.start_time = datetime.datetime.now()
         self.world = None
@@ -149,7 +150,7 @@ class InGame(GameState):
         self.world.draw(screen)
         self.all_sprites_list.draw(screen)
 
-        hero_hp = sn.load_font('BLKCHCRY.TTF', 32).render(
+        hero_hp = h.load_font('BLKCHCRY.TTF', 32).render(
             "HP: {0}".format(self.hero.hp), 1, constants.WHITE
         )
         screen.blit(hero_hp, (0, 0))
@@ -157,7 +158,7 @@ class InGame(GameState):
         if self.timer:
             elapsed_time = datetime.datetime.now() - self.start_time
             formatted_elapsed_time = elapsed_time.total_seconds()
-            elapsed_time_display = sn.load_font('BLKCHCRY.TTF', 20).render(
+            elapsed_time_display = h.load_font('BLKCHCRY.TTF', 20).render(
                 "{ElapsedTime}".format(ElapsedTime=formatted_elapsed_time), 1, constants.WHITE
             )
             screen.blit(elapsed_time_display, (950, 0))
@@ -233,7 +234,7 @@ class DeathScreen(GameState):
 
     def draw(self, screen):
         screen.fill(constants.BLACK)
-        death_text = sn.load_font("Melma.ttf", 32).render(
+        death_text = h.load_font("Melma.ttf", 32).render(
             "You Died! \n Press any key to try again.", 1, constants.RED
         )
         death_text_x = death_text.get_rect().width / 2

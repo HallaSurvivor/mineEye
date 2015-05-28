@@ -5,7 +5,63 @@ Adds individual subclasses of Room with information specific to each room.
 """
 import pygame
 import config
-import spritenames
+import helpers as h
+
+
+class Wall(pygame.sprite.Sprite):
+    """
+    Wall the Hero can collide with.
+
+    self.damage_player is True if the player is hurt on contact (spikes) but False otherwise
+    """
+    def __init__(self, x, y, image, damage_player=False):
+        """
+        Create the wall and its location
+        :param x: Int representing the x position of the wall's top left corner
+        :param y: Int representing the y position of the wall's top left corner
+        :param image: a pygame surface associated with the wall's texture
+        """
+        super().__init__()
+
+        self.image = image
+
+        self.rect = self.image.get_rect()
+        self.rect.y = y
+        self.rect.x = x
+
+        self.damage_player = damage_player
+
+    def update(self):
+        """
+        Update the blocks.
+        """
+        pass
+
+    def movex(self, xspeed):
+        """
+        Move the wall in the X direction.
+        Collisions are handled in the Room class, since the entire room
+            needs to stop moving when a single Wall collides with the hero.
+        Movement is split between X and Y so that collision checking only has to deal with
+            one at a time.
+
+        :param xpseed: Int representing the change in x direction
+        """
+
+        self.rect.x += xspeed
+
+    def movey(self, yspeed):
+        """
+        Move the wall in the Y direction.
+        Collisions are handled in the Room class, since the entire room
+            needs to stop moving when a single Wall collides with the hero.
+        Movement is split between X and Y so that collision checking only has to deal with
+            one at a time.
+
+        :param yspeed:  Inte representing the change in y direction
+        """
+
+        self.rect.y += yspeed
 
 
 class Room(object):
@@ -147,11 +203,11 @@ class Room(object):
         for row in self.room_array:
             for col in row:
                 if col == "S":
-                    wall = spritenames.Wall(x, y, spritenames.load('stone.png'))
+                    wall = Wall(x, y, h.load('stone.png'))
                     self.block_list.add(wall)
 
                 elif col == "P":
-                    wall = spritenames.Wall(x, y, spritenames.load('spikes.png'), True)
+                    wall = Wall(x, y, h.load('spikes.png'), True)
                     self.block_list.add(wall)
                 x += 64
             y += 64
@@ -166,7 +222,7 @@ class Room_01(Room):
     def __init__(self):
         super().__init__()
 
-        self.background = spritenames.create_background(spritenames.load('background.png'))
+        self.background = h.create_background(h.load('background.png'))
 
         self.room_array = [
             "  SSDDSSSSSSSS  ",
@@ -183,7 +239,7 @@ class Room_02(Room):
     def __init__(self):
         super().__init__()
 
-        self.background = spritenames.create_background(spritenames.load('background.png'))
+        self.background = h.create_background(h.load('background.png'))
 
         self.room_array = [
             "  SSSSSSSSSDDS  ",
