@@ -89,6 +89,7 @@ def play_music(musicname):
     except:
         raise FileNotFoundError
 
+
 class Hero(pygame.sprite.Sprite):
     """
     The Hero that the player controls
@@ -116,7 +117,7 @@ class Hero(pygame.sprite.Sprite):
 
         self.image = load('herosprite.png')
 
-        self.hp = 50
+        self.hp = 5000
 
         self.change_x = 0
         self.change_y = 0
@@ -124,58 +125,12 @@ class Hero(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = constants.CENTER
 
-    def changespeed(self, x, y):
-        """
-        Changes the Hero's movement speed
-        :param x: int representing the change in x speed
-        :param y: int representing the change in y speed
-        """
-        self.change_x += x
-        self.change_y += y
-
     def damage(self, amount):
         """
         Reduces the Hero's health based on an event.
         :param amount: Int representing how much damage was taken
         """
         self.hp -= amount
-
-    def move(self, walls, world):
-        """
-        Changes the Hero's position based on change_x and change_y. Also detects collisions
-        :param walls: list of Wall objects in a given area with which the player can collide
-        :param world: the world that the player is moving in. generated through InGame()
-        """
-
-        world.world_shift_x = self.change_x
-
-        block_hit_list = pygame.sprite.spritecollide(self, walls, False)
-
-        for block in block_hit_list:
-            world.world_shift_x = 0
-
-            if self.change_x > 0:
-                self.rect.left = block.rect.right
-            elif self.change_x < 0:
-                self.rect.right = block.rect.left
-
-            if block.damage_player:
-                self.damage(5)
-
-        world.world_shift_y = self.change_y
-
-        block_hit_list = pygame.sprite.spritecollide(self, walls, False)
-
-        for block in block_hit_list:
-            world.world_shift_y = 0
-
-            if self.change_y > 0:
-                self.rect.top = block.rect.bottom
-            elif self.change_y < 0:
-                self.rect.bottom = block.rect.top
-
-            if block.damage_player:
-                self.damage(5)
 
 
 class Wall(pygame.sprite.Sprite):
@@ -200,3 +155,35 @@ class Wall(pygame.sprite.Sprite):
         self.rect.x = x
 
         self.damage_player = damage_player
+
+    def update(self):
+        """
+        Update the blocks.
+        """
+        pass
+
+    def movex(self, xspeed):
+        """
+        Move the wall in the X direction.
+        Collisions are handled in the Room class, since the entire room
+            needs to stop moving when a single Wall collides with the hero.
+        Movement is split between X and Y so that collision checking only has to deal with
+            one at a time.
+
+        :param xpseed: Int representing the change in x direction
+        """
+
+        self.rect.x += xspeed
+
+    def movey(self, yspeed):
+        """
+        Move the wall in the Y direction.
+        Collisions are handled in the Room class, since the entire room
+            needs to stop moving when a single Wall collides with the hero.
+        Movement is split between X and Y so that collision checking only has to deal with
+            one at a time.
+
+        :param yspeed:  Inte representing the change in y direction
+        """
+
+        self.rect.y += yspeed

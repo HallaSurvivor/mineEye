@@ -47,18 +47,72 @@ class Room(object):
 
         self.background = pygame.Surface(config.SCREEN_RESOLUTION)
 
+        self.xspeed = 0
+        self.yspeed = 0
+
         self.room_array = None
 
         self.array_parsed = False
 
-        self.world_shift_x = 0
-        self.world_shift_y = 0
+    def update(self, hero):
+        """
+        Update all of the blocks in the room,
+        Move all of the blocks based on user input,
+        Check for collisions,
+        Update all of the enemies.
+        :param hero: An instance of the Hero class that walls can collide with.
+        """
 
-    def update(self):
-        """
-        Update everything in the room
-        """
+        # Move the blocks in the X direction
+        for block in self.block_list:
+            block.movex(self.xspeed)
+
+        # Check for block-hero collisions
+        block_hit_list = pygame.sprite.spritecollide(hero, self.block_list, False)
+        for block in block_hit_list:
+            old_x_pos = block.rect.x
+            if self.xspeed > 0:
+                block.rect.right = hero.rect.left
+            elif self.xspeed < 0:
+                block.rect.left = hero.rect.right
+            x_pos_change = block.rect.x - old_x_pos
+
+            # Shift the rest of the room to stay in line with the block that collided
+            for block2 in self.block_list:
+                if block2 != block:
+                    block2.rect.x += x_pos_change
+
+            # Damage the player if the block is a spike
+            if block.damage_player:
+                hero.damage(5)
+
+        # Move the blocks in the Y direction
+        for block in self.block_list:
+            block.movey(self.yspeed)
+
+        # Check for block-hero collisions
+        block_hit_list = pygame.sprite.spritecollide(hero, self.block_list, False)
+        for block in block_hit_list:
+            old_y_pos = block.rect.y
+            if self.yspeed > 0:
+                block.rect.bottom = hero.rect.top
+            elif self.yspeed < 0:
+                block.rect.top = hero.rect.bottom
+            y_pos_change = block.rect.y - old_y_pos
+
+            # Shift the rest of the room to stay in line with the block that collided
+            for block2 in self.block_list:
+                if block2 != block:
+                    block2.rect.y += y_pos_change
+
+            # Damage the player if the block is a spike
+            if block.damage_player:
+                hero.damage(5)
+
+        # Update all the blocks in the room
         self.block_list.update()
+
+        # Update the enemies (not currently implemented)
         self.enemy_list.update()
 
     def draw(self, screen):
@@ -72,10 +126,17 @@ class Room(object):
             self.parse_room_array()
             self.array_parsed = True
 
-        self.shift_world()
-
         self.block_list.draw(screen)
         self.enemy_list.draw(screen)
+
+    def changespeed(self, changex, changey):
+        """
+        Change the Room's velocity vector.
+        :param changex: Int representing the amount by which to change self.xspeed
+        :param changey: Int representing the amount by which to change self.yspeed
+        """
+        self.xspeed += changex
+        self.yspeed += changey
 
     def parse_room_array(self):
         """
@@ -96,24 +157,10 @@ class Room(object):
             y += 64
             x = 0
 
-    def shift_world(self):
-        """
-        Shift everything in the world by world_shift_x and world_shift_y, which parallel the hero's movespeed
-        """
-        for block in self.block_list:
-            block.rect.x += self.world_shift_x
-            block.rect.y += self.world_shift_y
-
-        for enemy in self.enemy_list:
-            enemy.rect.x += self.world_shift_x
-            enemy.rect.y += self.world_shift_y
-
 
 class Room_01(Room):
     """
-    Room 1:
-
-    TODO - make a schematic for this room and put it here.
+    Room 1
     """
 
     def __init__(self):
@@ -126,4 +173,21 @@ class Room_01(Room):
             "  S          P  ",
             "  S          P  ",
             "  SSSSSSSSSDDS  ",
+        ]
+
+
+class Room_02(Room):
+    """
+    Room 2
+    """
+    def __init__(self):
+        super().__init__()
+
+        self.background = spritenames.create_background(spritenames.load('background.png'))
+
+        self.room_array = [
+            "  SSSSSSSSSDDS  ",
+            "  P          P  ",
+            "  P       S  P  ",
+            "  SSDDSSSSSSSS  ",
         ]

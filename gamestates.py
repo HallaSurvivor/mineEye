@@ -134,9 +134,6 @@ class InGame(GameState):
         self.world = None
         self.generate_world()
 
-        self.world.world_shift_x = 0
-        self.world.world_shift_y = 0
-
         self.timer = timer
 
     def draw(self, screen):
@@ -170,7 +167,7 @@ class InGame(GameState):
         Redraw all of the blocks and enemies in their updated positions as the player interacts with the world,
         items drop, enemies move, etc.
         """
-        self.hero.move(self.world.block_list, self.world)
+        self.world.update(self.hero)
 
         if self.hero.hp <= 0:
             self.manager.go_to(DeathScreen())
@@ -186,13 +183,13 @@ class InGame(GameState):
             if event.type == pygame.KEYDOWN:
                 # Create the motion by changing the Hero's speed vector
                 if event.key == config.LEFT:
-                    self.hero.changespeed(3, 0)
+                    self.world.changespeed(3, 0)
                 elif event.key == config.RIGHT:
-                    self.hero.changespeed(-3, 0)
+                    self.world.changespeed(-3, 0)
                 elif event.key == config.UP:
-                    self.hero.changespeed(0, 3)
+                    self.world.changespeed(0, 3)
                 elif event.key == config.DOWN:
-                    self.hero.changespeed(0, -3)
+                    self.world.changespeed(0, -3)
                 # Quit to TitleScreen (eventually pause menu) if the user presses escape
                 elif event.key == config.PAUSE:
                     self.manager.go_to(TitleScreen())
@@ -200,13 +197,13 @@ class InGame(GameState):
             elif event.type == pygame.KEYUP:
                 # Cancel the motion by adding the opposite of the keydown situation
                 if event.key == config.LEFT:
-                    self.hero.changespeed(-3, 0)
+                    self.world.changespeed(-3, 0)
                 elif event.key == config.RIGHT:
-                    self.hero.changespeed(3, 0)
+                    self.world.changespeed(3, 0)
                 elif event.key == config.UP:
-                    self.hero.changespeed(0, -3)
+                    self.world.changespeed(0, -3)
                 elif event.key == config.DOWN:
-                    self.hero.changespeed(0, 3)
+                    self.world.changespeed(0, 3)
 
     def die(self):
         self.manager.go_to(DeathScreen())
@@ -220,7 +217,7 @@ class InGame(GameState):
             size of door (1 tile vs 2 tiles)
 
         """
-        self.world = rooms.Room_01()
+        self.world = rooms.Room_02()
 
 
 class DeathScreen(GameState):
