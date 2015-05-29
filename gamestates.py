@@ -132,11 +132,12 @@ class InGame(GameState):
 
         self.hero = Hero()
         self.all_sprites_list.add(self.hero)
+
         self.start_time = datetime.datetime.now()
+
         self.world = None
         self.generate_world()
-
-        self.world.change_gravity(0, -3)
+        self.hero.world = self.world
 
         self.timer = timer
 
@@ -191,9 +192,11 @@ class InGame(GameState):
                 elif event.key == config.RIGHT:
                     self.world.changespeed(-3, 0)
                 elif event.key == config.UP:
-                    self.world.changespeed(0, 3)
+                    if not self.hero.jumping:
+                        self.world.changespeed(0, 12)
+                        self.hero.jumping = True
                 elif event.key == config.DOWN:
-                    self.world.changespeed(0, -3)
+                    pass
                 # Quit to TitleScreen (eventually pause menu) if the user presses escape
                 elif event.key == config.PAUSE:
                     self.manager.go_to(TitleScreen())
@@ -205,9 +208,9 @@ class InGame(GameState):
                 elif event.key == config.RIGHT:
                     self.world.changespeed(3, 0)
                 elif event.key == config.UP:
-                    self.world.changespeed(0, -3)
+                    pass
                 elif event.key == config.DOWN:
-                    self.world.changespeed(0, 3)
+                    pass
 
     def die(self):
         self.manager.go_to(DeathScreen())

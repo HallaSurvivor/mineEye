@@ -20,6 +20,7 @@ class Wall(pygame.sprite.Sprite):
         :param x: Int representing the x position of the wall's top left corner
         :param y: Int representing the y position of the wall's top left corner
         :param image: a pygame surface associated with the wall's texture
+        :param damage_player: Boolean. True if touching the wall hurts the player
         """
         super().__init__()
 
@@ -94,7 +95,7 @@ class Room(object):
 
     def __init__(self):
         """
-        Set the blocklist and enemylist to be sprite groups, and the backgorund to be a surface.
+        Set the blocklist and enemylist to be sprite groups, and the background to be a surface.
 
         room_array is a list of strings that will be rendered into the room
         """
@@ -106,8 +107,8 @@ class Room(object):
         self.xspeed = 0
         self.yspeed = 0
 
-        self.xgravity = 0
-        self.ygravity = 0
+        self.base_y_gravity = -3
+        self.gravity_acceleration = -1
 
         self.room_array = None
 
@@ -115,7 +116,7 @@ class Room(object):
 
     def move_world(self, hero, x, y):
         """
-        Move all of the blocks based on user input,
+        Move all of the blocks by x and y,
         Check for collisions.
         :param hero: An instance of the Hero class that walls can collide with.
         :param x: The Int of how far to shift the world's x
@@ -157,6 +158,8 @@ class Room(object):
                 block.rect.bottom = hero.rect.top
             elif y < 0:
                 block.rect.top = hero.rect.bottom
+                self.yspeed = 0
+                hero.jumping = False
             y_pos_change = block.rect.y - old_y_pos
 
             # Shift the rest of the room to stay in line with the block that collided
@@ -168,14 +171,15 @@ class Room(object):
             if block.damage_player:
                 hero.damage(5)
 
-    def change_gravity(self, changex, changey):
+    def calc_gravity(self):
         """
         Change self.xgravity and self.ygravity to change the world's gravity.
-        :param changex: the Int amount by which to change self.xgravity
-        :param changey: the Int amount by which to change self.ygravity
         """
-        self.xgravity += changex
-        self.ygravity += changey
+        #TODO Make this work for x-gravity as well, (generalize more)
+        if self.yspeed == 0:
+            self.yspeed = self.base_y_gravity
+        else:
+            self.yspeed += self.gravity_acceleration
 
     def update(self, hero):
         """
@@ -183,12 +187,11 @@ class Room(object):
         Update all of the enemies.
         :param hero: An instance of the Hero class to pass to self.move_world()
         """
+        # Calculate the effect of gravity
+        self.calc_gravity()
 
         # Control the world via user input
         self.move_world(hero, self.xspeed, self.yspeed)
-
-        # Move the world due to gravity
-        self.move_world(hero, self.xgravity, self.ygravity)
 
         # Update all the blocks in the room
         self.block_list.update()

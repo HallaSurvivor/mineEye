@@ -16,8 +16,7 @@ class Hero(pygame.sprite.Sprite):
 
     self.hp is the Health remaining for the Hero.
 
-    self.change_x is the Hero's movement speed in the x direction
-    self.change_y is the Hero's movement speed in the y direction
+    self.world is the world in which the hero is placed
 
     self.rect is the Hero's bounding box
         .rect.y is the box's top left corner's y position
@@ -33,10 +32,11 @@ class Hero(pygame.sprite.Sprite):
 
         self.image = h.load('herosprite.png')
 
+        self.world = None
+
         self.hp = 5000
 
-        self.change_x = 0
-        self.change_y = 0
+        self.jumping = False
 
         self.rect = self.image.get_rect()
         self.rect.center = constants.CENTER
