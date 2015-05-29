@@ -106,28 +106,33 @@ class Room(object):
         self.xspeed = 0
         self.yspeed = 0
 
+        self.xgravity = 0
+        self.ygravity = 0
+
         self.room_array = None
 
         self.array_parsed = False
 
-    def move_world(self, hero):
+    def move_world(self, hero, x, y):
         """
         Move all of the blocks based on user input,
         Check for collisions.
         :param hero: An instance of the Hero class that walls can collide with.
+        :param x: The Int of how far to shift the world's x
+        :param y: the Int of how far to shift the world's y
         """
 
         # Move the blocks in the X direction
         for block in self.block_list:
-            block.movex(self.xspeed)
+            block.movex(x)
 
         # Check for block-hero collisions
         block_hit_list = pygame.sprite.spritecollide(hero, self.block_list, False)
         for block in block_hit_list:
             old_x_pos = block.rect.x
-            if self.xspeed > 0:
+            if x > 0:
                 block.rect.right = hero.rect.left
-            elif self.xspeed < 0:
+            elif x < 0:
                 block.rect.left = hero.rect.right
             x_pos_change = block.rect.x - old_x_pos
 
@@ -142,15 +147,15 @@ class Room(object):
 
         # Move the blocks in the Y direction
         for block in self.block_list:
-            block.movey(self.yspeed)
+            block.movey(y)
 
         # Check for block-hero collisions
         block_hit_list = pygame.sprite.spritecollide(hero, self.block_list, False)
         for block in block_hit_list:
             old_y_pos = block.rect.y
-            if self.yspeed > 0:
+            if y > 0:
                 block.rect.bottom = hero.rect.top
-            elif self.yspeed < 0:
+            elif y < 0:
                 block.rect.top = hero.rect.bottom
             y_pos_change = block.rect.y - old_y_pos
 
@@ -163,6 +168,14 @@ class Room(object):
             if block.damage_player:
                 hero.damage(5)
 
+    def change_gravity(self, changex, changey):
+        """
+        Change self.xgravity and self.ygravity to change the world's gravity.
+        :param changex: the Int amount by which to change self.xgravity
+        :param changey: the Int amount by which to change self.ygravity
+        """
+        self.xgravity += changex
+        self.ygravity += changey
 
     def update(self, hero):
         """
@@ -172,7 +185,10 @@ class Room(object):
         """
 
         # Control the world via user input
-        self.move_world(hero)
+        self.move_world(hero, self.xspeed, self.yspeed)
+
+        # Move the world due to gravity
+        self.move_world(hero, self.xgravity, self.ygravity)
 
         # Update all the blocks in the room
         self.block_list.update()

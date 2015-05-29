@@ -136,6 +136,8 @@ class InGame(GameState):
         self.world = None
         self.generate_world()
 
+        self.world.change_gravity(0, -3)
+
         self.timer = timer
 
     def draw(self, screen):
