@@ -5,6 +5,7 @@ import pygame
 import constants
 import helpers as h
 
+
 class Hero(pygame.sprite.Sprite):
     """
     The Hero that the player controls

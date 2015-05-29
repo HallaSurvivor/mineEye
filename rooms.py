@@ -110,12 +110,10 @@ class Room(object):
 
         self.array_parsed = False
 
-    def update(self, hero):
+    def move_world(self, hero):
         """
-        Update all of the blocks in the room,
         Move all of the blocks based on user input,
-        Check for collisions,
-        Update all of the enemies.
+        Check for collisions.
         :param hero: An instance of the Hero class that walls can collide with.
         """
 
@@ -164,6 +162,17 @@ class Room(object):
             # Damage the player if the block is a spike
             if block.damage_player:
                 hero.damage(5)
+
+
+    def update(self, hero):
+        """
+        Update all of the blocks in the room,
+        Update all of the enemies.
+        :param hero: An instance of the Hero class to pass to self.move_world()
+        """
+
+        # Control the world via user input
+        self.move_world(hero)
 
         # Update all the blocks in the room
         self.block_list.update()

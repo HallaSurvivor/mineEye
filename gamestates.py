@@ -64,8 +64,9 @@ class GameStateManager(object):
         self.state = gamestate
         self.state.manager = self
 
-        if gamestate.musicfile:
-            h.play_music(gamestate.musicfile)
+        if config.PLAY_MUSIC:
+            if gamestate.musicfile:
+                h.play_music(gamestate.musicfile)
 
 
 class TitleScreen(GameState):
