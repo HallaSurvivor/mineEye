@@ -36,7 +36,12 @@ class Hero(pygame.sprite.Sprite):
 
         self.hp = 5000
 
+        self.base_speed = 3
+        self.actual_speed = 3
+
         self.jumping = False
+        self.moving_left = False
+        self.moving_right = False
 
         self.rect = self.image.get_rect()
         self.rect.center = constants.CENTER

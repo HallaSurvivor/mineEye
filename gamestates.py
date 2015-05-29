@@ -141,6 +141,9 @@ class InGame(GameState):
 
         self.timer = timer
 
+        self.left_pressed = False
+        self.right_pressed = False
+
     def draw(self, screen):
         """
         Overwrites draw in the GameState class. Draws all of the blocks and enemies in the levels in this
@@ -184,33 +187,105 @@ class InGame(GameState):
             key presses
         :param events: a list of pygame events, get via pygame.event.get()
         """
-        for event in events:
-            if event.type == pygame.KEYDOWN:
-                # Create the motion by changing the Hero's speed vector
-                if event.key == config.LEFT:
-                    self.world.changespeed(3, 0)
-                elif event.key == config.RIGHT:
-                    self.world.changespeed(-3, 0)
-                elif event.key == config.UP:
-                    if not self.hero.jumping:
-                        self.world.changespeed(0, 12)
-                        self.hero.jumping = True
-                elif event.key == config.DOWN:
-                    pass
-                # Quit to TitleScreen (eventually pause menu) if the user presses escape
-                elif event.key == config.PAUSE:
-                    self.manager.go_to(TitleScreen())
 
-            elif event.type == pygame.KEYUP:
-                # Cancel the motion by adding the opposite of the keydown situation
-                if event.key == config.LEFT:
-                    self.world.changespeed(-3, 0)
-                elif event.key == config.RIGHT:
-                    self.world.changespeed(3, 0)
-                elif event.key == config.UP:
-                    pass
-                elif event.key == config.DOWN:
-                    pass
+        for event in events:
+            if config.KEY_CANCELING:
+
+                if event.type == pygame.KEYDOWN:
+                    if event.key == config.LEFT:
+                        self.left_pressed = True
+
+                        if self.hero.moving_right:
+                            self.world.changespeed(self.hero.actual_speed, 0)
+                            self.hero.moving_right = False
+
+                        self.world.changespeed(self.hero.actual_speed, 0)
+                        self.hero.moving_left = True
+
+                    elif event.key == config.RIGHT:
+                        self.right_pressed = True
+
+                        if self.hero.moving_left:
+                            self.world.changespeed(-self.hero.actual_speed, 0)
+                            self.hero.moving_left = False
+
+                        self.world.changespeed(-self.hero.actual_speed, 0)
+                        self.hero.moving_right = True
+
+                    elif event.key == config.UP:
+                        if not self.hero.jumping:
+                            self.world.changespeed(0, 12)
+                            self.hero.jumping = True
+
+                    elif event.key == config.DOWN:
+                        pass
+                    # Quit to TitleScreen (eventually pause menu) if the user presses escape
+                    elif event.key == config.PAUSE:
+                        self.manager.go_to(TitleScreen())
+
+                elif event.type == pygame.KEYUP:
+                    # Cancel the motion by adding the opposite of the keydown situation
+                    if event.key == config.LEFT:
+                        self.left_pressed = False
+
+                        if self.hero.moving_left:
+                            self.world.changespeed(-self.hero.actual_speed, 0)
+                            self.hero.moving_left = False
+
+                        if self.right_pressed and not self.hero.moving_right:
+                            self.world.changespeed(-self.hero.actual_speed, 0)
+                            self.hero.moving_right = True
+
+                    elif event.key == config.RIGHT:
+                        self.right_pressed = False
+
+                        if self.hero.moving_right:
+                            self.world.changespeed(self.hero.actual_speed, 0)
+                            self.hero.moving_right = False
+
+                        if self.left_pressed and not self.hero.moving_left:
+                            self.world.changespeed(self.hero.actual_speed, 0)
+                            self.hero.moving_left = True
+
+                    elif event.key == config.UP:
+                        pass
+
+                    elif event.key == config.DOWN:
+                        pass
+
+
+            else:  # Key Canceling is False
+                if event.type == pygame.KEYDOWN:
+                    if event.key == config.LEFT:
+                        self.world.changespeed(self.hero.actual_speed, 0)
+
+                    elif event.key == config.RIGHT:
+                        self.world.changespeed(-self.hero.actual_speed, 0)
+
+                    elif event.key == config.UP:
+                        if not self.hero.jumping:
+                            self.world.changespeed(0, 12)
+                            self.hero.jumping = True
+
+                    elif event.key == config.DOWN:
+                        pass
+                    # Quit to TitleScreen (eventually pause menu) if the user presses escape
+                    elif event.key == config.PAUSE:
+                        self.manager.go_to(TitleScreen())
+
+                elif event.type == pygame.KEYUP:
+                    # Cancel the motion by adding the opposite of the keydown situation
+                    if event.key == config.LEFT:
+                        self.world.changespeed(-self.hero.actual_speed, 0)
+
+                    elif event.key == config.RIGHT:
+                        self.world.changespeed(self.hero.actual_speed, 0)
+
+                    elif event.key == config.UP:
+                        pass
+
+                    elif event.key == config.DOWN:
+                        pass
 
     def die(self):
         self.manager.go_to(DeathScreen())
