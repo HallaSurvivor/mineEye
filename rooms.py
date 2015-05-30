@@ -23,17 +23,13 @@ room_dict = {
         "SSSSS      S",
         "SSSSSSSSSDDS"
     ],
-    "EndingRoomRight": [MoveRight,
-        "SSDDSSSSSS",
-        "S        S",
-        "S,       S",
-        "SSSSSSSSSS"
-    ],
-    "EndingRoomLeft": [MoveLeft,
-        "SSSSSSSDDSS",
-        "S         S",
-        "S         S",
-        "SSSSSSSSSSS"
+    "EndingRoom": [MoveRight,
+       "SSSDDSSS",
+       "S      S",
+       "S      S",
+       "SP    PS",
+       "P      P",
+       "SSSSSSSS"
     ],
     "Room01": [MoveDown,
         "SSDDSS",

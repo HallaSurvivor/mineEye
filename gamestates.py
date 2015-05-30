@@ -297,7 +297,7 @@ class InGame(GameState):
         """
         room_list = []
         possible_rooms = dict([(k, v) for k, v in rooms.room_dict.items() if k not in
-                              ["StartingRoom", "EndingRoomRight", "EndingRoomLeft"]])
+                              ["StartingRoom", "EndingRoom"]])
 
         room_list.append(rooms.room_dict["StartingRoom"])
 
@@ -336,6 +336,8 @@ class InGame(GameState):
                         move_left_counter = 0
                         move_right_counter += 1
                         matched = True
+
+        room_list.append(rooms.room_dict["EndingRoom"])
 
         self.world = rooms.World(room_list)
 
