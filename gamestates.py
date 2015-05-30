@@ -2,6 +2,7 @@
 Store all the game states as classes that are instantiated.
 """
 import datetime
+import random
 import pygame
 import config
 import constants
@@ -136,7 +137,7 @@ class InGame(GameState):
         self.start_time = datetime.datetime.now()
 
         self.world = None
-        self.generate_world()
+        self.generate_world(50)
         self.hero.world = self.world
 
         self.timer = timer
@@ -290,16 +291,54 @@ class InGame(GameState):
     def die(self):
         self.manager.go_to(DeathScreen())
 
-    def generate_world(self):
+    def generate_world(self, n):
         """
-        TODO - make this generate a series of 50 rooms stacked together
-            take things into consideration such as:
-
-            not having a bunch of rooms going to the right in a row
-            size of door (1 tile vs 2 tiles)
-
+        Generate the world by randomly selecting n rooms.
+        :param n: The Int number of rooms to randomly choose
         """
-        self.world = rooms.Room_02()
+        room_list = []
+        possible_rooms = dict([(k, v) for k, v in rooms.room_dict.items() if k not in
+                              ["StartingRoom", "EndingRoomRight", "EndingRoomLeft"]])
+
+        room_list.append(rooms.room_dict["StartingRoom"])
+
+        move_down_counter = 0
+        move_left_counter = 0
+        move_right_counter = 0
+
+        for i in range(n):
+            matched = False
+            while not matched:
+                possible_next_room = random.choice(list(possible_rooms.values()))
+
+                if possible_next_room[0] == rooms.MoveDown:
+                    if move_down_counter <= 3:
+                        room_list.append(possible_next_room)
+
+                        move_down_counter += 1
+                        move_left_counter = 0
+                        move_right_counter = 0
+                        matched = True
+
+                elif possible_next_room[0] == rooms.MoveLeft:
+                    if move_left_counter <= 1:
+                        room_list.append(possible_next_room)
+
+                        move_down_counter = 0
+                        move_left_counter += 1
+                        move_right_counter = 0
+                        matched = True
+
+                elif possible_next_room[0] == rooms.MoveRight:
+                    if move_right_counter <= 3:
+                        room_list.append(possible_next_room)
+
+                        move_down_counter = 0
+                        move_left_counter = 0
+                        move_right_counter += 1
+                        matched = True
+
+        self.world = rooms.World(room_list)
 
 
 class DeathScreen(GameState):

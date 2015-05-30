@@ -34,7 +34,7 @@ class Hero(pygame.sprite.Sprite):
 
         self.world = None
 
-        self.hp = 5000
+        self.hp = 500
 
         self.base_speed = 3
         self.actual_speed = 3

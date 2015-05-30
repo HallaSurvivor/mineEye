@@ -7,7 +7,7 @@ SCREEN_RESOLUTION = (1024, 768)
 
 PLAY_MUSIC = False
 
-KEY_CANCELING = False       # If TRUE, pushing Left while holding Right will make you move left.
+KEY_CANCELING = True       # If TRUE, pushing Left while holding Right will make you move left.
                             # If FALSE, pushing Left while holding Right will make you stand still.
 
 UP = pygame.K_UP
