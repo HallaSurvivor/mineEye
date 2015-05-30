@@ -321,7 +321,7 @@ class InGame(GameState):
                         matched = True
 
                 elif possible_next_room[0] == rooms.MoveLeft:
-                    if move_left_counter <= 1:
+                    if move_left_counter <= 1:  # Gets around small bug with moving left too many times
                         room_list.append(possible_next_room)
 
                         move_down_counter = 0
