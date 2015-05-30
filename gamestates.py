@@ -136,10 +136,11 @@ class InGame(GameState):
         self.start_time = datetime.datetime.now()
 
         self.world = None
-        self.generate_world(50)
+        self.generate_world(25)
         self.hero.world = self.world
 
         self.timer = timer
+        self.elapsed_time = 0
 
         self.left_pressed = False
         self.right_pressed = False
@@ -163,12 +164,22 @@ class InGame(GameState):
         screen.blit(hero_hp, (0, 0))
 
         if self.timer:
-            elapsed_time = datetime.datetime.now() - self.start_time
-            formatted_elapsed_time = elapsed_time.total_seconds()
-            elapsed_time_display = h.load_font('BLKCHCRY.TTF', 20).render(
-                "{ElapsedTime}".format(ElapsedTime=formatted_elapsed_time), 1, constants.WHITE
-            )
-            screen.blit(elapsed_time_display, (950, 0))
+            if self.hero.run_timer:
+                self.elapsed_time = datetime.datetime.now() - self.start_time
+                formatted_elapsed_time = self.elapsed_time.total_seconds()
+                elapsed_time_display = h.load_font('BLKCHCRY.TTF', 20).render(
+                    "{ElapsedTime}".format(ElapsedTime=formatted_elapsed_time), 1, constants.WHITE
+                )
+                screen.blit(elapsed_time_display, (950, 0))
+            else:
+                formatted_elapsed_time = self.elapsed_time.total_seconds()
+                elapsed_time_display = h.load_font('BLKCHCRY.TTF', 48).render(
+                    "Final Time: {ElapsedTime}".format(ElapsedTime=formatted_elapsed_time), 1, constants.GREEN
+                )
+                elapsed_time_display_rect = elapsed_time_display.get_rect()
+                elapsed_time_display_rect.center = constants.CENTER
+                screen.blit(elapsed_time_display, elapsed_time_display_rect)
+
 
     def update(self):
         """
@@ -305,6 +316,8 @@ class InGame(GameState):
         move_left_counter = 0
         move_right_counter = 0
 
+        total_displacement = 0
+
         for i in range(n):
             matched = False
             while not matched:
@@ -320,13 +333,16 @@ class InGame(GameState):
                         matched = True
 
                 elif possible_next_room[0] == rooms.MoveLeft:
-                    if move_left_counter <= 1:  # Gets around small bug with moving left too many times
-                        room_list.append(possible_next_room)
+                    if total_displacement >= 1:  # Gets around a bug with rendering negative of the start
+                        if move_left_counter <= 3:
+                            room_list.append(possible_next_room)
 
-                        move_down_counter = 0
-                        move_left_counter += 1
-                        move_right_counter = 0
-                        matched = True
+                            move_down_counter = 0
+                            move_left_counter += 1
+                            move_right_counter = 0
+
+                            total_displacement -= 1
+                            matched = True
 
                 elif possible_next_room[0] == rooms.MoveRight:
                     if move_right_counter <= 3:
@@ -335,6 +351,8 @@ class InGame(GameState):
                         move_down_counter = 0
                         move_left_counter = 0
                         move_right_counter += 1
+
+                        total_displacement += 1
                         matched = True
 
         room_list.append(rooms.room_dict["EndingRoom"])
