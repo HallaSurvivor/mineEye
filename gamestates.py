@@ -2,6 +2,7 @@
 Store all the game states as classes that are instantiated.
 """
 import datetime
+import pickle
 import random
 import pygame
 import config
@@ -163,6 +164,8 @@ class ChangeSettings(GameState):
         super().__init__()
         self.manager = None
 
+        self.selected = 0
+
     def draw(self, screen):
         """
         Draw a menu with configuration options.
@@ -187,7 +190,27 @@ class ChangeSettings(GameState):
         pass
 
     def handle_events(self, events):
-        pass
+        for e in events:
+            if e.type == pygame.KEYDOWN:
+                if e.key == config.DOWN:
+                    pass
+                elif e.key == config.UP:
+                    pass
+                elif e.key == config.LEFT:
+                    self.manager.go_to(TitleScreen())
+                elif e.key == pygame.K_SPACE or e.key == config.RIGHT:
+                    if self.selected == 0:
+                        f = open('settings', 'rb')
+                        settings_dict = pickle.loads(f.read())
+                        f.close()
+                        if settings_dict['PLAY_MUSIC']:
+                            settings_dict['PLAY_MUSIC'] = False
+                        else:
+                            settings_dict['PLAY_MUSIC'] = True
+
+                        f = open('settings', 'wb')
+                        f.write(pickle.dumps(settings_dict))
+                        f.close()
 
 
 class InGame(GameState):
