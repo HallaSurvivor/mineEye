@@ -274,6 +274,17 @@ class Room(object):
         self.block_list.draw(screen)
         self.enemy_list.draw(screen)
 
+    def setspeed(self, setx, sety):
+        """
+        Set a new x and y speed instead of changing the current one.
+        :param setx: Int representing the new self.xspeed
+        :param sety: Int representing the new self.yspeed
+        """
+        if setx is not None:
+            self.xspeed = setx
+        if sety is not None:
+            self.yspeed = sety
+
     def changespeed(self, changex, changey):
         """
         Change the Room's velocity vector.

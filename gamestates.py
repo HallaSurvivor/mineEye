@@ -336,6 +336,7 @@ class InGame(GameState):
 
                         else:
                             if self.hero.can_doublejump and not self.hero.double_jumping:
+                                self.world.setspeed(None, 0)
                                 self.world.changespeed(0, self.hero.double_jump_height)
                                 self.hero.double_jumping = True
 
