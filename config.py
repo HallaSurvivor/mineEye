@@ -6,7 +6,7 @@ import pickle
 import pygame
 
 #Defaults:
-SCREEN_RESOLUTION = (1024, 768)
+SCREEN_RESOLUTION = (1366, 768)
 
 PLAY_MUSIC = False
 
