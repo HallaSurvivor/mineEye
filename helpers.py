@@ -24,7 +24,7 @@ def load(imagename):
 
     if image is None:
         try:
-            image = pygame.image.load(os.path.join("Sprites", imagename))
+            image = pygame.image.load(os.path.join("Sprites", imagename)).convert()
             _image_library[imagename] = image
         except:
             raise FileNotFoundError
