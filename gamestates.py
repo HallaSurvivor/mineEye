@@ -95,34 +95,22 @@ class TitleScreen(GameState):
         welcome_text = h.load_font('BLKCHCRY.TTF', 48).render(
             "Welcome to mineEye!", 1, constants.BLACK
         )
-        welcome_rect = welcome_text.get_rect()
-        welcome_rect.centerx = constants.CENTER[0]
-        welcome_rect.centery = .125*config.SCREEN_RESOLUTION[1]
-        screen.blit(welcome_text, welcome_rect)
+        h.blit_text(welcome_text, screen, 1)
 
         begin_text = font.render(
             "Start!", 1, constants.BLACK
         )
-        begin_rect = begin_text.get_rect()
-        begin_rect.centerx = constants.CENTER[0]
-        begin_rect.centery = .25*config.SCREEN_RESOLUTION[1]
-        screen.blit(begin_text, begin_rect)
+        begin_rect = h.blit_text(begin_text, screen, 2)
 
         begin_timer_text = font.render(
             "Time Trial!", 1, constants.BLACK
         )
-        timer_rect = begin_timer_text.get_rect()
-        timer_rect.centerx = constants.CENTER[0]
-        timer_rect.centery = .375*config.SCREEN_RESOLUTION[1]
-        screen.blit(begin_timer_text, timer_rect)
+        timer_rect = h.blit_text(begin_timer_text, screen, 3)
 
         options_text = font.render(
             "Settings!", 1, constants.BLACK
         )
-        options_rect = options_text.get_rect()
-        options_rect.centerx = constants.CENTER[0]
-        options_rect.centery = .5*config.SCREEN_RESOLUTION[1]
-        screen.blit(options_text, options_rect)
+        options_rect = h.blit_text(options_text, screen, 4)
 
         selected_indicator = h.load('pickaxe.png')
         selected_rect = selected_indicator.get_rect()
@@ -182,20 +170,25 @@ class ChangeSettings(GameState):
         """
         background = h.create_background(h.load('sand.jpg'))
         screen.blit(background, (0, 0))
-        option_text = h.load_font('MelmaCracked.ttf', 32).render(
+
+        font = h.load_font('MelmaCracked.ttf', 32)
+
+        option_text = h.load_font('MelmaCracked.ttf', 48).render(
             "Options", 1, constants.BLACK
         )
-        option_text_rect = option_text.get_rect()
-        option_text_rect.centerx = screen.get_rect().centerx
-        option_text_rect.centery = .1*config.SCREEN_RESOLUTION[1]
+        h.blit_text(option_text, screen, 1)
 
-        screen.blit(option_text, option_text_rect)
+        music_text = font.render(
+            'Play Music', 1, constants.BLACK
+        )
+        music_rect = h.blit_text(music_text, screen, 2)
 
     def update(self):
         pass
 
     def handle_events(self, events):
         pass
+
 
 class InGame(GameState):
     """

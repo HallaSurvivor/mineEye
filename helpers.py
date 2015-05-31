@@ -4,6 +4,7 @@ Exports a variety of helper functions to cut down on repetitive code.
 import os
 import pygame
 import config
+import constants
 
 _image_library = {}
 _font_library = {}
@@ -81,3 +82,20 @@ def play_music(musicname):
         pygame.mixer.music.play()
     except:
         raise FileNotFoundError
+
+
+def blit_text(text, screen, position):
+    """
+    Automatically blit text to a certain position on the screen.
+    :param text: the pygame text to be blitted
+    :param screen: the screen to blit to
+    :param position: the vertical position to blit to
+    :returns rect: the rect to which the text is blitted
+    """
+
+    rect = text.get_rect()
+    rect.centerx = constants.CENTER[0]
+    rect.centery = .125*position*config.SCREEN_RESOLUTION[1]
+    screen.blit(text, rect)
+
+    return rect

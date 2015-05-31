@@ -1,8 +1,11 @@
 """
 A place to store things that the user can modify.
 """
+import os
+import pickle
 import pygame
 
+#Defaults:
 SCREEN_RESOLUTION = (1024, 768)
 
 PLAY_MUSIC = False
@@ -16,3 +19,21 @@ DOWN = pygame.K_DOWN
 RIGHT = pygame.K_RIGHT
 
 PAUSE = pygame.K_ESCAPE
+
+#Unless...
+if not os.path.exists('settings'):
+    settings_dict = {}
+    exclude = ['os', 'pickle', 'pygame', 'settings_dict', 'exclude']
+    for item in [item for item in dir() if not item.startswith('__') and item not in exclude]:
+        settings_dict[item] = locals()[item]
+
+    f = open('settings', 'wb')
+    f.write(pickle.dumps(settings_dict))
+    f.close()
+
+else:
+    f = open('settings', 'rb')
+    settings_dict = pickle.loads(f.read())
+    f.close()
+    for key in settings_dict.keys():
+        locals()[key] = settings_dict[key]
