@@ -7,6 +7,57 @@ import pygame
 import config
 import helpers as h
 
+MoveRight = 0
+MoveLeft = 1
+MoveDown = 2
+
+room_dict = {
+    # A dictionary of all the rooms to randomly select from.
+    # Each entry takes the form:
+    # ROOM_NAME: [PrimaryPlayerMotion, *room_layout]
+    # The First room must be StartingRoom,
+    # The Second and Third rooms must be some form of EndingRoom
+    "StartingRoom": [MoveRight,
+        "SSSSSSSS",
+        "S      S",
+        "S      S",
+        "SSSSSDDS"
+    ],
+    "EndingRoom": [MoveRight,
+       "SSSDDSSS",
+       "S      S",
+       "S      S",
+       "SP    PS",
+       "P      P",
+       "SSTTTTSS"
+    ],
+    "Room01": [MoveDown,
+        "SSDDSS",
+        "S    S",
+        "S    S",
+        "SS   S",
+        "S    S",
+        "S   SS",
+        "S    S",
+        "S S SS",
+        "S    S",
+        "S    S",
+        "SSDDSS"
+    ],
+    "Room02": [MoveLeft,
+        "SSSSSSSSSDDS",
+        "P          P",
+        "P       S  P",
+        "SSDDSSSSSSSS",
+    ],
+    "Room03": [MoveRight,
+        "SSDDSSSSSSSS",
+        "S          P",
+        "S          P",
+        "SSSSSSSSSDDS",
+    ]
+}
+
 
 class Wall(pygame.sprite.Sprite):
     """
@@ -14,13 +65,14 @@ class Wall(pygame.sprite.Sprite):
 
     self.damage_player is True if the player is hurt on contact (spikes) but False otherwise
     """
-    def __init__(self, x, y, image, damage_player=False):
+    def __init__(self, x, y, image, damage_player=False, end_timer=False):
         """
         Create the wall and its location
         :param x: Int representing the x position of the wall's top left corner
         :param y: Int representing the y position of the wall's top left corner
         :param image: a pygame surface associated with the wall's texture
         :param damage_player: Boolean. True if touching the wall hurts the player
+        :param end_timer: Boolean. True if touching the wall ends the game timer.
         """
         super().__init__()
 
@@ -31,6 +83,7 @@ class Wall(pygame.sprite.Sprite):
         self.rect.x = x
 
         self.damage_player = damage_player
+        self.end_timer = end_timer
 
     def update(self):
         """
@@ -146,6 +199,10 @@ class Room(object):
             if block.damage_player:
                 hero.damage(5)
 
+            # End the game timer if the block is the end
+            if block.end_timer:
+                hero.run_timer = False
+
         # Move the blocks in the Y direction
         for block in self.block_list:
             block.movey(y)
@@ -170,6 +227,10 @@ class Room(object):
             # Damage the player if the block is a spike
             if block.damage_player:
                 hero.damage(5)
+
+            # End the game timer if the block is the end
+            if block.end_timer:
+                hero.run_timer = False
 
     def calc_gravity(self):
         """
@@ -207,8 +268,7 @@ class Room(object):
         screen.blit(self.background, (0, 0))
 
         if not self.array_parsed:
-            self.parse_room_array()
-            self.array_parsed = True
+            self.parse_room_array(config.SCREEN_RESOLUTION[0]/2 - 128, config.SCREEN_RESOLUTION[1]/2 - 128)
 
         self.block_list.draw(screen)
         self.enemy_list.draw(screen)
@@ -222,56 +282,77 @@ class Room(object):
         self.xspeed += changex
         self.yspeed += changey
 
-    def parse_room_array(self):
+    def parse_room_array(self, xstart, ystart):
         """
-        Turn the list of strings stored in every room into an array of walls and enemies.
+        Turn a list of strings into an array of walls and enemies.
+        :param xstart: Int representing the starting x location
+        :param ystart: Int representing the starting y location
         """
-        x = 0
-        y = 256
+        x = xstart
+        y = ystart
         for row in self.room_array:
-            for col in row:
-                if col == "S":
-                    wall = Wall(x, y, h.load('stone.png'))
-                    self.block_list.add(wall)
+            if row != MoveRight and row != MoveLeft and row != MoveDown:
+                for col in row:
+                    if col == "S":
+                        wall = Wall(x, y, h.load('stone.png'))
+                        self.block_list.add(wall)
 
-                elif col == "P":
-                    wall = Wall(x, y, h.load('spikes.png'), True)
-                    self.block_list.add(wall)
-                x += 64
-            y += 64
-            x = 0
+                    if col == "T":
+                        wall = Wall(x, y, h.load('stone.png'), end_timer=True)
+                        self.block_list.add(wall)
+
+                    elif col == "P":
+                        wall = Wall(x, y, h.load('spikes.png'), damage_player=True)
+                        self.block_list.add(wall)
+
+                    x += 64
+                y += 64
+                x = xstart
+
+        self.array_parsed = True
 
 
-class Room_01(Room):
+class World(Room):
     """
-    Room 1
+    The complete world to be drawn to the screen.
     """
 
-    def __init__(self):
+    def __init__(self, rooms):
+        """
+        Initialize the world.
+        :param rooms: A list of all the Room objects in the order they appear.
+        """
         super().__init__()
-
         self.background = h.create_background(h.load('background.png'))
 
-        self.room_array = [
-            "  SSDDSSSSSSSS  ",
-            "  S          P  ",
-            "  S          P  ",
-            "  SSSSSSSSSDDS  ",
-        ]
+        self.room_array = []
+        for room in rooms:
+            if len(self.room_array) == 0:
+                self.room_array += room
 
+            else:
+                previous_door_location = 0
+                for char in self.room_array[-1]:
+                    previous_door_location += 1
+                    if char == "D":
+                        break
 
-class Room_02(Room):
-    """
-    Room 2
-    """
-    def __init__(self):
-        super().__init__()
+                new_door_location = 0
+                for char in room[1]:
+                    if char != MoveDown and char != MoveLeft and char != MoveRight:
+                        new_door_location += 1
+                    if char == "D":
+                        break
 
-        self.background = h.create_background(h.load('background.png'))
+                door_location = previous_door_location - new_door_location
 
-        self.room_array = [
-            "  SSSSSSSSSDDS  ",
-            "  P          P  ",
-            "  P       S  P  ",
-            "  SSDDSSSSSSSS  ",
-        ]
+                aligned_room = []
+                for row in room:
+                    if type(row) == str:
+                        aligned_row = ""
+                        for s in range(door_location):
+                            aligned_row += " "
+                        aligned_row += row
+                        aligned_room.append(aligned_row)
+
+                self.room_array += aligned_room

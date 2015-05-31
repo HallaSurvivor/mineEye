@@ -2,6 +2,8 @@
 Store all the game states as classes that are instantiated.
 """
 import datetime
+import pickle
+import random
 import pygame
 import config
 import constants
@@ -65,7 +67,7 @@ class GameStateManager(object):
         self.state = gamestate
         self.state.manager = self
 
-        if gamestate.musicfile:
+        if gamestate.musicfile and config.PLAY_MUSIC:
             h.play_music(gamestate.musicfile)
 
 
@@ -80,6 +82,8 @@ class TitleScreen(GameState):
         super().__init__()
         self.manager = None
 
+        self.selected = 0
+
     def draw(self, screen):
         """
         Draw a TitleScreen with text telling the user to press SPACE to begin
@@ -87,14 +91,43 @@ class TitleScreen(GameState):
         """
         background = h.create_background(h.load('sand.jpg'))
         screen.blit(background, (0, 0))
-        welcome_text = h.load_font('BLKCHCRY.TTF', 32).render(
-            "Welcome to mineEye! Press SPACE or T to begin!", 1, constants.BLACK
-        )
-        welcome_rect = welcome_text.get_rect()
-        welcome_rect.centerx = screen.get_rect().centerx
-        welcome_rect.centery = screen.get_rect().centery
 
-        screen.blit(welcome_text, welcome_rect)
+        font = h.load_font('BLKCHCRY.TTF', 32)
+
+        welcome_text = h.load_font('BLKCHCRY.TTF', 48).render(
+            "Welcome to mineEye!", 1, constants.BLACK
+        )
+        h.blit_text(welcome_text, screen, 1)
+
+        begin_text = font.render(
+            "Start!", 1, constants.BLACK
+        )
+        begin_rect = h.blit_text(begin_text, screen, 2)
+
+        begin_timer_text = font.render(
+            "Time Trial!", 1, constants.BLACK
+        )
+        timer_rect = h.blit_text(begin_timer_text, screen, 3)
+
+        options_text = font.render(
+            "Settings!", 1, constants.BLACK
+        )
+        options_rect = h.blit_text(options_text, screen, 4)
+
+        selected_indicator = h.load('pickaxe.png')
+        selected_rect = selected_indicator.get_rect()
+
+        if self.selected == 0:
+            selected_rect.left = begin_rect.right
+            selected_rect.centery = begin_rect.centery
+        elif self.selected == 1:
+            selected_rect.left = timer_rect.right
+            selected_rect.centery = timer_rect.centery
+        elif self.selected == 2:
+            selected_rect.left = options_rect.right
+            selected_rect.centery = options_rect.centery
+
+        screen.blit(selected_indicator, selected_rect)
 
     def update(self):
         pass
@@ -107,10 +140,78 @@ class TitleScreen(GameState):
         Overwrites the default handle_events from the parent GameState class.
         """
         for e in events:
-            if e.type == pygame.KEYDOWN and e.key == pygame.K_SPACE:
-                self.manager.go_to(InGame())
-            elif e.type == pygame.KEYDOWN and e.key == pygame.K_t:
-                self.manager.go_to(InGame(timer=True))
+            if e.type == pygame.KEYDOWN:
+                if e.key == config.DOWN:
+                    if self.selected <= 2:
+                        self.selected += 1
+                elif e.key == config.UP:
+                    if self.selected >= 1:
+                        self.selected -= 1
+                elif e.key == pygame.K_SPACE or e.key == config.RIGHT:
+                    if self.selected == 0:
+                        self.manager.go_to(InGame())
+                    elif self.selected == 1:
+                        self.manager.go_to(InGame(timer=True))
+                    elif self.selected == 2:
+                        self.manager.go_to(ChangeSettings())
+
+class ChangeSettings(GameState):
+    """
+    A game state for changing local variables like PLAY_MUSIC.
+    """
+
+    def __init__(self):
+
+        super().__init__()
+        self.manager = None
+
+        self.selected = 0
+
+    def draw(self, screen):
+        """
+        Draw a menu with configuration options.
+        :param screen: The pygame screen on which to draw.
+        """
+        background = h.create_background(h.load('sand.jpg'))
+        screen.blit(background, (0, 0))
+
+        font = h.load_font('MelmaCracked.ttf', 32)
+
+        option_text = h.load_font('MelmaCracked.ttf', 48).render(
+            "Options", 1, constants.BLACK
+        )
+        h.blit_text(option_text, screen, 1)
+
+        music_text = font.render(
+            'Play Music', 1, constants.BLACK
+        )
+        music_rect = h.blit_text(music_text, screen, 2)
+
+    def update(self):
+        pass
+
+    def handle_events(self, events):
+        for e in events:
+            if e.type == pygame.KEYDOWN:
+                if e.key == config.DOWN:
+                    pass
+                elif e.key == config.UP:
+                    pass
+                elif e.key == config.LEFT:
+                    self.manager.go_to(TitleScreen())
+                elif e.key == pygame.K_SPACE or e.key == config.RIGHT:
+                    if self.selected == 0:
+                        f = open('settings', 'rb')
+                        settings_dict = pickle.loads(f.read())
+                        f.close()
+                        if settings_dict['PLAY_MUSIC']:
+                            settings_dict['PLAY_MUSIC'] = False
+                        else:
+                            settings_dict['PLAY_MUSIC'] = True
+
+                        f = open('settings', 'wb')
+                        f.write(pickle.dumps(settings_dict))
+                        f.close()
 
 
 class InGame(GameState):
@@ -139,10 +240,11 @@ class InGame(GameState):
         self.start_time = datetime.datetime.now()
 
         self.world = None
-        self.generate_world()
+        self.generate_world(25)
         self.hero.world = self.world
 
         self.timer = timer
+        self.elapsed_time = 0
 
         self.left_pressed = False
         self.right_pressed = False
@@ -166,12 +268,21 @@ class InGame(GameState):
         screen.blit(hero_hp, (0, 0))
 
         if self.timer:
-            elapsed_time = datetime.datetime.now() - self.start_time
-            formatted_elapsed_time = elapsed_time.total_seconds()
-            elapsed_time_display = h.load_font('BLKCHCRY.TTF', 20).render(
-                "{ElapsedTime}".format(ElapsedTime=formatted_elapsed_time), 1, constants.WHITE
-            )
-            screen.blit(elapsed_time_display, (950, 0))
+            if self.hero.run_timer:
+                self.elapsed_time = datetime.datetime.now() - self.start_time
+                formatted_elapsed_time = self.elapsed_time.total_seconds()
+                elapsed_time_display = h.load_font('BLKCHCRY.TTF', 20).render(
+                    "{ElapsedTime}".format(ElapsedTime=formatted_elapsed_time), 1, constants.WHITE
+                )
+                screen.blit(elapsed_time_display, (950, 0))
+            else:
+                formatted_elapsed_time = self.elapsed_time.total_seconds()
+                elapsed_time_display = h.load_font('BLKCHCRY.TTF', 48).render(
+                    "Final Time: {ElapsedTime}".format(ElapsedTime=formatted_elapsed_time), 1, constants.GREEN
+                )
+                elapsed_time_display_rect = elapsed_time_display.get_rect()
+                elapsed_time_display_rect.center = constants.CENTER
+                screen.blit(elapsed_time_display, elapsed_time_display_rect)
 
     def update(self):
         """
@@ -293,16 +404,63 @@ class InGame(GameState):
     def die(self):
         self.manager.go_to(DeathScreen())
 
-    def generate_world(self):
+    def generate_world(self, n):
         """
-        TODO - make this generate a series of 50 rooms stacked together
-            take things into consideration such as:
-
-            not having a bunch of rooms going to the right in a row
-            size of door (1 tile vs 2 tiles)
-
+        Generate the world by randomly selecting n rooms.
+        :param n: The Int number of rooms to randomly choose
         """
-        self.world = rooms.Room_02()
+        room_list = []
+        possible_rooms = dict([(k, v) for k, v in rooms.room_dict.items() if k not in
+                              ["StartingRoom", "EndingRoom"]])
+
+        room_list.append(rooms.room_dict["StartingRoom"])
+
+        move_down_counter = 0
+        move_left_counter = 0
+        move_right_counter = 0
+
+        total_displacement = 0
+
+        for i in range(n):
+            matched = False
+            while not matched:
+                possible_next_room = random.choice(list(possible_rooms.values()))
+
+                if possible_next_room[0] == rooms.MoveDown:
+                    if move_down_counter <= 3:
+                        room_list.append(possible_next_room)
+
+                        move_down_counter += 1
+                        move_left_counter = 0
+                        move_right_counter = 0
+                        matched = True
+
+                elif possible_next_room[0] == rooms.MoveLeft:
+                    if total_displacement >= 1:  # Gets around a bug with rendering negative of the start
+                        if move_left_counter <= 3:
+                            room_list.append(possible_next_room)
+
+                            move_down_counter = 0
+                            move_left_counter += 1
+                            move_right_counter = 0
+
+                            total_displacement -= 1
+                            matched = True
+
+                elif possible_next_room[0] == rooms.MoveRight:
+                    if move_right_counter <= 3:
+                        room_list.append(possible_next_room)
+
+                        move_down_counter = 0
+                        move_left_counter = 0
+                        move_right_counter += 1
+
+                        total_displacement += 1
+                        matched = True
+
+        room_list.append(rooms.room_dict["EndingRoom"])
+
+        self.world = rooms.World(room_list)
 
 
 class DeathScreen(GameState):
