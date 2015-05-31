@@ -18,10 +18,10 @@ room_dict = {
     # The First room must be StartingRoom,
     # The Second and Third rooms must be some form of EndingRoom
     "StartingRoom": [MoveRight,
-        "SSSSSSSSSSSS",
-        "SSSSS      S",
-        "SSSSS      S",
-        "SSSSSSSSSDDS"
+        "SSSSSSSS",
+        "S      S",
+        "S      S",
+        "SSSSSDDS"
     ],
     "EndingRoom": [MoveRight,
        "SSSDDSSS",
@@ -268,7 +268,7 @@ class Room(object):
         screen.blit(self.background, (0, 0))
 
         if not self.array_parsed:
-            self.parse_room_array(0, 256)
+            self.parse_room_array(config.SCREEN_RESOLUTION[0]/2 - 128, config.SCREEN_RESOLUTION[1]/2 - 128)
 
         self.block_list.draw(screen)
         self.enemy_list.draw(screen)
