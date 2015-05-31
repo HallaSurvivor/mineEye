@@ -39,7 +39,14 @@ class Hero(pygame.sprite.Sprite):
         self.base_speed = 7
         self.actual_speed = 7
 
+        self.jump_height = 12
+        self.double_jump_height = 15
+
+        self.can_doublejump = True
+
         self.jumping = False
+        self.double_jumping = False
+
         self.moving_left = False
         self.moving_right = False
 

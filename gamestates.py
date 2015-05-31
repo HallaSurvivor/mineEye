@@ -154,6 +154,7 @@ class TitleScreen(GameState):
                     elif self.selected == 2:
                         self.manager.go_to(ChangeSettings())
 
+
 class ChangeSettings(GameState):
     """
     A game state for changing local variables like PLAY_MUSIC.
@@ -324,8 +325,19 @@ class InGame(GameState):
 
                     elif event.key == config.UP:
                         if not self.hero.jumping:
-                            self.world.changespeed(0, 12)
-                            self.hero.jumping = True
+
+                            # If the hero is on a platform:
+                            self.hero.rect.y += 2
+                            hit_list = pygame.sprite.spritecollide(self.hero, self.world.block_list, False)
+                            self.hero.rect.y -= 2
+                            if len(hit_list) > 0:
+                                self.world.changespeed(0, self.hero.jump_height)
+                                self.hero.jumping = True
+
+                        else:
+                            if self.hero.can_doublejump and not self.hero.double_jumping:
+                                self.world.changespeed(0, self.hero.double_jump_height)
+                                self.hero.double_jumping = True
 
                     elif event.key == config.DOWN:
                         pass
@@ -374,8 +386,19 @@ class InGame(GameState):
 
                     elif event.key == config.UP:
                         if not self.hero.jumping:
-                            self.world.changespeed(0, 12)
-                            self.hero.jumping = True
+
+                            # If the hero is on a platform:
+                            self.hero.rect.y += 2
+                            hit_list = pygame.sprite.spritecollide(self.hero, self.world.block_list, False)
+                            self.hero.rect.y -= 2
+                            if len(hit_list) > 0:
+                                self.world.changespeed(0, self.hero.jump_height)
+                                self.hero.jumping = True
+
+                        else:
+                            if self.hero.can_doublejump and not self.hero.double_jumping:
+                                self.world.changespeed(0, self.hero.double_jump_height)
+                                self.hero.double_jumping = True
 
                     elif event.key == config.DOWN:
                         pass

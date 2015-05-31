@@ -217,6 +217,7 @@ class Room(object):
                 block.rect.top = hero.rect.bottom
                 self.yspeed = 0
                 hero.jumping = False
+                hero.double_jumping = False
             y_pos_change = block.rect.y - old_y_pos
 
             # Shift the rest of the room to stay in line with the block that collided
