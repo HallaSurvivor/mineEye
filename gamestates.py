@@ -80,6 +80,8 @@ class TitleScreen(GameState):
         super().__init__()
         self.manager = None
 
+        self.selected = 0
+
     def draw(self, screen):
         """
         Draw a TitleScreen with text telling the user to press SPACE to begin
@@ -87,14 +89,55 @@ class TitleScreen(GameState):
         """
         background = h.create_background(h.load('sand.jpg'))
         screen.blit(background, (0, 0))
-        welcome_text = h.load_font('BLKCHCRY.TTF', 32).render(
-            "Welcome to mineEye! Press SPACE or T to begin!", 1, constants.BLACK
+
+        font = h.load_font('BLKCHCRY.TTF', 32)
+
+        welcome_text = h.load_font('BLKCHCRY.TTF', 48).render(
+            "Welcome to mineEye!", 1, constants.BLACK
         )
         welcome_rect = welcome_text.get_rect()
-        welcome_rect.centerx = screen.get_rect().centerx
-        welcome_rect.centery = screen.get_rect().centery
-
+        welcome_rect.centerx = constants.CENTER[0]
+        welcome_rect.centery = .125*config.SCREEN_RESOLUTION[1]
         screen.blit(welcome_text, welcome_rect)
+
+        begin_text = font.render(
+            "Start!", 1, constants.BLACK
+        )
+        begin_rect = begin_text.get_rect()
+        begin_rect.centerx = constants.CENTER[0]
+        begin_rect.centery = .25*config.SCREEN_RESOLUTION[1]
+        screen.blit(begin_text, begin_rect)
+
+        begin_timer_text = font.render(
+            "Time Trial!", 1, constants.BLACK
+        )
+        timer_rect = begin_timer_text.get_rect()
+        timer_rect.centerx = constants.CENTER[0]
+        timer_rect.centery = .375*config.SCREEN_RESOLUTION[1]
+        screen.blit(begin_timer_text, timer_rect)
+
+        options_text = font.render(
+            "Settings!", 1, constants.BLACK
+        )
+        options_rect = options_text.get_rect()
+        options_rect.centerx = constants.CENTER[0]
+        options_rect.centery = .5*config.SCREEN_RESOLUTION[1]
+        screen.blit(options_text, options_rect)
+
+        selected_indicator = h.load('pickaxe.png')
+        selected_rect = selected_indicator.get_rect()
+
+        if self.selected == 0:
+            selected_rect.left = begin_rect.right
+            selected_rect.centery = begin_rect.centery
+        elif self.selected == 1:
+            selected_rect.left = timer_rect.right
+            selected_rect.centery = timer_rect.centery
+        elif self.selected == 2:
+            selected_rect.left = options_rect.right
+            selected_rect.centery = options_rect.centery
+
+        screen.blit(selected_indicator, selected_rect)
 
     def update(self):
         pass
@@ -107,11 +150,52 @@ class TitleScreen(GameState):
         Overwrites the default handle_events from the parent GameState class.
         """
         for e in events:
-            if e.type == pygame.KEYDOWN and e.key == pygame.K_SPACE:
-                self.manager.go_to(InGame())
-            elif e.type == pygame.KEYDOWN and e.key == pygame.K_t:
-                self.manager.go_to(InGame(timer=True))
+            if e.type == pygame.KEYDOWN:
+                if e.key == config.DOWN:
+                    if self.selected <= 2:
+                        self.selected += 1
+                elif e.key == config.UP:
+                    if self.selected >= 1:
+                        self.selected -= 1
+                elif e.key == pygame.K_SPACE or e.key == config.RIGHT:
+                    if self.selected == 0:
+                        self.manager.go_to(InGame())
+                    elif self.selected == 1:
+                        self.manager.go_to(InGame(timer=True))
+                    elif self.selected == 2:
+                        self.manager.go_to(ChangeSettings())
 
+class ChangeSettings(GameState):
+    """
+    A game state for changing local variables like PLAY_MUSIC.
+    """
+
+    def __init__(self):
+
+        super().__init__()
+        self.manager = None
+
+    def draw(self, screen):
+        """
+        Draw a menu with configuration options.
+        :param screen: The pygame screen on which to draw.
+        """
+        background = h.create_background(h.load('sand.jpg'))
+        screen.blit(background, (0, 0))
+        option_text = h.load_font('MelmaCracked.ttf', 32).render(
+            "Options", 1, constants.BLACK
+        )
+        option_text_rect = option_text.get_rect()
+        option_text_rect.centerx = screen.get_rect().centerx
+        option_text_rect.centery = .1*config.SCREEN_RESOLUTION[1]
+
+        screen.blit(option_text, option_text_rect)
+
+    def update(self):
+        pass
+
+    def handle_events(self, events):
+        pass
 
 class InGame(GameState):
     """
@@ -179,7 +263,6 @@ class InGame(GameState):
                 elapsed_time_display_rect = elapsed_time_display.get_rect()
                 elapsed_time_display_rect.center = constants.CENTER
                 screen.blit(elapsed_time_display, elapsed_time_display_rect)
-
 
     def update(self):
         """
