@@ -39,6 +39,7 @@ class Enemy(pygame.sprite.Sprite):
         self.base_speed = 3
         self.actual_speed = 3
 
+
         self.jumping = False
         self.moving_left = False
         self.moving_right = False

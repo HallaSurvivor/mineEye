@@ -8,6 +8,7 @@ import constants
 import helpers as h
 import rooms
 from hero import Hero
+from enemy import Enemy
 
 
 class GameState(object):
@@ -131,6 +132,9 @@ class InGame(GameState):
 
         self.hero = Hero()
         self.all_sprites_list.add(self.hero)
+
+        #self.enemy = Enemy()
+        #self.all_sprites_list.add(self.enemy)
 
         self.start_time = datetime.datetime.now()
 
