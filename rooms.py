@@ -18,43 +18,62 @@ room_dict = {
     # The First room must be StartingRoom,
     # The Second and Third rooms must be some form of EndingRoom
     "StartingRoom": [MoveRight,
-        "SSSSSSSS",
-        "S      S",
-        "S      S",
-        "SSSSSDDS"
+                     "SSSSSSSS",
+                     "S      S",
+                     "S      S",
+                     "SSSSSDDS"
     ],
     "EndingRoom": [MoveRight,
-       "SSSDDSSS",
-       "S      S",
-       "S      S",
-       "SP    PS",
-       "P      P",
-       "SSTTTTSS"
+                   "SSSDDSSS",
+                   "S      S",
+                   "S      S",
+                   "SP    PS",
+                   "P      P",
+                   "SSTTTTSS"
     ],
     "Room01": [MoveDown,
-        "SSDDSS",
-        "S    S",
-        "S    S",
-        "SS   S",
-        "S    S",
-        "S   SS",
-        "S    S",
-        "S S SS",
-        "S    S",
-        "S    S",
-        "SSDDSS"
+               "SSDDSS",
+               "S    S",
+               "S    S",
+               "SS   S",
+               "S    S",
+               "S   SS",
+               "S    S",
+               "S S SS",
+               "S    S",
+               "S    S",
+               "SSDDSS"
     ],
     "Room02": [MoveLeft,
-        "SSSSSSSSSDDS",
-        "P          P",
-        "P       S  P",
-        "SSDDSSSSSSSS",
+               "SSSSSSSSSDDS",
+               "P          P",
+               "P       S  P",
+               "SSDDSSSSSSSS",
     ],
     "Room03": [MoveRight,
-        "SSDDSSSSSSSS",
-        "S          P",
-        "S          P",
-        "SSSSSSSSSDDS",
+               "SSDDSSSSSSSS",
+               "S          P",
+               "S          P",
+               "SSSSSSSSSDDS",
+    ],
+    "Room04": [MoveRight,
+               "SSDDSSSSSSSSSSSSS",
+               "S               S",
+               "S               S",
+               "S     SSSSSSS   S",
+               "S      S   S    S",
+               "S    S   S      S",
+               "SSSSSSSSSSSSSDDSS"
+    ],
+    "Room05": [MoveLeft,
+                "SSSSSSSSSSSSSSSDDS",
+                "S                S",
+                "S                S",
+                "S                S",
+                "S   SSSSSSSSP  SSS",
+                "S    S   S   S   S",
+                "S  S   S   S     S",
+                "SDDSSSSSSSSSSSSSSS"
     ]
 }
 
@@ -65,6 +84,7 @@ class Wall(pygame.sprite.Sprite):
 
     self.damage_player is True if the player is hurt on contact (spikes) but False otherwise
     """
+
     def __init__(self, x, y, image, damage_player=False, end_timer=False):
         """
         Create the wall and its location
@@ -237,7 +257,7 @@ class Room(object):
         """
         Change self.xgravity and self.ygravity to change the world's gravity.
         """
-        #TODO Make this work for x-gravity as well, (generalize more)
+        # TODO Make this work for x-gravity as well, (generalize more)
         if self.yspeed == 0:
             self.yspeed = self.base_y_gravity
         else:
@@ -269,7 +289,7 @@ class Room(object):
         screen.blit(self.background, (0, 0))
 
         if not self.array_parsed:
-            self.parse_room_array(config.SCREEN_RESOLUTION[0]/2 - 128, config.SCREEN_RESOLUTION[1]/2 - 128)
+            self.parse_room_array(config.SCREEN_RESOLUTION[0] / 2 - 128, config.SCREEN_RESOLUTION[1] / 2 - 128)
 
         self.block_list.draw(screen)
         self.enemy_list.draw(screen)
