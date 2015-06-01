@@ -550,8 +550,8 @@ class InGame(GameState):
                         matched = True
 
                 elif possible_next_room[0] == rooms.MoveLeft:
-                    if total_displacement >= 2:  # Gets around a bug with rendering negative of the start
-                        if move_left_counter <= 3:
+                    if total_displacement >= 3:  # Gets around a bug with rendering negative of the start
+                        if move_left_counter <= 5:
                             room_list.append(possible_next_room)
 
                             move_down_counter = 0
@@ -562,7 +562,7 @@ class InGame(GameState):
                             matched = True
 
                 elif possible_next_room[0] == rooms.MoveRight:
-                    if move_right_counter <= 3:
+                    if move_right_counter <= 5:
                         room_list.append(possible_next_room)
 
                         move_down_counter = 0
