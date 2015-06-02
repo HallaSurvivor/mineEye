@@ -17,6 +17,7 @@ class Enemy(pygame.sprite.Sprite):
     def __init__(self):
         """
         create the class.
+        note damage_player_on_touch means that when the player is hitting the bad guy damage is done. This would be true of a bwarler type chractor
         """
         super().__init__()
 
@@ -26,6 +27,8 @@ class Enemy(pygame.sprite.Sprite):
 
         self.current_hp = self.hp
 
+
+        self.damage_player_on_touch = True
 
         self.jumping = False
         self.moving_left = False

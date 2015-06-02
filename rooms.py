@@ -251,7 +251,7 @@ class Room(object):
                 hero.double_jumping = False
             y_pos_change = block.rect.y - old_y_pos
 
-            # Shift the rest of the room to stay in line with the block that collided
+                 # Shift the rest of the room to stay in line with the block that collided
             for block2 in self.block_list:
                 if block2 != block:
                     block2.rect.y += y_pos_change
@@ -265,6 +265,14 @@ class Room(object):
             # End the game timer if the block is the end
             if block.end_timer:
                 hero.run_timer = False
+
+        block_hit_list = pygame.sprite.spritecollide(hero, self.enemy_list, False)
+        for block in block_hit_list:
+            # Damage the player if the block is a spike
+            if block.damage_player_on_touch:
+                hero.damage(5)
+
+
 
     def calc_gravity(self):
         """
