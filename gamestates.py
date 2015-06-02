@@ -113,6 +113,11 @@ class TitleScreen(GameState):
         )
         options_rect = h.blit_text(options_text, screen, 4)
 
+        quit_text = font.render(
+            "Quit", 1, constants.BLACK
+        )
+        quit_rect = h.blit_text(quit_text, screen, 5)
+
         selected_indicator = h.load('pickaxe.png')
         selected_rect = selected_indicator.get_rect()
 
@@ -125,6 +130,9 @@ class TitleScreen(GameState):
         elif self.selected == 2:
             selected_rect.left = options_rect.right
             selected_rect.centery = options_rect.centery
+        elif self.selected == 3:
+            selected_rect.left = quit_rect.right
+            selected_rect.centery = quit_rect.centery
 
         screen.blit(selected_indicator, selected_rect)
 
@@ -142,10 +150,10 @@ class TitleScreen(GameState):
         for e in events:
             if e.type == pygame.KEYDOWN:
                 if e.key == config.DOWN:
-                    if self.selected <= 2:
+                    if self.selected < 3:
                         self.selected += 1
                 elif e.key == config.UP:
-                    if self.selected >= 1:
+                    if self.selected > 0:
                         self.selected -= 1
                 elif e.key == pygame.K_SPACE or e.key == config.RIGHT:
                     if self.selected == 0:
@@ -154,6 +162,8 @@ class TitleScreen(GameState):
                         self.manager.go_to(ChooseHero(timer=True))
                     elif self.selected == 2:
                         self.manager.go_to(ChangeSettings())
+                    elif self.selected == 3:
+                        pygame.quit()
 
 
 class ChooseHero(GameState):
