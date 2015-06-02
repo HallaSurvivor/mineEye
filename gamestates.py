@@ -5,15 +5,12 @@ import datetime
 import pickle
 import random
 import pygame
-import config
+from config import settings
 import constants
 import helpers as h
 import rooms
 import hero
 
-f = open('settings', 'rb')
-settings_dict = pickle.loads(f.read())
-f.close()
 
 class GameState(object):
     """
@@ -70,7 +67,7 @@ class GameStateManager(object):
         self.state = gamestate
         self.state.manager = self
 
-        if gamestate.musicfile and config.PLAY_MUSIC:
+        if gamestate.musicfile and settings['PLAY_MUSIC']:
             h.play_music(gamestate.musicfile)
 
 
@@ -153,13 +150,13 @@ class TitleScreen(GameState):
         """
         for e in events:
             if e.type == pygame.KEYDOWN:
-                if e.key == config.DOWN:
+                if e.key == settings['DOWN']:
                     if self.selected < 3:
                         self.selected += 1
-                elif e.key == config.UP:
+                elif e.key == settings['UP']:
                     if self.selected > 0:
                         self.selected -= 1
-                elif e.key == pygame.K_SPACE or e.key == config.RIGHT:
+                elif e.key == pygame.K_SPACE or e.key == settings['RIGHT']:
                     if self.selected == 0:
                         self.manager.go_to(ChooseHero())
                     elif self.selected == 1:
@@ -246,15 +243,15 @@ class ChooseHero(GameState):
         """
         for e in events:
             if e.type == pygame.KEYDOWN:
-                if e.key == config.DOWN:
+                if e.key == settings['DOWN']:
                     if self.selected <= 2:
                         self.selected += 1
-                elif e.key == config.UP:
+                elif e.key == settings['UP']:
                     if self.selected >= 1:
                         self.selected -= 1
-                elif e.key == config.LEFT:
+                elif e.key == settings['LEFT']:
                     self.manager.go_to(TitleScreen())
-                elif e.key == pygame.K_SPACE or e.key == config.RIGHT:
+                elif e.key == pygame.K_SPACE or e.key == settings['RIGHT']:
                     if self.selected == 0:
                         self.manager.go_to(InGame(timer=self.timer, chosen_hero=hero.hero_list[0]))
                     elif self.selected == 1:
@@ -303,7 +300,7 @@ class ChangeSettings(GameState):
         )
         music_rect = h.blit_text(music_text, screen, 2)
 
-        if settings_dict['PLAY_MUSIC']:
+        if settings['PLAY_MUSIC']:
             on_rect = on.get_rect()
             on_rect.left = music_rect.right
             on_rect.centery = music_rect.centery
@@ -314,28 +311,28 @@ class ChangeSettings(GameState):
             off_rect.centery = music_rect.centery
             screen.blit(off, off_rect)
 
-
     def update(self):
         pass
 
     def handle_events(self, events):
         for e in events:
             if e.type == pygame.KEYDOWN:
-                if e.key == config.DOWN:
+                if e.key == settings['DOWN']:
                     pass
-                elif e.key == config.UP:
+                elif e.key == settings['UP']:
                     pass
-                elif e.key == config.LEFT:
+                elif e.key == settings['LEFT']:
                     self.manager.go_to(TitleScreen())
-                elif e.key == pygame.K_SPACE or e.key == config.RIGHT:
+                elif e.key == pygame.K_SPACE or e.key == settings['RIGHT']:
                     if self.selected == 0:
-                        if settings_dict['PLAY_MUSIC']:
-                            settings_dict['PLAY_MUSIC'] = False
+                        if settings['PLAY_MUSIC']:
+                            settings['PLAY_MUSIC'] = False
+
                         else:
-                            settings_dict['PLAY_MUSIC'] = True
+                            settings['PLAY_MUSIC'] = True
 
                         f = open('settings', 'wb')
-                        f.write(pickle.dumps(settings_dict))
+                        f.write(pickle.dumps(settings))
                         f.close()
 
 
@@ -425,10 +422,10 @@ class InGame(GameState):
         """
 
         for event in events:
-            if config.KEY_CANCELING:
+            if settings['KEY_CANCELING']:
 
                 if event.type == pygame.KEYDOWN:
-                    if event.key == config.LEFT:
+                    if event.key == settings['LEFT']:
                         self.left_pressed = True
 
                         if self.hero.moving_right:
@@ -438,7 +435,7 @@ class InGame(GameState):
                         self.world.changespeed(self.hero.actual_speed, 0)
                         self.hero.moving_left = True
 
-                    elif event.key == config.RIGHT:
+                    elif event.key == settings['RIGHT']:
                         self.right_pressed = True
 
                         if self.hero.moving_left:
@@ -448,7 +445,7 @@ class InGame(GameState):
                         self.world.changespeed(-self.hero.actual_speed, 0)
                         self.hero.moving_right = True
 
-                    elif event.key == config.UP:
+                    elif event.key == settings['UP']:
                         if not self.hero.jumping:
 
                             # If the hero is on a platform:
@@ -465,15 +462,15 @@ class InGame(GameState):
                                 self.world.changespeed(0, self.hero.double_jump_height)
                                 self.hero.double_jumping = True
 
-                    elif event.key == config.DOWN:
+                    elif event.key == settings['DOWN']:
                         pass
                     # Quit to TitleScreen (eventually pause menu) if the user presses escape
-                    elif event.key == config.PAUSE:
+                    elif event.key == settings['PAUSE']:
                         self.manager.go_to(TitleScreen())
 
                 elif event.type == pygame.KEYUP:
                     # Cancel the motion by adding the opposite of the keydown situation
-                    if event.key == config.LEFT:
+                    if event.key == settings['LEFT']:
                         self.left_pressed = False
 
                         if self.hero.moving_left:
@@ -484,7 +481,7 @@ class InGame(GameState):
                             self.world.changespeed(-self.hero.actual_speed, 0)
                             self.hero.moving_right = True
 
-                    elif event.key == config.RIGHT:
+                    elif event.key == settings['RIGHT']:
                         self.right_pressed = False
 
                         if self.hero.moving_right:
@@ -495,22 +492,22 @@ class InGame(GameState):
                             self.world.changespeed(self.hero.actual_speed, 0)
                             self.hero.moving_left = True
 
-                    elif event.key == config.UP:
+                    elif event.key == settings['UP']:
                         pass
 
-                    elif event.key == config.DOWN:
+                    elif event.key == settings['DOWN']:
                         pass
 
 
             else:  # Key Canceling is False
                 if event.type == pygame.KEYDOWN:
-                    if event.key == config.LEFT:
+                    if event.key == settings['LEFT']:
                         self.world.changespeed(self.hero.actual_speed, 0)
 
-                    elif event.key == config.RIGHT:
+                    elif event.key == settings['RIGHT']:
                         self.world.changespeed(-self.hero.actual_speed, 0)
 
-                    elif event.key == config.UP:
+                    elif event.key == settings['UP']:
                         if not self.hero.jumping:
 
                             # If the hero is on a platform:
@@ -526,24 +523,24 @@ class InGame(GameState):
                                 self.world.changespeed(0, self.hero.double_jump_height)
                                 self.hero.double_jumping = True
 
-                    elif event.key == config.DOWN:
+                    elif event.key == settings['DOWN']:
                         pass
                     # Quit to TitleScreen (eventually pause menu) if the user presses escape
-                    elif event.key == config.PAUSE:
+                    elif event.key == settings['PAUSE']:
                         self.manager.go_to(TitleScreen())
 
                 elif event.type == pygame.KEYUP:
                     # Cancel the motion by adding the opposite of the keydown situation
-                    if event.key == config.LEFT:
+                    if event.key == settings['LEFT']:
                         self.world.changespeed(-self.hero.actual_speed, 0)
 
-                    elif event.key == config.RIGHT:
+                    elif event.key == settings['RIGHT']:
                         self.world.changespeed(self.hero.actual_speed, 0)
 
-                    elif event.key == config.UP:
+                    elif event.key == settings['UP']:
                         pass
 
-                    elif event.key == config.DOWN:
+                    elif event.key == settings['DOWN']:
                         pass
 
     def die(self):

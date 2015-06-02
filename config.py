@@ -1,5 +1,5 @@
 """
-A place to store things that the user can modify.
+Default values for things the user can modify in game.
 """
 import os
 import pickle
@@ -20,20 +20,17 @@ RIGHT = pygame.K_RIGHT
 
 PAUSE = pygame.K_ESCAPE
 
+settings = {}
+exclude = ['os', 'pickle', 'pygame', 'settings_dict', 'exclude']
+for item in [item for item in dir() if not item.startswith('__') and item not in exclude]:
+    settings[item] = locals()[item]
+
 #Unless...
 if not os.path.exists('settings'):
-    settings_dict = {}
-    exclude = ['os', 'pickle', 'pygame', 'settings_dict', 'exclude']
-    for item in [item for item in dir() if not item.startswith('__') and item not in exclude]:
-        settings_dict[item] = locals()[item]
-
     f = open('settings', 'wb')
-    f.write(pickle.dumps(settings_dict))
+    f.write(pickle.dumps(settings))
     f.close()
-
 else:
     f = open('settings', 'rb')
-    settings_dict = pickle.loads(f.read())
+    settings = pickle.loads(f.read())
     f.close()
-    for key in settings_dict.keys():
-        locals()[key] = settings_dict[key]

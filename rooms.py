@@ -4,7 +4,7 @@ Adds the Room class which stores data about any room that can be called via rand
 Adds individual subclasses of Room with information specific to each room.
 """
 import pygame
-import config
+from config import settings
 import helpers as h
 
 MoveRight = 0
@@ -175,7 +175,7 @@ class Room(object):
         self.block_list = pygame.sprite.Group()
         self.enemy_list = pygame.sprite.Group()
 
-        self.background = pygame.Surface(config.SCREEN_RESOLUTION)
+        self.background = pygame.Surface(settings['SCREEN_RESOLUTION'])
 
         self.xspeed = 0
         self.yspeed = 0
@@ -289,7 +289,7 @@ class Room(object):
         screen.blit(self.background, (0, 0))
 
         if not self.array_parsed:
-            self.parse_room_array(config.SCREEN_RESOLUTION[0] / 2 - 128, config.SCREEN_RESOLUTION[1] / 2 - 128)
+            self.parse_room_array(settings['SCREEN_RESOLUTION'][0] / 2 - 128, settings['SCREEN_RESOLUTION'][1] / 2 - 128)
 
         self.block_list.draw(screen)
         self.enemy_list.draw(screen)

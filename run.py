@@ -2,11 +2,11 @@
 Run the game.
 """
 import pygame
-import config
+from config import settings
 import gamestates
 
 pygame.init()
-screen = pygame.display.set_mode(config.SCREEN_RESOLUTION)
+screen = pygame.display.set_mode(settings['SCREEN_RESOLUTION'])
 pygame.display.set_caption("mineEye")
 clock = pygame.time.Clock()
 
