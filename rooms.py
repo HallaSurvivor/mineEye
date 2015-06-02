@@ -231,6 +231,10 @@ class Room(object):
         block_hit_list = pygame.sprite.spritecollide(hero, self.block_list, False)
         for block in block_hit_list:
             old_y_pos = block.rect.y
+
+            if self.yspeed < -25 and hero.take_falldamage:
+                hero.damage(-(self.yspeed + 25))  # Damage 25 less than the current speed
+
             if y > 0:
                 block.rect.bottom = hero.rect.top
             elif y < 0:
