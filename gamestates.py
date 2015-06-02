@@ -390,10 +390,13 @@ class InGame(GameState):
             if self.hero.run_timer:
                 self.elapsed_time = datetime.datetime.now() - self.start_time
                 formatted_elapsed_time = self.elapsed_time.total_seconds()
+
                 elapsed_time_display = h.load_font('BLKCHCRY.TTF', 20).render(
                     "{ElapsedTime}".format(ElapsedTime=formatted_elapsed_time), 1, constants.WHITE
                 )
-                screen.blit(elapsed_time_display, (950, 0))
+
+                time_pos = (constants.TOP_RIGHT[0] - elapsed_time_display.get_rect().width - 16, 0)
+                screen.blit(elapsed_time_display, time_pos)
             else:
                 formatted_elapsed_time = self.elapsed_time.total_seconds()
                 elapsed_time_display = h.load_font('BLKCHCRY.TTF', 48).render(
