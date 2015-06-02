@@ -12,12 +12,11 @@ clock = pygame.time.Clock()
 
 manager = gamestates.GameStateManager()
 
-done = False
-while not done:
+while not manager.done:
     clock.tick(60)
 
     if pygame.event.get(pygame.QUIT):
-        done = True
+        manager.done = True
 
     manager.state.handle_events(pygame.event.get())
     manager.state.update()

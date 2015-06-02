@@ -11,6 +11,9 @@ import helpers as h
 import rooms
 import hero
 
+f = open('settings', 'rb')
+settings_dict = pickle.loads(f.read())
+f.close()
 
 class GameState(object):
     """
@@ -55,6 +58,7 @@ class GameStateManager(object):
     """
     def __init__(self):
         self.state = None
+        self.done = False
         self.go_to(TitleScreen())
 
     def go_to(self, gamestate):
@@ -163,7 +167,7 @@ class TitleScreen(GameState):
                     elif self.selected == 2:
                         self.manager.go_to(ChangeSettings())
                     elif self.selected == 3:
-                        pygame.quit()
+                        self.manager.done = True
 
 
 class ChooseHero(GameState):
@@ -281,6 +285,14 @@ class ChangeSettings(GameState):
 
         font = h.load_font('MelmaCracked.ttf', 32)
 
+        on = h.load_font('MelmaCracked.ttf', 16).render(
+            'On', 1, constants.BLACK
+        )
+
+        off = h.load_font('MelmaCracked.ttf', 16).render(
+            'Off', 1, constants.BLACK
+        )
+
         option_text = h.load_font('MelmaCracked.ttf', 48).render(
             "Options", 1, constants.BLACK
         )
@@ -290,6 +302,18 @@ class ChangeSettings(GameState):
             'Play Music', 1, constants.BLACK
         )
         music_rect = h.blit_text(music_text, screen, 2)
+
+        if settings_dict['PLAY_MUSIC']:
+            on_rect = on.get_rect()
+            on_rect.left = music_rect.right
+            on_rect.centery = music_rect.centery
+            screen.blit(on, on_rect)
+        else:
+            off_rect = off.get_rect()
+            off_rect.left = music_rect.right
+            off_rect.centery = music_rect.centery
+            screen.blit(off, off_rect)
+
 
     def update(self):
         pass
@@ -305,9 +329,6 @@ class ChangeSettings(GameState):
                     self.manager.go_to(TitleScreen())
                 elif e.key == pygame.K_SPACE or e.key == config.RIGHT:
                     if self.selected == 0:
-                        f = open('settings', 'rb')
-                        settings_dict = pickle.loads(f.read())
-                        f.close()
                         if settings_dict['PLAY_MUSIC']:
                             settings_dict['PLAY_MUSIC'] = False
                         else:
