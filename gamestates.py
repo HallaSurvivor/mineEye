@@ -9,8 +9,7 @@ import config
 import constants
 import helpers as h
 import rooms
-from hero import Hero
-from enemy import Enemy
+import hero
 
 
 class GameState(object):
@@ -134,8 +133,9 @@ class TitleScreen(GameState):
 
     def handle_events(self, events):
         """
-        Wait for a keystroke to move forward with the game. Space will go to a timerless game, whereas T will go to
-        a timed game.
+        Wait for a keystroke to move forward with the game.
+        UP and DOWN will move through options
+        SPACE or RIGHT will execute the currently selected option
 
         Overwrites the default handle_events from the parent GameState class.
         """
@@ -149,11 +149,105 @@ class TitleScreen(GameState):
                         self.selected -= 1
                 elif e.key == pygame.K_SPACE or e.key == config.RIGHT:
                     if self.selected == 0:
-                        self.manager.go_to(InGame())
+                        self.manager.go_to(ChooseHero())
                     elif self.selected == 1:
-                        self.manager.go_to(InGame(timer=True))
+                        self.manager.go_to(ChooseHero(timer=True))
                     elif self.selected == 2:
                         self.manager.go_to(ChangeSettings())
+
+
+class ChooseHero(GameState):
+    """
+    A game state for choosing a hero to play as.
+    """
+
+    def __init__(self, timer=False):
+        super().__init__()
+        self.manager = None
+
+        self.selected = 0
+
+        self.timer = timer
+
+    def draw(self, screen):
+        """
+        Draw a selection menu with a picture of the heros.
+        """
+        background = h.create_background(h.load('sand.jpg'))
+        screen.blit(background, (0, 0))
+
+        font = h.load_font('MelmaCracked.ttf', 32)
+        desc_font = h.load_font('MelmaCracked.ttf', 24)
+
+        title_text = h.load_font('MelmaCracked.ttf', 48).render(
+            "Choose a Hero!", 1, constants.BLACK
+        )
+        h.blit_text(title_text, screen, 1)
+
+        i = 2
+        rect_list = []
+        for possible_hero in hero.hero_list:
+            name_text = font.render(
+                possible_hero.name, 1, constants.BLACK
+            )
+            name_rect = h.blit_text(name_text, screen, i)
+
+            desc_text = desc_font.render(
+                possible_hero.description, 1, constants.BLACK
+            )
+            desc_rect = desc_text.get_rect()
+            desc_rect.top = name_rect.bottom
+            desc_rect.centerx = name_rect.centerx
+            screen.blit(desc_text, desc_rect)
+
+            rect_list.append(desc_rect)
+
+            i += 1
+
+        selected_indicator = h.load('pickaxe.png')
+        selected_rect = selected_indicator.get_rect()
+
+        if self.selected == 0:
+            selected_rect.left = rect_list[0].right
+            selected_rect.bottom = rect_list[0].bottom
+        elif self.selected == 1:
+            selected_rect.left = rect_list[1].right
+            selected_rect.bottom = rect_list[1].bottom
+        elif self.selected == 2:
+            selected_rect.left = rect_list[2].right
+            selected_rect.bottom = rect_list[2].bottom
+
+        screen.blit(selected_indicator, selected_rect)
+
+    def update(self):
+        pass
+
+    def handle_events(self, events):
+        """
+        Wait for a keystroke to move forward with the game.
+        UP and DOWN will move through options
+        SPACE or RIGHT will execute the currently selected option
+
+        Overwrites the default handle_events from the parent GameState class.
+        """
+        for e in events:
+            if e.type == pygame.KEYDOWN:
+                if e.key == config.DOWN:
+                    if self.selected <= 2:
+                        self.selected += 1
+                elif e.key == config.UP:
+                    if self.selected >= 1:
+                        self.selected -= 1
+                elif e.key == config.LEFT:
+                    self.manager.go_to(TitleScreen())
+                elif e.key == pygame.K_SPACE or e.key == config.RIGHT:
+                    if self.selected == 0:
+                        self.manager.go_to(InGame(timer=self.timer, chosen_hero=hero.hero_list[0]))
+                    elif self.selected == 1:
+                        self.manager.go_to(InGame(timer=self.timer, chosen_hero=hero.hero_list[1]))
+                    elif self.selected == 2:
+                        self.manager.go_to(InGame(timer=self.timer, chosen_hero=hero.hero_list[2]))
+
 
 class ChangeSettings(GameState):
     """
@@ -221,7 +315,7 @@ class InGame(GameState):
 
     musicfile = 'Pathetique.mp3'
 
-    def __init__(self, timer=False):
+    def __init__(self, timer=False, chosen_hero=hero.Hero3):
         """
         Instantiate the primary Game State.
         :param timer: A boolean. True if a timer is to be displayed in the top right, False if not.
@@ -231,11 +325,8 @@ class InGame(GameState):
 
         self.all_sprites_list = pygame.sprite.Group()
 
-        self.hero = Hero()
+        self.hero = chosen_hero()
         self.all_sprites_list.add(self.hero)
-
-        #self.enemy = Enemy()
-        #self.all_sprites_list.add(self.enemy)
 
         self.start_time = datetime.datetime.now()
 
@@ -328,8 +419,20 @@ class InGame(GameState):
 
                     elif event.key == config.UP:
                         if not self.hero.jumping:
-                            self.world.changespeed(0, 12)
-                            self.hero.jumping = True
+
+                            # If the hero is on a platform:
+                            self.hero.rect.y += 2
+                            hit_list = pygame.sprite.spritecollide(self.hero, self.world.block_list, False)
+                            self.hero.rect.y -= 2
+                            if len(hit_list) > 0:
+                                self.world.changespeed(0, self.hero.jump_height)
+                                self.hero.jumping = True
+
+                        else:
+                            if self.hero.can_doublejump and not self.hero.double_jumping:
+                                self.world.setspeed(None, 0)
+                                self.world.changespeed(0, self.hero.double_jump_height)
+                                self.hero.double_jumping = True
 
                     elif event.key == config.DOWN:
                         pass
@@ -378,8 +481,19 @@ class InGame(GameState):
 
                     elif event.key == config.UP:
                         if not self.hero.jumping:
-                            self.world.changespeed(0, 12)
-                            self.hero.jumping = True
+
+                            # If the hero is on a platform:
+                            self.hero.rect.y += 2
+                            hit_list = pygame.sprite.spritecollide(self.hero, self.world.block_list, False)
+                            self.hero.rect.y -= 2
+                            if len(hit_list) > 0:
+                                self.world.changespeed(0, self.hero.jump_height)
+                                self.hero.jumping = True
+
+                        else:
+                            if self.hero.can_doublejump and not self.hero.double_jumping:
+                                self.world.changespeed(0, self.hero.double_jump_height)
+                                self.hero.double_jumping = True
 
                     elif event.key == config.DOWN:
                         pass
@@ -436,8 +550,8 @@ class InGame(GameState):
                         matched = True
 
                 elif possible_next_room[0] == rooms.MoveLeft:
-                    if total_displacement >= 1:  # Gets around a bug with rendering negative of the start
-                        if move_left_counter <= 3:
+                    if total_displacement >= 3:  # Gets around a bug with rendering negative of the start
+                        if move_left_counter <= 5:
                             room_list.append(possible_next_room)
 
                             move_down_counter = 0
@@ -448,7 +562,7 @@ class InGame(GameState):
                             matched = True
 
                 elif possible_next_room[0] == rooms.MoveRight:
-                    if move_right_counter <= 3:
+                    if move_right_counter <= 5:
                         room_list.append(possible_next_room)
 
                         move_down_counter = 0
