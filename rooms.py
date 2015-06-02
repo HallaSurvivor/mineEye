@@ -5,6 +5,7 @@ Adds individual subclasses of Room with information specific to each room.
 """
 import pygame
 from config import settings
+import enemy
 import helpers as h
 
 MoveRight = 0
@@ -53,7 +54,7 @@ room_dict = {
     "Room03": [MoveRight,
                "SSDDSSSSSSSS",
                "S          P",
-               "S          P",
+               "S     E    P",
                "SSSSSSSSSDDS",
     ],
     "Room04": [MoveRight,
@@ -119,7 +120,7 @@ class Wall(pygame.sprite.Sprite):
         Movement is split between X and Y so that collision checking only has to deal with
             one at a time.
 
-        :param xpseed: Int representing the change in x direction
+        :param xspeed: Int representing the change in x direction
         """
 
         self.rect.x += xspeed
@@ -199,6 +200,8 @@ class Room(object):
         # Move the blocks in the X direction
         for block in self.block_list:
             block.movex(x)
+        for e in self.enemy_list:
+            e.movex(x)
 
         # Check for block-hero collisions
         block_hit_list = pygame.sprite.spritecollide(hero, self.block_list, False)
@@ -214,6 +217,8 @@ class Room(object):
             for block2 in self.block_list:
                 if block2 != block:
                     block2.rect.x += x_pos_change
+            for e in self.enemy_list:
+                e.rect.x += x_pos_change
 
             # Damage the player if the block is a spike
             if block.damage_player:
@@ -226,11 +231,17 @@ class Room(object):
         # Move the blocks in the Y direction
         for block in self.block_list:
             block.movey(y)
+        for e in self.enemy_list:
+            e.movey(y)
 
         # Check for block-hero collisions
         block_hit_list = pygame.sprite.spritecollide(hero, self.block_list, False)
         for block in block_hit_list:
             old_y_pos = block.rect.y
+
+            if self.yspeed < -25 and hero.take_falldamage:
+                hero.damage(-(self.yspeed + 25))  # Damage 25 less than the current speed
+
             if y > 0:
                 block.rect.bottom = hero.rect.top
             elif y < 0:
@@ -244,6 +255,8 @@ class Room(object):
             for block2 in self.block_list:
                 if block2 != block:
                     block2.rect.y += y_pos_change
+            for e in self.enemy_list:
+                e.rect.y += y_pos_change
 
             # Damage the player if the block is a spike
             if block.damage_player:
@@ -336,6 +349,12 @@ class Room(object):
                     elif col == "P":
                         wall = Wall(x, y, h.load('spikes.png'), damage_player=True)
                         self.block_list.add(wall)
+
+                    elif col == "E":
+                        new_enemy = enemy.Enemy1()
+                        new_enemy.rect.x = x
+                        new_enemy.rect.y = y + 16
+                        self.enemy_list.add(new_enemy)
 
                     x += 64
                 y += 64

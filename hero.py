@@ -30,6 +30,8 @@ class Hero(pygame.sprite.Sprite):
 
     self.can_doublejump is True if the hero can doublejump. False by default
 
+    self.can_take_falldamage is False if the hero never takes fall damage. True by default
+
     self.rect is the Hero's bounding box
         .rect.y is the box's top left corner's y position
         .rect.x is the box's top left corner's x position
@@ -47,6 +49,8 @@ class Hero(pygame.sprite.Sprite):
 
     can_doublejump = False
 
+    can_take_falldamage = True
+
     def __init__(self):
         """
         create the class.
@@ -61,6 +65,7 @@ class Hero(pygame.sprite.Sprite):
         self.actual_speed = self.base_speed
         self.jump_height = self.base_jump_height
         self.double_jump_height = self.base_double_jump_height
+        self.take_falldamage = self.can_take_falldamage
 
         self.jumping = False
         self.double_jumping = False
@@ -87,6 +92,7 @@ class Hero(pygame.sprite.Sprite):
         self.actual_speed = self.base_speed
         self.jump_height = self.base_jump_height
         self.double_jump_height = self.base_double_jump_height
+        self.take_falldamage = self.can_take_falldamage
 
     def change_speed(self, amount):
         """
@@ -112,13 +118,15 @@ class Hero(pygame.sprite.Sprite):
 
 class Hero1(Hero):
     """
-    A hero with double jump abilities.
+    A hero with double jump abilities. Doesn't take fall damage
     """
 
     name = "Hero 1"
-    description = "A hero with double jump abilities"
+    description = "A hero with double jump abilities. Doesn't take fall damage"
 
     can_doublejump = True
+
+    can_take_falldamage = False
 
     def __init__(self):
         super().__init__()
