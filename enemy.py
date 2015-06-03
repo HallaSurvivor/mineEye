@@ -2,17 +2,19 @@
 Exports the Enemy class that the User actually controls.
 """
 import pygame
-import constants
 import helpers as h
 
 
 class Enemy(pygame.sprite.Sprite):
     """
     An Enemy superclass meant to be subclassed by individual enemies.
+
+    contact_damage - the amount of damage the enemy does when the player touches it.
     """
 
     hp = 100
     speed = 3
+    contact_damage = 3
 
     def __init__(self):
         """

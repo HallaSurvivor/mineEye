@@ -581,15 +581,16 @@ class InGame(GameState):
                         matched = True
 
                 elif possible_next_room[0] == rooms.MoveLeft:
-                    if total_displacement >= 3:  # Gets around a bug with rendering negative of the start
-                        if move_left_counter <= 5:
+                    # Solves a bug with rendering left of the start
+                    if total_displacement >= len(possible_next_room[-1]):
+                        if move_left_counter <= 3:
                             room_list.append(possible_next_room)
 
                             move_down_counter = 0
                             move_left_counter += 1
                             move_right_counter = 0
 
-                            total_displacement -= 1
+                            total_displacement -= len(possible_next_room[-1])
                             matched = True
 
                 elif possible_next_room[0] == rooms.MoveRight:
@@ -600,7 +601,7 @@ class InGame(GameState):
                         move_left_counter = 0
                         move_right_counter += 1
 
-                        total_displacement += 1
+                        total_displacement += len(possible_next_room[-1])
                         matched = True
 
         room_list.append(rooms.room_dict["EndingRoom"])

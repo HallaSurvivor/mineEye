@@ -239,8 +239,10 @@ class Room(object):
         for block in block_hit_list:
             old_y_pos = block.rect.y
 
-            if self.yspeed < -25 and hero.take_falldamage:
-                hero.damage(-(self.yspeed + 25))  # Damage 25 less than the current speed
+            if hero.take_falldamage:
+                damage = -self.yspeed - 30
+                if damage > 0:
+                    hero.damage(damage)
 
             if y > 0:
                 block.rect.bottom = hero.rect.top
@@ -266,36 +268,10 @@ class Room(object):
             if block.end_timer:
                 hero.run_timer = False
 
-        """
-        #clips and implements damage for enemies( damage in this case is contact based damage)
-        block_hit_list = pygame.sprite.spritecollide(hero, self.enemy_list, False)
-        for block in block_hit_list:
-
-            block.movex(-hero.actual_speed)
-
-            old_x_pos = block.rect.x
-            if x > 0:
-                block.rect.right = hero.rect.left
-            elif x < 0:
-                block.rect.left = hero.rect.right
-            x_pos_change = block.rect.x - old_x_pos
-
-            # Shift the rest of the room to stay in line with the block that collided
-            for block2 in self.block_list:
-                if block2 != block:
-                    block2.rect.x += x_pos_change
-            for e in self.enemy_list:
-                e.rect.x += x_pos_change
-
-
-            # Damage the player if the block is a spike
-            if block.damage_player_on_touch:
-                hero.damage(5)
-
-        """
-
-
-
+        enemy_hit_list = pygame.sprite.spritecollide(hero, self.enemy_list, False)
+        for e in enemy_hit_list:
+            if e.contact_damage:
+                hero.damage(e.contact_damage)
 
 
     def calc_gravity(self):
