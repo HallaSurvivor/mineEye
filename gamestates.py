@@ -582,8 +582,8 @@ class InGame(GameState):
 
                 elif possible_next_room[0] == rooms.MoveLeft:
                     # Solves a bug with rendering left of the start
-                    if total_displacement >= len(possible_next_room[-1]):
-                        if move_left_counter <= 5 and random.randint(0, 10) > 6:
+                    if total_displacement >= 2*len(possible_next_room[-1]):
+                        if move_left_counter <= 5:
                             room_list.append(possible_next_room)
 
                             move_down_counter = 0
