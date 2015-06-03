@@ -28,6 +28,10 @@ class Enemy(pygame.sprite.Sprite):
         self.current_hp = self.hp
 
 
+        self.moving_left = False
+        self.moving_right = False
+
+
         self.damage_player_on_touch = True
 
         self.jumping = False
