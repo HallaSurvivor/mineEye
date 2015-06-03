@@ -3,6 +3,7 @@ Adds the Room class which stores data about any room that can be called via rand
 
 Adds individual subclasses of Room with information specific to each room.
 """
+from math import hypot
 import pygame
 from config import settings
 import enemy
@@ -162,6 +163,7 @@ class Room(object):
 
     block_list = None
     enemy_list = None
+    enemy_projectile_list = None
 
     background = None
 
@@ -175,6 +177,8 @@ class Room(object):
         """
         self.block_list = pygame.sprite.Group()
         self.enemy_list = pygame.sprite.Group()
+        self.enemy_projectile_list = pygame.sprite.Group()
+        self.hero_projectile_list = pygame.sprite.Group()
 
         self.background = pygame.Surface(settings['SCREEN_RESOLUTION'])
 
@@ -273,7 +277,6 @@ class Room(object):
             if e.contact_damage:
                 hero.damage(e.contact_damage)
 
-
     def calc_gravity(self):
         """
         Change self.xgravity and self.ygravity to change the world's gravity.
@@ -283,6 +286,41 @@ class Room(object):
             self.yspeed = self.base_y_gravity
         else:
             self.yspeed += self.gravity_acceleration
+
+    def cause_ranged_attacks(self, hero):
+        """
+        Cause every enemy with a ranged attack to attack the hero, if in range
+        :param hero: The hero to target
+        """
+        for e in self.enemy_list:
+            distance = hypot(e.rect.centerx - hero.rect.centerx, e.rect.centery - hero.rect.centery)
+            if e.is_ranged and distance < e.attack_range:
+                if e.ranged_attack_cooldown == 0:
+                    proj = e.ranged_attack(hero)
+                    self.enemy_projectile_list.add(proj)
+                else:
+                    e.ranged_attack_cooldown -= 1
+
+    def destroy_projectiles(self):
+        """
+        Check collisions between projectiles and walls, and destroy projectiles appropriately.
+        """
+        for block in self.block_list:
+            pygame.sprite.spritecollide(block, self.enemy_projectile_list, True)
+
+        for proj in self.enemy_projectile_list:
+            hit_list = pygame.sprite.spritecollide(proj, self.hero_projectile_list, True)
+            if len(hit_list) > 0:
+                self.enemy_projectile_list.remove(proj)
+
+    def cause_projectile_damage(self, hero):
+        """
+        Cause damage to the player from projectiles
+        :param hero: The hero to check against the projectiles, and damage for a hit.
+        """
+        hit_list = pygame.sprite.spritecollide(hero, self.enemy_projectile_list, True)
+        for proj in hit_list:
+            hero.damage(proj.damage)
 
     def update(self, hero):
         """
@@ -299,8 +337,25 @@ class Room(object):
         # Update all the blocks in the room
         self.block_list.update()
 
-        # Update the enemies (not currently implemented)
+        # Remove enemies that are dead
+        for e in self.enemy_list:
+            if e.current_hp <= 0:
+                self.enemy_list.remove(e)
+
+        # Use ranged attacks
+        self.cause_ranged_attacks(hero)
+
+        # Deal damage from ranged attacks
+        self.cause_projectile_damage(hero)
+
+        # Update the enemies
         self.enemy_list.update()
+
+        # Destroy any projectiles that hit walls or opposing projectiles
+        self.destroy_projectiles()
+
+        #Update the entities
+        self.enemy_projectile_list.update()
 
     def draw(self, screen):
         """
@@ -314,6 +369,7 @@ class Room(object):
 
         self.block_list.draw(screen)
         self.enemy_list.draw(screen)
+        self.enemy_projectile_list.draw(screen)
 
     def setspeed(self, setx, sety):
         """
