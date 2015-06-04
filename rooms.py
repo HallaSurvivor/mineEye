@@ -25,7 +25,7 @@ room_dict = {
                      "S      S",
                      "SSSSSDDS"
     ],
-    "EndingRoom": [MoveRight,
+    "EndingRoom": [MoveDown,
                    "SSSDDSSS",
                    "S      S",
                    "S      S",
@@ -55,16 +55,16 @@ room_dict = {
     "Room03": [MoveRight,
                "SSDDSSSSSSSS",
                "S          P",
-               "S     E    P",
+               "S     R    P",
                "SSSSSSSSSDDS",
     ],
     "Room04": [MoveRight,
                "SSDDSSSSSSSSSSSSS",
                "S               S",
-               "S               S",
+               "S        R      S",
                "S     SSSSSSS   S",
                "S      S   S    S",
-               "S    S   S      S",
+               "S    S R S      S",
                "SSSSSSSSSSSSSDDSS"
     ],
     "Room05": [MoveLeft,
@@ -414,8 +414,8 @@ class Room(object):
                         wall = Wall(x, y, h.load('spikes.png'), damage_player=True)
                         self.block_list.add(wall)
 
-                    elif col == "E":
-                        new_enemy = enemy.Enemy1()
+                    elif col == "R":
+                        new_enemy = enemy.Turret()
                         new_enemy.rect.x = x
                         new_enemy.rect.y = y + 16
                         self.enemy_list.add(new_enemy)

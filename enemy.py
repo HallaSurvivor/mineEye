@@ -93,9 +93,9 @@ class Enemy(pygame.sprite.Sprite):
         pass
 
 
-class Enemy1(Enemy):
+class Turret(Enemy):
     """
-    A basic enemy
+    A stationary turret that fires projectiles at the player.
     """
 
     is_ranged = True
