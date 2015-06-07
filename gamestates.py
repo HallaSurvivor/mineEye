@@ -71,163 +71,28 @@ class GameStateManager(object):
             h.play_music(gamestate.musicfile)
 
 
-class TitleScreen(GameState):
+class Menu(GameState):
     """
-    The title screen game state.
+    A blank template for rendering menus and handling their events.
     """
 
-    musicfile = 'O_Fortuna.mp3'
+    title = ""
+    options = []
+    descriptions = None
+    selections = []
 
     def __init__(self):
         super().__init__()
         self.manager = None
 
-        self.title = 'Press Space to begin!'
-        self.options = ['Start!', 'Time Trial!', 'Settings!', 'Quit!']
-        self.selections = [ChooseHero(), ChooseHero(timer=True), ChangeSettings(), Quit()]
-
         self.selected = 0
-        self.list_size = len(self.title) - 1
+        self.list_size = len(self.options) - 1
 
     def draw(self, screen):
         """
-        Draw a TitleScreen with text telling the user to press SPACE to begin
+        Draw the title and all the options/descriptions to the screen.
         :param screen: The pygame screen on which to draw
         """
-        
-        screen.blit(self.default_background, (0, 0))
-
-        rect_list = h.create_menu(screen, self.title, self.options)
-
-        selected_indicator = h.load('pickaxe.png')
-        selected_rect = selected_indicator.get_rect()
-
-        selected_rect.left = rect_list[self.selected].right
-        selected_rect.centery = rect_list[self.selected].centery
-
-        screen.blit(selected_indicator, selected_rect)
-
-    def update(self):
-        pass
-
-    def handle_events(self, events):
-        """
-        Wait for a keystroke to move forward with the game.
-        UP and DOWN will move through options
-        SPACE or RIGHT will execute the currently selected option
-
-        Overwrites the default handle_events from the parent GameState class.
-        """
-        for e in events:
-            if e.type == pygame.KEYDOWN:
-                if e.key == settings['DOWN']:
-                    if self.selected < self.list_size:
-                        self.selected += 1
-                elif e.key == settings['UP']:
-                    if self.selected > 0:
-                        self.selected -= 1
-
-                elif e.key == pygame.K_SPACE or e.key == settings['RIGHT']:
-                    self.manager.go_to(self.selections[self.selected])
-
-
-class Quit(GameState):
-    """
-    A gamestate to quit. Done to make things more general.
-    """
-
-    def __init__(self):
-        super().__init__()
-        self.manager = None
-
-    def update(self):
-        self.manager.done = True
-
-
-class ChooseHero(GameState):
-    """
-    A game state for choosing a hero to play as.
-    """
-
-    def __init__(self, timer=False):
-        super().__init__()
-        self.manager = None
-
-        self.selected = 0
-        self.list_size = 0
-
-        self.timer = timer
-
-    def draw(self, screen):
-        """
-        Draw a selection menu with a picture of the heros.
-        """
-        
-        screen.blit(self.default_background, (0, 0))
-
-        title = 'Choose a Hero!'
-        options = [player.name for player in hero.hero_list]
-        descriptions = [player.description for player in hero.hero_list]
-
-        rect_list = h.create_menu(screen, title, options, descriptions)
-        self.list_size = len(rect_list) - 1
-
-        selected_indicator = h.load('pickaxe.png')
-        selected_rect = selected_indicator.get_rect()
-        selected_rect.left = rect_list[self.selected].right + 5
-        selected_rect.bottom = rect_list[self.selected].bottom
-
-        screen.blit(selected_indicator, selected_rect)
-
-    def update(self):
-        pass
-
-    def handle_events(self, events):
-        """
-        Wait for a keystroke to move forward with the game.
-        UP and DOWN will move through options
-        SPACE or RIGHT will execute the currently selected option
-
-        Overwrites the default handle_events from the parent GameState class.
-        """
-        for e in events:
-            if e.type == pygame.KEYDOWN:
-                if e.key == settings['DOWN']:
-                    if self.selected <= self.list_size:
-                        self.selected += 1
-
-                elif e.key == settings['UP']:
-                    if self.selected > 0:
-                        self.selected -= 1
-
-                elif e.key == settings['LEFT']:
-                    self.manager.go_to(TitleScreen())
-
-                elif e.key == pygame.K_SPACE or e.key == settings['RIGHT']:
-                    self.manager.go_to(InGame(timer=self.timer, chosen_hero=hero.hero_list[self.selected]))
-
-
-class ChangeSettings(GameState):
-    """
-    A game state for changing local variables like PLAY_MUSIC.
-    """
-
-    def __init__(self):
-
-        super().__init__()
-        self.manager = None
-
-        self.selected = 0
-
-    def draw(self, screen):
-        """
-        Draw a menu with configuration options.
-        :param screen: The pygame screen on which to draw.
-        """
-        
-        screen.blit(self.default_background, (0, 0))
-
-        font = h.load_font('MelmaCracked.ttf', 32)
 
         on = h.load_font('MelmaCracked.ttf', 16).render(
             'On', 1, constants.BLACK
@@ -237,26 +102,25 @@ class ChangeSettings(GameState):
             'Off', 1, constants.BLACK
         )
 
-        option_text = h.load_font('MelmaCracked.ttf', 48).render(
-            "Options", 1, constants.BLACK
-        )
-        h.blit_text(option_text, screen, 1)
+        screen.blit(self.default_background, (0, 0))
 
-        music_text = font.render(
-            'Play Music', 1, constants.BLACK
-        )
-        music_rect = h.blit_text(music_text, screen, 2)
+        rect_list = h.create_menu(screen, self.title, self.options, self.descriptions)
 
-        if settings['PLAY_MUSIC']:
-            on_rect = on.get_rect()
-            on_rect.left = music_rect.right
-            on_rect.centery = music_rect.centery
-            screen.blit(on, on_rect)
-        else:
-            off_rect = off.get_rect()
-            off_rect.left = music_rect.right
-            off_rect.centery = music_rect.centery
-            screen.blit(off, off_rect)
+        for index, option in enumerate(self.selections):
+            if type(option) == str:
+                if settings[option]:
+                    on_rect = on.get_rect()
+                    on_rect.bottomright = rect_list[index].bottomleft
+                    screen.blit(on, on_rect)
+                else:
+                    off_rect = off.get_rect()
+                    off_rect.bottomright = rect_list[index].bottomleft
+                    screen.blit(off, off_rect)
+
+        selected_indicator = h.load('pickaxe.png')
+        selected_rect = selected_indicator.get_rect()
+        selected_rect.bottomleft = rect_list[self.selected].bottomright
+        screen.blit(selected_indicator, selected_rect)
 
     def update(self):
         pass
@@ -265,22 +129,79 @@ class ChangeSettings(GameState):
         for e in events:
             if e.type == pygame.KEYDOWN:
                 if e.key == settings['DOWN']:
-                    pass
+                    if self.selected < self.list_size:
+                        self.selected += 1
                 elif e.key == settings['UP']:
-                    pass
+                    if self.selected > 0:
+                        self.selected -= 1
+
                 elif e.key == settings['LEFT']:
                     self.manager.go_to(TitleScreen())
+
                 elif e.key == pygame.K_SPACE or e.key == settings['RIGHT']:
-                    if self.selected == 0:
-                        if settings['PLAY_MUSIC']:
-                            settings['PLAY_MUSIC'] = False
+                    if type(self.selections[self.selected]) == str:
+                        print(settings)
+                        if settings[self.selections[self.selected]]:
+                            settings[self.selections[self.selected]] = False
 
                         else:
-                            settings['PLAY_MUSIC'] = True
+                            settings[self.selections[self.selected]] = True
 
                         f = open('settings', 'wb')
                         f.write(pickle.dumps(settings))
                         f.close()
+
+                        print(settings)
+
+                    else:
+                        self.manager.go_to(self.selections[self.selected])
+
+
+class TitleScreen(Menu):
+    """
+    The title screen game state.
+    """
+
+    musicfile = 'O_Fortuna.mp3'
+
+    title = 'Press Space to begin!'
+    options = ['Start!', 'Time Trial!', 'Settings!', 'Quit!']
+
+    def __init__(self):
+        super().__init__()
+
+        self.selections = [ChooseHero(), ChooseHero(timer=True), ChangeSettings(), Quit()]
+
+
+class ChooseHero(Menu):
+    """
+    A game state for choosing a hero to play as.
+    """
+
+    title = 'Choose a Hero!'
+    options = [player.name for player in hero.hero_list]
+    descriptions = [player.description for player in hero.hero_list]
+
+    def __init__(self, timer=False):
+        super().__init__()
+        self.manager = None
+        self.timer = timer
+
+        self.selections = [InGame(timer=self.timer, chosen_hero=player) for player in hero.hero_list]
+
+
+class ChangeSettings(Menu):
+    """
+    A game state for changing local variables like PLAY_MUSIC.
+    """
+    title = "Settings"
+    options = ["Play Music", "Play Sound Effects", "Change Keybinds"]
+
+    def __init__(self):
+        super().__init__()
+        self.manager = None
+
+        self.selections = ['PLAY_MUSIC', 'PLAY_SFX', Quit()]
 
 
 class InGame(GameState):
@@ -573,3 +494,19 @@ class DeathScreen(GameState):
         for event in events:
             if event.type == pygame.KEYDOWN:
                 self.manager.go_to(TitleScreen())
+
+
+class Quit(GameState):
+    """
+    A gamestate to quit. Done to make things more general.
+    """
+
+    def __init__(self):
+        super().__init__()
+        self.manager = None
+
+    def draw(self, screen):
+        self.manager.done = True
+
+    def update(self):
+        pass

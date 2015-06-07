@@ -104,13 +104,14 @@ def create_menu(screen, title, options, descriptions=None,
                 title_color=constants.BLACK, option_color=constants.BLACK, description_color=constants.BLACK):
     """
     Dynamically create a menu of options for the user to move between.
+
     :param screen: The screen to blit to
     :param title: A title string to display at the top of the menu
     :param options: A list of strings showing option text
     :param descriptions: A list of strings describing the options. Gets displayed immediately below them
-    :param title_font: The pre-loaded font to write the title with, if none, defaults to BLKCHCRY size 48
-    :param option_font: The pre-loaded font to write with, if none, will default to BLKCHCRY size 32
-    :param description_font: The preloaded font to write descriptions with, if none, defaults to BLKCHCRY size 24
+    :param title_font: The pre-loaded font to write the title with, if none, defaults to Melma size 48
+    :param option_font: The pre-loaded font to write with, if none, will default to Melma size 32
+    :param description_font: The preloaded font to write descriptions with, if none, defaults to Melma size 24
     :param title_color: The color to write the title in, defaults to black
     :param option_color: The color to write the options in, defaults to black
     :param description_color: The color to write descriptions in, defaults to black
@@ -119,17 +120,17 @@ def create_menu(screen, title, options, descriptions=None,
     if title_font is not None:
         title_font = title_font
     else:
-        title_font = load_font('BLKCHCRY.TTF', 48)
+        title_font = load_font('Melma.ttf', 48)
 
     if option_font is not None:
         option_font = option_font
     else:
-        option_font = load_font('BLKCHCRY.TTF', 32)
+        option_font = load_font('Melma.ttf', 32)
 
     if description_font is not None:
         description_font = description_font
     else:
-        description_font = load_font('BLKCHCRY.TTF', 24)
+        description_font = load_font('Melma.ttf', 24)
 
     title_surf = title_font.render(title, 1, title_color)
     blit_text(title_surf, screen, 0)
