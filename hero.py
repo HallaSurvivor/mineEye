@@ -55,6 +55,7 @@ class Hero(pygame.sprite.Sprite):
     can_take_falldamage = True
 
     bomb_control = False
+    base_bomb_count = 3
 
     def __init__(self):
         """
@@ -88,7 +89,7 @@ class Hero(pygame.sprite.Sprite):
         self.rect = pygame.Rect(0, 0, 48, 48)
         self.rect.center = constants.CENTER
 
-        self.bombs = 3
+        self.bombs = self.base_bomb_count
 
     def create_animation_dict(self):
         """
@@ -181,13 +182,14 @@ class Hero(pygame.sprite.Sprite):
 
     def reset_all(self):
         """
-        Resets the speed, jump_height, and double_jump_height to the hero's baseline.
+        Resets the speed, jump_height, double_jump_height, and bomb_count to the hero's baseline.
         """
         self.hp = self.base_hp
         self.actual_speed = self.base_speed
         self.jump_height = self.base_jump_height
         self.double_jump_height = self.base_double_jump_height
         self.take_falldamage = self.can_take_falldamage
+        self.bombs = self.base_bomb_count
 
     def change_speed(self, amount):
         """
@@ -220,6 +222,7 @@ class Demo(Hero):
     description = "A demolition expert with control over bombs."
 
     bomb_control = True
+    base_bomb_count = 5
 
     def __init__(self):
         super().__init__()

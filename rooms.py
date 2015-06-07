@@ -329,7 +329,7 @@ class Room(object):
             if len(hit_list) > 0:
                 self.enemy_projectile_list.remove(proj)
 
-    def det_bombs(self):
+    def det_bombs(self, hero):
         """
         Check collisions between bombs and walls, and have them stick until they detonate.
         """
@@ -345,6 +345,10 @@ class Room(object):
                     distance = hypot(e.rect.centerx - bomb.rect.centerx, e.rect.centery - bomb.rect.centery)
                     if distance < bomb.radius:
                         e.damage(100)
+
+                hero_distance = hypot(hero.rect.centerx - bomb.rect.centerx, hero.rect.centery - bomb.rect.centery)
+                if hero_distance < bomb.radius:
+                    hero.damage(50)
 
                 self.bomb_list.remove(bomb)
 
@@ -367,7 +371,7 @@ class Room(object):
         self.calc_gravity()
 
         #Stick the bombs to walls
-        self.det_bombs()
+        self.det_bombs(hero)
 
         # Control the world via user input
         self.move_world(hero, self.xspeed, self.yspeed)
