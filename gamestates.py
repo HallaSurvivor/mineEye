@@ -367,23 +367,33 @@ class InGame(GameState):
         self.left_pressed = False
         self.right_pressed = False
 
-    def draw(self, screen):
+    def draw_hud(self, screen):
         """
-        Overwrites draw in the GameState class. Draws all of the blocks and enemies in the levels in this
-        game state to the screen.
-
-        Additionally, a HUD is displayed at the top of the screen, showing:
-            the Hero's HP
-            the
-        :param screen: The pygame screen on which to draw.
+        Draw the user Heads Up Display to the screen, includes HP, timer, Ammo, etc.
+        :param screen: The screen on which to draw
         """
-        self.world.draw(screen)
-        self.hero.draw(screen)
+        hp_background = pygame.Surface((int(1/6 * constants.WIDTH), 48))
+        hp_background.fill(constants.BLACK)
+        screen.blit(hp_background, (0, 0))
 
-        hero_hp = h.load_font('BLKCHCRY.TTF', 32).render(
-            "HP: {0}".format(self.hero.hp), 1, constants.WHITE
+        hp_bar = pygame.Surface((int(((1/6 * constants.WIDTH) - 4) / self.hero.base_hp * self.hero.hp), 44))
+        if self.hero.hp/self.hero.base_hp > .25:
+            hp_bar.fill(constants.BLUE)
+        else:
+            hp_bar.fill(constants.RED)
+        screen.blit(hp_bar, (2, 2))
+
+        hp_text = h.load_font('BLKCHCRY.TTF', 32).render(
+            "{0}/{1}".format(self.hero.hp, self.hero.base_hp), 1, constants.WHITE
         )
-        screen.blit(hero_hp, (0, 0))
+        hp_text_rect = hp_text.get_rect()
+        hp_text_rect.center = hp_background.get_rect().center
+        screen.blit(hp_text, hp_text_rect)
+
+        bomb_ammo = h.load_font('BLKCHCRY.TTF', 32).render(
+            "Bombs: {0}".format(self.hero.bombs), 1, constants.WHITE
+        )
+        screen.blit(bomb_ammo, (0, 64))
 
         if self.timer:
             if self.hero.run_timer:
@@ -404,6 +414,20 @@ class InGame(GameState):
                 elapsed_time_display_rect = elapsed_time_display.get_rect()
                 elapsed_time_display_rect.center = constants.CENTER
                 screen.blit(elapsed_time_display, elapsed_time_display_rect)
+
+    def draw(self, screen):
+        """
+        Overwrites draw in the GameState class. Draws all of the blocks and enemies in the levels in this
+        game state to the screen.
+
+        Additionally, a HUD is displayed at the top of the screen, showing:
+            the Hero's HP
+            the
+        :param screen: The pygame screen on which to draw.
+        """
+        self.world.draw(screen)
+        self.hero.draw(screen)
+        self.draw_hud(screen)
 
     def update(self):
         """
@@ -467,8 +491,9 @@ class InGame(GameState):
                             self.hero.start_double_jump = True
 
                 elif event.key == settings['BOMB']:
-                    bomb = self.hero.drop_bomb()
-                    self.world.bomb_list.add(bomb)
+                    if self.hero.bombs > 0:
+                        bomb = self.hero.drop_bomb()
+                        self.world.bomb_list.add(bomb)
 
                 elif event.key == settings['DOWN']:
                     pass
