@@ -101,7 +101,7 @@ room_dict = {
     ],
     "Room08": [MoveLeft,
                "SSSSSSSSSSSDDSSS",
-               "S     RRR      S",
+               "S       R      S",
                "S   B          S",
                "SS  BB         S",
                "SSDDSSSSSSSSSSSS"
@@ -369,11 +369,15 @@ class Room(object):
                 for e in self.enemy_list:
                     distance = hypot(e.rect.centerx - bomb.rect.centerx, e.rect.centery - bomb.rect.centery)
                     if distance < bomb.radius:
-                        e.damage(100)
+                        if not hero.bomb_control:
+                            e.damage(100)
+                        else:
+                            e.damage(150)
 
                 hero_distance = hypot(hero.rect.centerx - bomb.rect.centerx, hero.rect.centery - bomb.rect.centery)
                 if hero_distance < bomb.radius:
-                    hero.damage(50)
+                    if not hero.bomb_control:
+                        hero.damage(25)
 
                 self.bomb_list.remove(bomb)
 

@@ -233,7 +233,7 @@ class InGame(GameState):
         self.start_time = datetime.datetime.now()
 
         self.world = None
-        self.generate_world(50)
+        self.generate_world(30)
         self.hero.world = self.world
 
         self.timer = timer
