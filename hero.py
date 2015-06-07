@@ -47,7 +47,7 @@ class Hero(pygame.sprite.Sprite):
     base_hp = 500
     base_speed = 7
     base_jump_height = 12
-    base_double_jump_height = 15
+    base_double_jump_height = 0
 
     can_doublejump = False
 
@@ -213,8 +213,10 @@ class Jumpy(Hero):
     name = "Jumpy"
     description = "A hero with double jump abilities. Doesn't take fall damage"
 
-    can_doublejump = True
+    base_jump_height = 15
+    base_double_jump_height = 15
 
+    can_doublejump = True
     can_take_falldamage = False
 
     def __init__(self):
