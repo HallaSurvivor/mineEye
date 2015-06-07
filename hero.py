@@ -5,6 +5,7 @@ import os
 import pygame
 import pyganim
 import constants
+import entities
 import helpers as h
 
 
@@ -53,6 +54,8 @@ class Hero(pygame.sprite.Sprite):
 
     can_take_falldamage = True
 
+    bomb_control = False
+
     def __init__(self):
         """
         create the class.
@@ -84,6 +87,8 @@ class Hero(pygame.sprite.Sprite):
         self.conductor = None
         self.rect = pygame.Rect(0, 0, 48, 48)
         self.rect.center = constants.CENTER
+
+        self.bombs = 3
 
     def create_animation_dict(self):
         """
@@ -159,6 +164,21 @@ class Hero(pygame.sprite.Sprite):
         """
         self.hp -= amount
 
+    def drop_bomb(self):
+        """
+        Drop a bomb that destroys surronding blocks and damages enemies.
+        :returns bomb: A bomb entity
+        """
+        self.bombs -= 1
+        if self.last_motion == "right":
+            x = 8
+        elif self.last_motion == "left":
+            x = -8
+        else:
+            x = 0
+        bomb = entities.Bomb(h.load('bomb.png'), self.rect.center, x, -8, controlled=self.bomb_control)
+        return bomb
+
     def reset_all(self):
         """
         Resets the speed, jump_height, and double_jump_height to the hero's baseline.
@@ -191,13 +211,15 @@ class Hero(pygame.sprite.Sprite):
         self.double_jump_height = amount*self.base_double_jump_height
 
 
-class Normal(Hero):
+class Demo(Hero):
     """
-    Just a regular hero.
+    A demolition expert with control over bombs.
     """
 
-    name = "Normal"
-    description = "Nothing fancy. Just a regular hero."
+    name = "Demo"
+    description = "A demolition expert with control over bombs."
+
+    bomb_control = True
 
     def __init__(self):
         super().__init__()
@@ -243,4 +265,4 @@ class Speedy(Hero):
         self.reset_all()
 
 
-hero_list = [Normal, Jumpy, Speedy]
+hero_list = [Demo, Jumpy, Speedy]

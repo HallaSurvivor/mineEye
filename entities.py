@@ -38,3 +38,54 @@ class Projectile(pygame.sprite.Sprite):
 
         self.rect.x += self.changex
         self.rect.y += self.changey
+
+
+class Bomb(pygame.sprite.Sprite):
+    """
+    Stores the data for one of the Hero's bombs.
+    """
+    def __init__(self, image, center, changex, changey, radius=128, controlled=False):
+        """
+
+        :return:
+        """
+        super().__init__()
+
+        self.image = image
+        self.rect = self.image.get_rect()
+        self.rect.center = center
+
+        self.changex = changex
+        self.changey = changey
+
+        self.radius = radius
+
+        self.controlled = controlled
+
+    def update(self, xgrav, ygrav):
+        """
+        Change the bomb's location based on changex and changey
+        :param xgrav: The x component of gravity, passed to calc_gravity
+        :param ygrav: The y component of gravity, passed to calc_gravity
+        """
+        self.calc_gravity(xgrav, ygrav)
+        self.move(self.changex, self.changey)
+
+    def calc_gravity(self, xgrav=0, ygrav=0):
+        """
+        Change the bomb's motion based on world gravity.
+        :param xgrav: The x component of gravity - modifies self.changex.
+        :param ygrav: The y component of gravity - modifies self.changey
+        """
+
+        self.changex += xgrav
+        self.changey -= ygrav
+
+    def move(self, changex, changey):
+        """
+        Move the bomb according to some parameters
+        :param changex: the X distance to move the bomb
+        :param changey: the Y distance to move the bomb
+        """
+        self.rect.x += changex
+        self.rect.y += changey

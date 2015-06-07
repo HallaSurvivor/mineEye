@@ -343,7 +343,7 @@ class InGame(GameState):
 
     musicfile = 'Pathetique.mp3'
 
-    def __init__(self, timer=False, chosen_hero=hero.Normal):
+    def __init__(self, timer=False, chosen_hero=hero.Demo):
         """
         Instantiate the primary Game State.
         :param timer: A boolean. True if a timer is to be displayed in the top right, False if not.
@@ -465,6 +465,10 @@ class InGame(GameState):
                             self.world.changespeed(0, self.hero.double_jump_height)
                             self.hero.double_jumping = True
                             self.hero.start_double_jump = True
+
+                elif event.key == settings['BOMB']:
+                    bomb = self.hero.drop_bomb()
+                    self.world.bomb_list.add(bomb)
 
                 elif event.key == settings['DOWN']:
                     pass

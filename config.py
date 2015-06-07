@@ -10,10 +10,12 @@ SCREEN_RESOLUTION = (1366, 768)
 
 PLAY_MUSIC = False
 
-UP = pygame.K_UP
-LEFT = pygame.K_LEFT
-DOWN = pygame.K_DOWN
-RIGHT = pygame.K_RIGHT
+UP = pygame.K_w
+LEFT = pygame.K_a
+DOWN = pygame.K_s
+RIGHT = pygame.K_d
+
+BOMB = pygame.K_b
 
 PAUSE = pygame.K_ESCAPE
 

@@ -76,6 +76,13 @@ room_dict = {
                 "S    S   S   S   S",
                 "S  S   S   S     S",
                 "SDDSSSSSSSSSSSSSSS"
+    ],
+    "Room06": [MoveRight,
+               "SSDDSSSSSSSS",
+               "S          S",
+               "S      B   S",
+               "S      B   S",
+               "SSSSSSSSDDSS"
     ]
 }
 
@@ -87,7 +94,7 @@ class Wall(pygame.sprite.Sprite):
     self.damage_player is True if the player is hurt on contact (spikes) but False otherwise
     """
 
-    def __init__(self, x, y, image, damage_player=False, end_timer=False):
+    def __init__(self, x, y, image, damage_player=False, end_timer=False, breakable=False):
         """
         Create the wall and its location
         :param x: Int representing the x position of the wall's top left corner
@@ -95,6 +102,7 @@ class Wall(pygame.sprite.Sprite):
         :param image: a pygame surface associated with the wall's texture
         :param damage_player: Boolean. True if touching the wall hurts the player
         :param end_timer: Boolean. True if touching the wall ends the game timer.
+        :param breakable: Boolean. True if the player's explosives can destroy the wall.
         """
         super().__init__()
 
@@ -106,6 +114,8 @@ class Wall(pygame.sprite.Sprite):
 
         self.damage_player = damage_player
         self.end_timer = end_timer
+
+        self.breakable = breakable
 
     def update(self):
         """
@@ -158,12 +168,17 @@ class Room(object):
     KEY for room_array:
         S is stone
         P is spike
+        B is a breakable wall
+        R is a turret
+        T is a block that stops the timer
         D is door <- IMPORTANT, you need a door at the top and bottom to make the logic work
     """
 
     block_list = None
     enemy_list = None
     enemy_projectile_list = None
+    hero_projectile_list = None
+    bomb_list = None
 
     background = None
 
@@ -179,6 +194,7 @@ class Room(object):
         self.enemy_list = pygame.sprite.Group()
         self.enemy_projectile_list = pygame.sprite.Group()
         self.hero_projectile_list = pygame.sprite.Group()
+        self.bomb_list = pygame.sprite.Group()
 
         self.background = pygame.Surface(settings['SCREEN_RESOLUTION'])
 
@@ -313,6 +329,25 @@ class Room(object):
             if len(hit_list) > 0:
                 self.enemy_projectile_list.remove(proj)
 
+    def det_bombs(self):
+        """
+        Check collisions between bombs and walls, and have them stick until they detonate.
+        """
+        for bomb in self.bomb_list:
+            hit_list = pygame.sprite.spritecollide(bomb, self.block_list, False)
+            if len(hit_list) > 0:
+                for block in self.block_list:
+                    distance = hypot(block.rect.centerx - bomb.rect.centerx, block.rect.centery - bomb.rect.centery)
+                    if distance < bomb.radius and block.breakable:
+                        self.block_list.remove(block)
+
+                for e in self.enemy_list:
+                    distance = hypot(e.rect.centerx - bomb.rect.centerx, e.rect.centery - bomb.rect.centery)
+                    if distance < bomb.radius:
+                        e.damage(100)
+
+                self.bomb_list.remove(bomb)
+
     def cause_projectile_damage(self, hero):
         """
         Cause damage to the player from projectiles
@@ -331,11 +366,15 @@ class Room(object):
         # Calculate the effect of gravity
         self.calc_gravity()
 
+        #Stick the bombs to walls
+        self.det_bombs()
+
         # Control the world via user input
         self.move_world(hero, self.xspeed, self.yspeed)
 
         # Update all the blocks in the room
         self.block_list.update()
+        self.bomb_list.update(0, self.gravity_acceleration)
 
         # Remove enemies that are dead
         for e in self.enemy_list:
@@ -370,6 +409,7 @@ class Room(object):
         self.block_list.draw(screen)
         self.enemy_list.draw(screen)
         self.enemy_projectile_list.draw(screen)
+        self.bomb_list.draw(screen)
 
     def setspeed(self, setx, sety):
         """
@@ -412,6 +452,10 @@ class Room(object):
 
                     elif col == "P":
                         wall = Wall(x, y, h.load('spikes.png'), damage_player=True)
+                        self.block_list.add(wall)
+
+                    elif col == "B":
+                        wall = Wall(x, y, h.load('broken_stone.png'), breakable=True)
                         self.block_list.add(wall)
 
                     elif col == "R":
