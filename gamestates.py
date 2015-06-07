@@ -22,7 +22,7 @@ class GameState(object):
     musicfile = None
 
     def __init__(self):
-        pass
+        self.default_background = h.create_background(h.load('sand.jpg'))
 
     def draw(self, screen):
         """
@@ -82,58 +82,28 @@ class TitleScreen(GameState):
         super().__init__()
         self.manager = None
 
+        self.title = 'Press Space to begin!'
+        self.options = ['Start!', 'Time Trial!', 'Settings!', 'Quit!']
+        self.selections = [ChooseHero(), ChooseHero(timer=True), ChangeSettings(), Quit()]
+
         self.selected = 0
+        self.list_size = len(self.title) - 1
 
     def draw(self, screen):
         """
         Draw a TitleScreen with text telling the user to press SPACE to begin
         :param screen: The pygame screen on which to draw
         """
-        background = h.create_background(h.load('sand.jpg'))
-        screen.blit(background, (0, 0))
+        
+        screen.blit(self.default_background, (0, 0))
 
-        font = h.load_font('BLKCHCRY.TTF', 32)
-
-        welcome_text = h.load_font('BLKCHCRY.TTF', 48).render(
-            "Welcome to mineEye!", 1, constants.BLACK
-        )
-        h.blit_text(welcome_text, screen, 1)
-
-        begin_text = font.render(
-            "Start!", 1, constants.BLACK
-        )
-        begin_rect = h.blit_text(begin_text, screen, 2)
-
-        begin_timer_text = font.render(
-            "Time Trial!", 1, constants.BLACK
-        )
-        timer_rect = h.blit_text(begin_timer_text, screen, 3)
-
-        options_text = font.render(
-            "Settings!", 1, constants.BLACK
-        )
-        options_rect = h.blit_text(options_text, screen, 4)
-
-        quit_text = font.render(
-            "Quit", 1, constants.BLACK
-        )
-        quit_rect = h.blit_text(quit_text, screen, 5)
+        rect_list = h.create_menu(screen, self.title, self.options)
 
         selected_indicator = h.load('pickaxe.png')
         selected_rect = selected_indicator.get_rect()
 
-        if self.selected == 0:
-            selected_rect.left = begin_rect.right
-            selected_rect.centery = begin_rect.centery
-        elif self.selected == 1:
-            selected_rect.left = timer_rect.right
-            selected_rect.centery = timer_rect.centery
-        elif self.selected == 2:
-            selected_rect.left = options_rect.right
-            selected_rect.centery = options_rect.centery
-        elif self.selected == 3:
-            selected_rect.left = quit_rect.right
-            selected_rect.centery = quit_rect.centery
+        selected_rect.left = rect_list[self.selected].right
+        selected_rect.centery = rect_list[self.selected].centery
 
         screen.blit(selected_indicator, selected_rect)
 
@@ -151,20 +121,27 @@ class TitleScreen(GameState):
         for e in events:
             if e.type == pygame.KEYDOWN:
                 if e.key == settings['DOWN']:
-                    if self.selected < 3:
+                    if self.selected < self.list_size:
                         self.selected += 1
                 elif e.key == settings['UP']:
                     if self.selected > 0:
                         self.selected -= 1
+
                 elif e.key == pygame.K_SPACE or e.key == settings['RIGHT']:
-                    if self.selected == 0:
-                        self.manager.go_to(ChooseHero())
-                    elif self.selected == 1:
-                        self.manager.go_to(ChooseHero(timer=True))
-                    elif self.selected == 2:
-                        self.manager.go_to(ChangeSettings())
-                    elif self.selected == 3:
-                        self.manager.done = True
+                    self.manager.go_to(self.selections[self.selected])
+
+
+class Quit(GameState):
+    """
+    A gamestate to quit. Done to make things more general.
+    """
+
+    def __init__(self):
+        super().__init__()
+        self.manager = None
+
+    def update(self):
+        self.manager.done = True
 
 
 class ChooseHero(GameState):
@@ -177,6 +154,7 @@ class ChooseHero(GameState):
         self.manager = None
 
         self.selected = 0
+        self.list_size = 0
 
         self.timer = timer
 
@@ -184,49 +162,20 @@ class ChooseHero(GameState):
         """
         Draw a selection menu with a picture of the heros.
         """
-        background = h.create_background(h.load('sand.jpg'))
-        screen.blit(background, (0, 0))
+        
+        screen.blit(self.default_background, (0, 0))
 
-        font = h.load_font('MelmaCracked.ttf', 32)
-        desc_font = h.load_font('MelmaCracked.ttf', 24)
+        title = 'Choose a Hero!'
+        options = [player.name for player in hero.hero_list]
+        descriptions = [player.description for player in hero.hero_list]
 
-        title_text = h.load_font('MelmaCracked.ttf', 48).render(
-            "Choose a Hero!", 1, constants.BLACK
-        )
-        h.blit_text(title_text, screen, 1)
-
-        i = 2
-        rect_list = []
-        for possible_hero in hero.hero_list:
-            name_text = font.render(
-                possible_hero.name, 1, constants.BLACK
-            )
-            name_rect = h.blit_text(name_text, screen, i)
-
-            desc_text = desc_font.render(
-                possible_hero.description, 1, constants.BLACK
-            )
-            desc_rect = desc_text.get_rect()
-            desc_rect.top = name_rect.bottom
-            desc_rect.centerx = name_rect.centerx
-            screen.blit(desc_text, desc_rect)
-
-            rect_list.append(desc_rect)
-
-            i += 1
+        rect_list = h.create_menu(screen, title, options, descriptions)
+        self.list_size = len(rect_list) - 1
 
         selected_indicator = h.load('pickaxe.png')
         selected_rect = selected_indicator.get_rect()
-
-        if self.selected == 0:
-            selected_rect.left = rect_list[0].right
-            selected_rect.bottom = rect_list[0].bottom
-        elif self.selected == 1:
-            selected_rect.left = rect_list[1].right
-            selected_rect.bottom = rect_list[1].bottom
-        elif self.selected == 2:
-            selected_rect.left = rect_list[2].right
-            selected_rect.bottom = rect_list[2].bottom
+        selected_rect.left = rect_list[self.selected].right + 5
+        selected_rect.bottom = rect_list[self.selected].bottom
 
         screen.blit(selected_indicator, selected_rect)
 
@@ -244,20 +193,18 @@ class ChooseHero(GameState):
         for e in events:
             if e.type == pygame.KEYDOWN:
                 if e.key == settings['DOWN']:
-                    if self.selected <= 2:
+                    if self.selected <= self.list_size:
                         self.selected += 1
+
                 elif e.key == settings['UP']:
-                    if self.selected >= 1:
+                    if self.selected > 0:
                         self.selected -= 1
+
                 elif e.key == settings['LEFT']:
                     self.manager.go_to(TitleScreen())
+
                 elif e.key == pygame.K_SPACE or e.key == settings['RIGHT']:
-                    if self.selected == 0:
-                        self.manager.go_to(InGame(timer=self.timer, chosen_hero=hero.hero_list[0]))
-                    elif self.selected == 1:
-                        self.manager.go_to(InGame(timer=self.timer, chosen_hero=hero.hero_list[1]))
-                    elif self.selected == 2:
-                        self.manager.go_to(InGame(timer=self.timer, chosen_hero=hero.hero_list[2]))
+                    self.manager.go_to(InGame(timer=self.timer, chosen_hero=hero.hero_list[self.selected]))
 
 
 class ChangeSettings(GameState):
@@ -277,8 +224,8 @@ class ChangeSettings(GameState):
         Draw a menu with configuration options.
         :param screen: The pygame screen on which to draw.
         """
-        background = h.create_background(h.load('sand.jpg'))
-        screen.blit(background, (0, 0))
+        
+        screen.blit(self.default_background, (0, 0))
 
         font = h.load_font('MelmaCracked.ttf', 32)
 

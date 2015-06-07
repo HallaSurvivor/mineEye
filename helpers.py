@@ -24,14 +24,11 @@ def load(imagename, subfolder=None):
     image = _image_library.get((imagename, subfolder))
 
     if image is None:
-        try:
-            if subfolder:
-                image = pygame.image.load(os.path.join("Sprites", subfolder, imagename)).convert()
-            else:
-                image = pygame.image.load(os.path.join("Sprites", imagename)).convert()
-            _image_library[(imagename, subfolder)] = image
-        except:
-            raise FileNotFoundError
+        if subfolder:
+            image = pygame.image.load(os.path.join("Sprites", subfolder, imagename)).convert()
+        else:
+            image = pygame.image.load(os.path.join("Sprites", imagename)).convert()
+        _image_library[(imagename, subfolder)] = image
 
     return image
 
@@ -65,11 +62,8 @@ def load_font(fontname, size):
     font = _font_library.get((fontname, size))
 
     if font is None:
-        try:
-            font = pygame.font.Font(os.path.join('Fonts', fontname), size)
-            _font_library[(fontname, size)] = font
-        except:
-            raise FileNotFoundError
+        font = pygame.font.Font(os.path.join('Fonts', fontname), size)
+        _font_library[(fontname, size)] = font
 
     return font
 
@@ -99,7 +93,67 @@ def blit_text(text, screen, position):
 
     rect = text.get_rect()
     rect.centerx = constants.CENTER[0]
-    rect.centery = .125*position*settings['SCREEN_RESOLUTION'][1]
+    rect.centery = .125*(position + 1)*settings['SCREEN_RESOLUTION'][1]
     screen.blit(text, rect)
 
     return rect
+
+
+def create_menu(screen, title, options, descriptions=None,
+                title_font=None, option_font=None, description_font=None,
+                title_color=constants.BLACK, option_color=constants.BLACK, description_color=constants.BLACK):
+    """
+    Dynamically create a menu of options for the user to move between.
+    :param screen: The screen to blit to
+    :param title: A title string to display at the top of the menu
+    :param options: A list of strings showing option text
+    :param descriptions: A list of strings describing the options. Gets displayed immediately below them
+    :param title_font: The pre-loaded font to write the title with, if none, defaults to BLKCHCRY size 48
+    :param option_font: The pre-loaded font to write with, if none, will default to BLKCHCRY size 32
+    :param description_font: The preloaded font to write descriptions with, if none, defaults to BLKCHCRY size 24
+    :param title_color: The color to write the title in, defaults to black
+    :param option_color: The color to write the options in, defaults to black
+    :param description_color: The color to write descriptions in, defaults to black
+    :returns rect_list: A list containing the containing rects for each option. Used to show the current selection
+    """
+    if title_font is not None:
+        title_font = title_font
+    else:
+        title_font = load_font('BLKCHCRY.TTF', 48)
+
+    if option_font is not None:
+        option_font = option_font
+    else:
+        option_font = load_font('BLKCHCRY.TTF', 32)
+
+    if description_font is not None:
+        description_font = description_font
+    else:
+        description_font = load_font('BLKCHCRY.TTF', 24)
+
+    title_surf = title_font.render(title, 1, title_color)
+    blit_text(title_surf, screen, 0)
+
+    i = 1
+    rect_list = []
+    if descriptions is not None:
+        for option in options:
+            option_surf = option_font.render(option, 1, option_color)
+            rect = blit_text(option_surf, screen, i)
+
+            description_surf = description_font.render(descriptions[i -1], 1, description_color)
+            desc_rect = description_surf.get_rect()
+            desc_rect.top = rect.bottom
+            desc_rect.centerx = rect.centerx
+            screen.blit(description_surf, desc_rect)
+
+            rect_list.append(rect)
+            i += 1
+    else:
+        for option in options:
+            option_surf = option_font.render(option, 1, option_color)
+            rect = blit_text(option_surf, screen, i)
+            rect_list.append(rect)
+            i += 1
+
+    return rect_list
