@@ -140,7 +140,6 @@ class Menu(GameState):
 
                 elif e.key == pygame.K_SPACE or e.key == settings['RIGHT']:
                     if type(self.selections[self.selected]) == str:
-                        print(settings)
                         if settings[self.selections[self.selected]]:
                             settings[self.selections[self.selected]] = False
 
@@ -150,8 +149,6 @@ class Menu(GameState):
                         f = open('settings', 'wb')
                         f.write(pickle.dumps(settings))
                         f.close()
-
-                        print(settings)
 
                     else:
                         self.manager.go_to(self.selections[self.selected])
