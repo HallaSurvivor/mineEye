@@ -10,22 +10,26 @@ _image_library = {}
 _font_library = {}
 
 
-def load(imagename):
+def load(imagename, subfolder=None):
     """
     Retrieves previously loaded images from _image_library, and stores newly created ones there as they are called.
 
     :param imagename: a string representing the name of the image to load, including extension
+    :param subfolder: a string representing the subfolder in which the image is stored
     :returns image: a pygame surface created from the file at imagename
 
     thanks to Blake at NerdParadise for the basis of this code.
     """
     global _image_library
-    image = _image_library.get(imagename)
+    image = _image_library.get((imagename, subfolder))
 
     if image is None:
         try:
-            image = pygame.image.load(os.path.join("Sprites", imagename)).convert()
-            _image_library[imagename] = image
+            if subfolder:
+                image = pygame.image.load(os.path.join("Sprites", subfolder, imagename)).convert()
+            else:
+                image = pygame.image.load(os.path.join("Sprites", imagename)).convert()
+            _image_library[(imagename, subfolder)] = image
         except:
             raise FileNotFoundError
 

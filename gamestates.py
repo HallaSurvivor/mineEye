@@ -343,7 +343,7 @@ class InGame(GameState):
 
     musicfile = 'Pathetique.mp3'
 
-    def __init__(self, timer=False, chosen_hero=hero.Hero3):
+    def __init__(self, timer=False, chosen_hero=hero.Normal):
         """
         Instantiate the primary Game State.
         :param timer: A boolean. True if a timer is to be displayed in the top right, False if not.
@@ -354,7 +354,6 @@ class InGame(GameState):
         self.all_sprites_list = pygame.sprite.Group()
 
         self.hero = chosen_hero()
-        self.all_sprites_list.add(self.hero)
 
         self.start_time = datetime.datetime.now()
 
@@ -379,7 +378,7 @@ class InGame(GameState):
         :param screen: The pygame screen on which to draw.
         """
         self.world.draw(screen)
-        self.all_sprites_list.draw(screen)
+        self.hero.draw(screen)
 
         hero_hp = h.load_font('BLKCHCRY.TTF', 32).render(
             "HP: {0}".format(self.hero.hp), 1, constants.WHITE
@@ -425,126 +424,86 @@ class InGame(GameState):
         """
 
         for event in events:
-            if settings['KEY_CANCELING']:
+            if event.type == pygame.KEYDOWN:
+                if event.key == settings['LEFT']:
+                    self.left_pressed = True
 
-                if event.type == pygame.KEYDOWN:
-                    if event.key == settings['LEFT']:
-                        self.left_pressed = True
-
-                        if self.hero.moving_right:
-                            self.world.changespeed(self.hero.actual_speed, 0)
-                            self.hero.moving_right = False
-
+                    if self.hero.moving_right:
                         self.world.changespeed(self.hero.actual_speed, 0)
-                        self.hero.moving_left = True
+                        self.hero.moving_right = False
 
-                    elif event.key == settings['RIGHT']:
-                        self.right_pressed = True
+                    self.world.changespeed(self.hero.actual_speed, 0)
+                    self.hero.moving_left = True
+                    self.hero.last_motion = 'left'
 
-                        if self.hero.moving_left:
-                            self.world.changespeed(-self.hero.actual_speed, 0)
-                            self.hero.moving_left = False
+                elif event.key == settings['RIGHT']:
+                    self.right_pressed = True
 
+                    if self.hero.moving_left:
+                        self.world.changespeed(-self.hero.actual_speed, 0)
+                        self.hero.moving_left = False
+
+                    self.world.changespeed(-self.hero.actual_speed, 0)
+                    self.hero.moving_right = True
+                    self.hero.last_motion = 'right'
+
+                elif event.key == settings['UP']:
+                    if not self.hero.jumping:
+
+                        # If the hero is on a platform:
+                        self.hero.rect.y += 2
+                        hit_list = pygame.sprite.spritecollide(self.hero, self.world.block_list, False)
+                        self.hero.rect.y -= 2
+                        if len(hit_list) > 0:
+                            self.world.changespeed(0, self.hero.jump_height)
+                            self.hero.jumping = True
+                            self.hero.start_jump = True
+
+                    else:
+                        if self.hero.can_doublejump and not self.hero.double_jumping:
+                            self.world.setspeed(None, 0)
+                            self.world.changespeed(0, self.hero.double_jump_height)
+                            self.hero.double_jumping = True
+                            self.hero.start_double_jump = True
+
+                elif event.key == settings['DOWN']:
+                    pass
+
+                # Quit to TitleScreen (eventually pause menu) if the user presses escape
+                elif event.key == settings['PAUSE']:
+                    self.manager.go_to(TitleScreen())
+
+            elif event.type == pygame.KEYUP:
+                # Cancel the motion by adding the opposite of the keydown situation
+                if event.key == settings['LEFT']:
+                    self.left_pressed = False
+
+                    if self.hero.moving_left:
+                        self.world.changespeed(-self.hero.actual_speed, 0)
+                        self.hero.moving_left = False
+
+                    if self.right_pressed and not self.hero.moving_right:
                         self.world.changespeed(-self.hero.actual_speed, 0)
                         self.hero.moving_right = True
+                        self.hero.last_motion = 'right'
 
-                    elif event.key == settings['UP']:
-                        if not self.hero.jumping:
+                elif event.key == settings['RIGHT']:
+                    self.right_pressed = False
 
-                            # If the hero is on a platform:
-                            self.hero.rect.y += 2
-                            hit_list = pygame.sprite.spritecollide(self.hero, self.world.block_list, False)
-                            self.hero.rect.y -= 2
-                            if len(hit_list) > 0:
-                                self.world.changespeed(0, self.hero.jump_height)
-                                self.hero.jumping = True
-
-                        else:
-                            if self.hero.can_doublejump and not self.hero.double_jumping:
-                                self.world.setspeed(None, 0)
-                                self.world.changespeed(0, self.hero.double_jump_height)
-                                self.hero.double_jumping = True
-
-                    elif event.key == settings['DOWN']:
-                        pass
-                    # Quit to TitleScreen (eventually pause menu) if the user presses escape
-                    elif event.key == settings['PAUSE']:
-                        self.manager.go_to(TitleScreen())
-
-                elif event.type == pygame.KEYUP:
-                    # Cancel the motion by adding the opposite of the keydown situation
-                    if event.key == settings['LEFT']:
-                        self.left_pressed = False
-
-                        if self.hero.moving_left:
-                            self.world.changespeed(-self.hero.actual_speed, 0)
-                            self.hero.moving_left = False
-
-                        if self.right_pressed and not self.hero.moving_right:
-                            self.world.changespeed(-self.hero.actual_speed, 0)
-                            self.hero.moving_right = True
-
-                    elif event.key == settings['RIGHT']:
-                        self.right_pressed = False
-
-                        if self.hero.moving_right:
-                            self.world.changespeed(self.hero.actual_speed, 0)
-                            self.hero.moving_right = False
-
-                        if self.left_pressed and not self.hero.moving_left:
-                            self.world.changespeed(self.hero.actual_speed, 0)
-                            self.hero.moving_left = True
-
-                    elif event.key == settings['UP']:
-                        pass
-
-                    elif event.key == settings['DOWN']:
-                        pass
-
-
-            else:  # Key Canceling is False
-                if event.type == pygame.KEYDOWN:
-                    if event.key == settings['LEFT']:
+                    if self.hero.moving_right:
                         self.world.changespeed(self.hero.actual_speed, 0)
+                        self.hero.moving_right = False
 
-                    elif event.key == settings['RIGHT']:
-                        self.world.changespeed(-self.hero.actual_speed, 0)
-
-                    elif event.key == settings['UP']:
-                        if not self.hero.jumping:
-
-                            # If the hero is on a platform:
-                            self.hero.rect.y += 2
-                            hit_list = pygame.sprite.spritecollide(self.hero, self.world.block_list, False)
-                            self.hero.rect.y -= 2
-                            if len(hit_list) > 0:
-                                self.world.changespeed(0, self.hero.jump_height)
-                                self.hero.jumping = True
-
-                        else:
-                            if self.hero.can_doublejump and not self.hero.double_jumping:
-                                self.world.changespeed(0, self.hero.double_jump_height)
-                                self.hero.double_jumping = True
-
-                    elif event.key == settings['DOWN']:
-                        pass
-                    # Quit to TitleScreen (eventually pause menu) if the user presses escape
-                    elif event.key == settings['PAUSE']:
-                        self.manager.go_to(TitleScreen())
-
-                elif event.type == pygame.KEYUP:
-                    # Cancel the motion by adding the opposite of the keydown situation
-                    if event.key == settings['LEFT']:
-                        self.world.changespeed(-self.hero.actual_speed, 0)
-
-                    elif event.key == settings['RIGHT']:
+                    if self.left_pressed and not self.hero.moving_left:
                         self.world.changespeed(self.hero.actual_speed, 0)
+                        self.hero.moving_left = True
+                        self.hero.last_motion = 'left'
 
-                    elif event.key == settings['UP']:
-                        pass
+                elif event.key == settings['UP']:
+                    pass
 
-                    elif event.key == settings['DOWN']:
-                        pass
+                elif event.key == settings['DOWN']:
+                    pass
 
     def die(self):
         self.manager.go_to(DeathScreen())

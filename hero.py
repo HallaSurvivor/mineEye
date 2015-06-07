@@ -1,7 +1,9 @@
 """
 Exports the Hero class that the User actually controls.
 """
+import os
 import pygame
+import pyganim
 import constants
 import helpers as h
 
@@ -57,8 +59,6 @@ class Hero(pygame.sprite.Sprite):
         """
         super().__init__()
 
-        self.image = pygame.Surface((48, 48))
-
         self.world = None
 
         self.hp = self.base_hp
@@ -67,15 +67,90 @@ class Hero(pygame.sprite.Sprite):
         self.double_jump_height = self.base_double_jump_height
         self.take_falldamage = self.can_take_falldamage
 
+        self.start_jump = False
+        self.start_double_jump = False
+
         self.jumping = False
         self.double_jumping = False
+        self.jump_count = 0
+
         self.moving_left = False
         self.moving_right = False
+        self.last_motion = 'right'
 
         self.run_timer = True
 
-        self.rect = self.image.get_rect()
+        self.animation_obj = {}
+        self.conductor = None
+        self.rect = pygame.Rect(0, 0, 48, 48)
         self.rect.center = constants.CENTER
+
+    def create_animation_dict(self):
+        """
+        Create an animation object and conductor to run the animations for walking, jumping, standing, etc.
+
+        note: only right moving sprites exist. left sprites are simply reflections of the right sprites.
+
+        Pulls all the images of a category in the Sprites/[hero name] folder
+        Creates a Pyganim animation for each possible motion, then stores them in a dictionary
+        Creates a Pyganim conductor to control the dictionary of animations
+
+        Thanks to the pyganim example code for the basis of this code.
+        """
+        standing = [(os.path.join('Sprites', self.name, 'standing{num}.png'.format(num=num)), 0.1) for num in range(3)]
+        walking = [(os.path.join('Sprites', self.name, 'walking{num}.png'.format(num=num)), 0.1) for num in range(8)]
+        jumping = [(os.path.join('Sprites', self.name, 'jumping{num}.png'.format(num=num)), 0.1) for num in range(4)]
+
+        self.animation_obj['stand_right'] = pyganim.PygAnimation(standing)
+
+        self.animation_obj['stand_left'] = self.animation_obj['stand_right'].getCopy()
+        self.animation_obj['stand_left'].flip(True, False)
+        self.animation_obj['stand_left'].makeTransformsPermanent()
+
+        self.animation_obj['move_right'] = pyganim.PygAnimation(walking)
+
+        self.animation_obj['move_left'] = self.animation_obj['move_right'].getCopy()
+        self.animation_obj['move_left'].flip(True, False)
+        self.animation_obj['move_left'].makeTransformsPermanent()
+
+        self.animation_obj['jump_right'] = pyganim.PygAnimation(jumping)
+
+        self.animation_obj['jump_left'] = self.animation_obj['jump_right'].getCopy()
+        self.animation_obj['jump_left'].flip(True, False)
+        self.animation_obj['jump_left'].makeTransformsPermanent()
+
+        self.conductor = pyganim.PygConductor(self.animation_obj)
+
+    def draw(self, screen):
+        if self.jump_count >= 4:
+            self.jump_count = 0
+            self.start_jump = False
+            self.start_double_jump = False
+
+        if self.start_jump or self.start_double_jump:
+            self.jump_count += 1
+            self.conductor.play()
+            if self.last_motion == 'right':
+                self.animation_obj['jump_right'].blit(screen, self.rect)
+
+            elif self.last_motion == 'left':
+                self.animation_obj['jump_left'].blit(screen, self.rect)
+
+        elif self.moving_left or self.moving_right:
+            self.conductor.play()
+            if self.moving_left:
+                self.animation_obj['move_left'].blit(screen, self.rect)
+
+            elif self.moving_right:
+                self.animation_obj['move_right'].blit(screen, self.rect)
+
+        else:
+            self.conductor.play()
+            if self.last_motion == 'right':
+                self.animation_obj['stand_right'].blit(screen, self.rect)
+
+            elif self.last_motion == 'left':
+                self.animation_obj['stand_left'].blit(screen, self.rect)
 
     def damage(self, amount):
         """
@@ -116,12 +191,26 @@ class Hero(pygame.sprite.Sprite):
         self.double_jump_height = amount*self.base_double_jump_height
 
 
-class Hero1(Hero):
+class Normal(Hero):
+    """
+    Just a regular hero.
+    """
+
+    name = "Normal"
+    description = "Nothing fancy. Just a regular hero."
+
+    def __init__(self):
+        super().__init__()
+        self.create_animation_dict()
+        self.reset_all()
+
+
+class Jumpy(Hero):
     """
     A hero with double jump abilities. Doesn't take fall damage
     """
 
-    name = "Hero 1"
+    name = "Jumpy"
     description = "A hero with double jump abilities. Doesn't take fall damage"
 
     can_doublejump = True
@@ -130,17 +219,16 @@ class Hero1(Hero):
 
     def __init__(self):
         super().__init__()
-
-        self.image = h.load('herosprite.png')
+        self.create_animation_dict()
         self.reset_all()
 
 
-class Hero2(Hero):
+class Speedy(Hero):
     """
     A fast hero with low health.
     """
 
-    name = "Hero 2"
+    name = "Speedy"
     description = "A fast hero with low health"
 
     base_hp = 250
@@ -149,26 +237,8 @@ class Hero2(Hero):
 
     def __init__(self):
         super().__init__()
-
-        self.image = h.load('herosprite2.png')
-
+        self.create_animation_dict()
         self.reset_all()
 
 
-class Hero3(Hero):
-    """
-    Just a regular hero.
-    """
-
-    name = "Hero 3"
-    description = "Nothing fancy. Just a regular hero."
-
-    def __init__(self):
-        super().__init__()
-
-        self.image = h.load('herosprite3.png')
-
-        self.reset_all()
-
-
-hero_list = [Hero1, Hero2, Hero3]
+hero_list = [Normal, Jumpy, Speedy]

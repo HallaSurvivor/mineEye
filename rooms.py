@@ -188,7 +188,7 @@ class Room(object):
         self.base_y_gravity = -3
         self.gravity_acceleration = -1
 
-        self.room_array = None
+        self.room_array = []
 
         self.array_parsed = False
 
@@ -416,7 +416,7 @@ class Room(object):
 
                     elif col == "R":
                         new_enemy = enemy.Turret()
-                        new_enemy.rect.x = x
+                        new_enemy.rect.x = x + 8
                         new_enemy.rect.y = y + 16
                         self.enemy_list.add(new_enemy)
 
