@@ -69,6 +69,8 @@ class GameStateManager(object):
 
         if gamestate.musicfile and settings['PLAY_MUSIC']:
             h.play_music(gamestate.musicfile)
+        if not settings['PLAY_MUSIC']:
+            pygame.mixer.music.stop()
 
 
 class Menu(GameState):
@@ -79,7 +81,7 @@ class Menu(GameState):
     title = ""
     options = []
     descriptions = None
-    selections = []
+    selections = None
 
     def __init__(self):
         super().__init__()
@@ -105,17 +107,17 @@ class Menu(GameState):
         screen.blit(self.default_background, (0, 0))
 
         rect_list = h.create_menu(screen, self.title, self.options, self.descriptions)
-
-        for index, option in enumerate(self.selections):
-            if type(option) == str:
-                if settings[option]:
-                    on_rect = on.get_rect()
-                    on_rect.bottomright = rect_list[index].bottomleft
-                    screen.blit(on, on_rect)
-                else:
-                    off_rect = off.get_rect()
-                    off_rect.bottomright = rect_list[index].bottomleft
-                    screen.blit(off, off_rect)
+        if self.selections is not None:
+            for index, option in enumerate(self.selections):
+                if type(option) == str:
+                    if settings[option]:
+                        on_rect = on.get_rect()
+                        on_rect.bottomright = rect_list[index].bottomleft
+                        screen.blit(on, on_rect)
+                    else:
+                        off_rect = off.get_rect()
+                        off_rect.bottomright = rect_list[index].bottomleft
+                        screen.blit(off, off_rect)
 
         selected_indicator = h.load('pickaxe.png')
         selected_rect = selected_indicator.get_rect()
@@ -139,19 +141,20 @@ class Menu(GameState):
                     self.manager.go_to(TitleScreen())
 
                 elif e.key == pygame.K_SPACE or e.key == settings['RIGHT']:
-                    if type(self.selections[self.selected]) == str:
-                        if settings[self.selections[self.selected]]:
-                            settings[self.selections[self.selected]] = False
+                    if self.selections is not None:
+                        if type(self.selections[self.selected]) == str:
+                            if settings[self.selections[self.selected]]:
+                                settings[self.selections[self.selected]] = False
+
+                            else:
+                                settings[self.selections[self.selected]] = True
+
+                            f = open('settings', 'wb')
+                            f.write(pickle.dumps(settings))
+                            f.close()
 
                         else:
-                            settings[self.selections[self.selected]] = True
-
-                        f = open('settings', 'wb')
-                        f.write(pickle.dumps(settings))
-                        f.close()
-
-                    else:
-                        self.manager.go_to(self.selections[self.selected])
+                            self.manager.go_to(self.selections[self.selected])
 
 
 class TitleScreen(Menu):
@@ -181,7 +184,6 @@ class ChooseHero(Menu):
 
     def __init__(self, timer=False):
         super().__init__()
-        self.manager = None
         self.timer = timer
 
         self.selections = [InGame(timer=self.timer, chosen_hero=player) for player in hero.hero_list]
@@ -196,10 +198,18 @@ class ChangeSettings(Menu):
 
     def __init__(self):
         super().__init__()
-        self.manager = None
+        self.selections = ['PLAY_MUSIC', 'PLAY_SFX', ChangeBinds()]
 
-        self.selections = ['PLAY_MUSIC', 'PLAY_SFX', Quit()]
 
+class ChangeBinds(Menu):
+    """
+    A place to change keybinds.
+    """
+    title = "KeyBinds"
+    options = ["Up", "Left", "Right", "Down", "Bomb"]
+
+    def __init__(self):
+        super().__init__()
 
 class InGame(GameState):
     """
@@ -223,7 +233,7 @@ class InGame(GameState):
         self.start_time = datetime.datetime.now()
 
         self.world = None
-        self.generate_world(25)
+        self.generate_world(50)
         self.hero.world = self.world
 
         self.timer = timer

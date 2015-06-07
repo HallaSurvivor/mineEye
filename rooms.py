@@ -55,13 +55,13 @@ room_dict = {
     "Room03": [MoveRight,
                "SSDDSSSSSSSS",
                "S          P",
-               "S     R    P",
+               "S     B    P",
                "SSSSSSSSSDDS",
     ],
     "Room04": [MoveRight,
                "SSDDSSSSSSSSSSSSS",
                "S               S",
-               "S        R      S",
+               "SR              S",
                "S     SSSSSSS   S",
                "S      S   S    S",
                "S    S R S      S",
@@ -74,15 +74,38 @@ room_dict = {
                 "S                S",
                 "S   SSSSSSSSP  SSS",
                 "S    S   S   S   S",
-                "S  S   S   S     S",
+                "S  B   B   B     S",
                 "SDDSSSSSSSSSSSSSSS"
     ],
     "Room06": [MoveRight,
                "SSDDSSSSSSSS",
                "S          S",
                "S      B   S",
-               "S      B   S",
+               "S     BB   S",
                "SSSSSSSSDDSS"
+    ],
+    "Room07": [MoveDown,
+               "SSDDSS",
+               "S    S",
+               "S    S",
+               "S    S",
+               "S    S",
+               "SR  RS",
+               "S    S",
+               "S BBBS",
+               "S    S",
+               "SBBB S",
+               "S    S",
+               "S    S",
+               "SSDDSS"
+    ],
+    "Room08": [MoveLeft,
+               "SSSSSSSSSSSDDSSS",
+               "S     RRR      S",
+               "S   B          S",
+               "SS  BB         S",
+               "SSDDSSSSSSSSSSSS"
+
     ]
 }
 
@@ -94,7 +117,7 @@ class Wall(pygame.sprite.Sprite):
     self.damage_player is True if the player is hurt on contact (spikes) but False otherwise
     """
 
-    def __init__(self, x, y, image, damage_player=False, end_timer=False, breakable=False):
+    def __init__(self, x, y, image, damage_player=False, end_timer=False, breakable=False, damage=1):
         """
         Create the wall and its location
         :param x: Int representing the x position of the wall's top left corner
@@ -103,6 +126,7 @@ class Wall(pygame.sprite.Sprite):
         :param damage_player: Boolean. True if touching the wall hurts the player
         :param end_timer: Boolean. True if touching the wall ends the game timer.
         :param breakable: Boolean. True if the player's explosives can destroy the wall.
+        :param damage: Int. The amount of damage per tick to deal.
         """
         super().__init__()
 
@@ -112,6 +136,7 @@ class Wall(pygame.sprite.Sprite):
         self.rect.y = y
         self.rect.x = x
 
+        self.damage = damage
         self.damage_player = damage_player
         self.end_timer = end_timer
 
@@ -242,7 +267,7 @@ class Room(object):
 
             # Damage the player if the block is a spike
             if block.damage_player:
-                hero.damage(5)
+                hero.damage(block.damage)
 
             # End the game timer if the block is the end
             if block.end_timer:
@@ -282,7 +307,7 @@ class Room(object):
 
             # Damage the player if the block is a spike
             if block.damage_player:
-                hero.damage(5)
+                hero.damage(block.damage)
 
             # End the game timer if the block is the end
             if block.end_timer:

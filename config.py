@@ -16,7 +16,7 @@ LEFT = pygame.K_a
 DOWN = pygame.K_s
 RIGHT = pygame.K_d
 
-BOMB = pygame.K_b
+BOMB = pygame.K_SPACE
 
 PAUSE = pygame.K_ESCAPE
 
