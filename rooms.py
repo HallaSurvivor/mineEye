@@ -18,7 +18,7 @@ room_dict = {
     # Each entry takes the form:
     # ROOM_NAME: [PrimaryPlayerMotion, *room_layout]
     # The First room must be StartingRoom,
-    # The Second and Third rooms must be some form of EndingRoom
+    # The Second room must be EndingRoom
     "StartingRoom": [MoveRight,
                      "SSSSSSSS",
                      "S      S",

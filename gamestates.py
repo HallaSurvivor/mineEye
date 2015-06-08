@@ -11,6 +11,7 @@ import helpers as h
 import rooms
 import hero
 
+pygame.init()
 
 class GameState(object):
     """
@@ -83,6 +84,8 @@ class Menu(GameState):
     descriptions = None
     selections = None
 
+    allow_on_off = True
+
     def __init__(self):
         super().__init__()
         self.manager = None
@@ -109,7 +112,7 @@ class Menu(GameState):
         rect_list = h.create_menu(screen, self.title, self.options, self.descriptions)
         if self.selections is not None:
             for index, option in enumerate(self.selections):
-                if type(option) == str:
+                if type(option) == str and self.allow_on_off:
                     if settings[option]:
                         on_rect = on.get_rect()
                         on_rect.bottomright = rect_list[index].bottomleft
@@ -130,17 +133,17 @@ class Menu(GameState):
     def handle_events(self, events):
         for e in events:
             if e.type == pygame.KEYDOWN:
-                if e.key == settings['DOWN']:
+                if e.key == settings['DOWN'] or e.key == pygame.K_DOWN:
                     if self.selected < self.list_size:
                         self.selected += 1
-                elif e.key == settings['UP']:
+                elif e.key == settings['UP'] or e.key == pygame.K_UP:
                     if self.selected > 0:
                         self.selected -= 1
 
-                elif e.key == settings['LEFT']:
+                elif e.key == settings['LEFT'] or e.key == pygame.K_LEFT:
                     self.manager.go_to(TitleScreen())
 
-                elif e.key == pygame.K_SPACE or e.key == settings['RIGHT']:
+                elif e.key == pygame.K_SPACE or e.key == settings['RIGHT'] or e.key == pygame.K_RIGHT:
                     if self.selections is not None:
                         if type(self.selections[self.selected]) == str:
                             if settings[self.selections[self.selected]]:
@@ -207,9 +210,69 @@ class ChangeBinds(Menu):
     """
     title = "KeyBinds"
     options = ["Up", "Left", "Right", "Down", "Bomb"]
+    selections = [string.upper() for string in options]
+
+    allow_on_off = False
 
     def __init__(self):
         super().__init__()
+
+        self.modifying = False
+        self.descriptions = [pygame.key.name(settings[option]) for option in self.selections]
+
+    def handle_events(self, events):
+        """
+        Override the default event checking in order to check for any key press.
+        """
+        self.descriptions = [pygame.key.name(settings[option]) for option in self.selections]
+
+        for e in events:
+            if e.type == pygame.KEYDOWN:
+                if not self.modifying:
+                    if e.key == settings['DOWN'] or e.key == pygame.K_DOWN:
+                        if self.selected < self.list_size:
+                            self.selected += 1
+                    elif e.key == settings['UP'] or e.key == pygame.K_UP:
+                        if self.selected > 0:
+                            self.selected -= 1
+
+                    elif e.key == settings['LEFT'] or e.key == pygame.K_LEFT:
+                        self.manager.go_to(TitleScreen())
+
+                    elif e.key == pygame.K_SPACE or e.key == settings['RIGHT'] or e.key == pygame.K_RIGHT:
+                        self.options[self.selected] = ">" + self.options[self.selected]
+                        self.modifying = True
+
+                else:
+                    if e.key == pygame.K_ESCAPE:
+                        self.options[self.selected] = self.options[self.selected][1:]
+                        self.modifying = False
+
+                    else:
+                        if e.key not in [settings[selection] for selection in self.selections]:
+                            settings[self.selections[self.selected]] = e.key
+                            self.options[self.selected] = self.options[self.selected][1:]
+                            self.modifying = False
+
+                        else:  # If the key is already bound, pick a random key and bind it to the old option
+                            for selection in self.selections:
+                                if settings[selection] == e.key:
+                                    found = False
+                                    while not found:
+                                        new_key = random.randint(10, 99)
+                                        if new_key not in [settings[selection] for selection in self.selections]:
+                                            found = True
+
+                                    settings[selection] = new_key
+
+                            settings[self.selections[self.selected]] = e.key
+                            self.options[self.selected] = self.options[self.selected][1:]
+                            self.modifying = False
+
+                        f = open('settings', 'wb')
+                        f.write(pickle.dumps(settings))
+                        f.close()
+
 
 class InGame(GameState):
     """
