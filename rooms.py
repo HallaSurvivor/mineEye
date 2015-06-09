@@ -297,7 +297,9 @@ class Room(object):
         screen.blit(self.background, (0, 0))
 
         if not self.array_parsed:
-            self.parse_room_array(settings['SCREEN_RESOLUTION'][0] / 2 - 128, settings['SCREEN_RESOLUTION'][1] / 2 - 128)
+            # Create the room 128, 128 left and upwards of center-screen
+            self.parse_room_array(settings['SCREEN_RESOLUTION'][0] / 2 - 128,
+                                  settings['SCREEN_RESOLUTION'][1] / 2 - 128)
 
         self.all_sprites.draw(screen)
 
