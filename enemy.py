@@ -116,6 +116,7 @@ class Turret(Enemy):
 
     is_ranged = True
     contact_damage = 0
+    stationary = True
 
     def __init__(self):
         super().__init__()

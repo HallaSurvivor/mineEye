@@ -3,11 +3,12 @@ Adds the Room class which stores data about any room that can be called via rand
 
 Adds individual subclasses of Room with information specific to each room.
 """
+import random
 from math import hypot
 import pygame
-import pyganim
 from config import settings
 import enemy
+import weapons
 import helpers as h
 
 MoveRight = 0
@@ -23,7 +24,7 @@ room_dict = {
     "StartingRoom": [MoveRight,
                      "SSSSSSSS",
                      "S      S",
-                     "SC     S",
+                     "SW     S",
                      "SSSSSDDS"
     ],
     "EndingRoom": [MoveDown,
@@ -111,7 +112,7 @@ room_dict = {
 }
 
 
-class Wall(pygame.sprite.Sprite):
+class Wall(h.Sprite):
     """
     Wall the Hero can collide with.
 
@@ -143,40 +144,8 @@ class Wall(pygame.sprite.Sprite):
 
         self.breakable = breakable
 
-    def update(self):
-        """
-        Update the blocks.
-        """
-        pass
 
-    def movex(self, xspeed):
-        """
-        Move the wall in the X direction.
-        Collisions are handled in the Room class, since the entire room
-            needs to stop moving when a single Wall collides with the hero.
-        Movement is split between X and Y so that collision checking only has to deal with
-            one at a time.
-
-        :param xspeed: Int representing the change in x direction
-        """
-
-        self.rect.x += xspeed
-
-    def movey(self, yspeed):
-        """
-        Move the wall in the Y direction.
-        Collisions are handled in the Room class, since the entire room
-            needs to stop moving when a single Wall collides with the hero.
-        Movement is split between X and Y so that collision checking only has to deal with
-            one at a time.
-
-        :param yspeed:  Inte representing the change in y direction
-        """
-
-        self.rect.y += yspeed
-
-
-class Chest(pygame.sprite.Sprite):
+class Chest(h.Sprite):
     """
     A chest that can hold either items or weapons.
     """
@@ -191,10 +160,30 @@ class Chest(pygame.sprite.Sprite):
         """
         super().__init__()
 
-        self.image = h.load('Chest0.png', 'Chest')
+        self.image = h.load('chest.png')
+        self.rect = self.image.get_rect()
 
-    def update(self):
-        pass
+        self.rect.x = x
+        self.rect.y = y
+
+        self.is_item_chest = item
+        self.is_weapon_chest = weapon
+
+    def generate_contents(self, hero):
+        """
+        Generate an item/weapon when the chest is opened. Called in Room.check_chests()
+        :param hero: The hero opening the chest. Hero could have attributes modifying item drops.
+        :returns contents: A list of sprites representing the items/weapons in the chest.
+        """
+        contents = []
+        if self.is_weapon_chest:
+            contents.append(random.choice(weapons.all_weapons))
+            if hero.multiple_weapon_drops:
+                contents.append(random.choice(weapons.all_weapons))
+        elif self.is_item_chest:
+            pass
+
+        return contents
 
 
 class Room(object):
@@ -218,10 +207,12 @@ class Room(object):
         B is a breakable wall
         R is a turret
         T is a block that stops the timer
+        W is a weapon chest
         D is door <- IMPORTANT, you need a door at the top and bottom to make the logic work
     """
 
     block_list = None
+    chest_list = None
     enemy_list = None
     enemy_projectile_list = None
     hero_projectile_list = None
@@ -237,7 +228,10 @@ class Room(object):
 
         room_array is a list of strings that will be rendered into the room
         """
+        self.all_sprites = pygame.sprite.Group()
         self.block_list = pygame.sprite.Group()
+        self.chest_list = pygame.sprite.Group()
+        self.drops_list = pygame.sprite.Group()
         self.enemy_list = pygame.sprite.Group()
         self.enemy_projectile_list = pygame.sprite.Group()
         self.hero_projectile_list = pygame.sprite.Group()
@@ -265,10 +259,8 @@ class Room(object):
         """
 
         # Move the blocks in the X direction
-        for block in self.block_list:
-            block.movex(x)
-        for e in self.enemy_list:
-            e.movex(x)
+        for sprite in self.all_sprites:
+            sprite.movex(x)
 
         # Check for block-hero collisions
         block_hit_list = pygame.sprite.spritecollide(hero, self.block_list, False)
@@ -281,11 +273,9 @@ class Room(object):
             x_pos_change = block.rect.x - old_x_pos
 
             # Shift the rest of the room to stay in line with the block that collided
-            for block2 in self.block_list:
-                if block2 != block:
-                    block2.rect.x += x_pos_change
-            for e in self.enemy_list:
-                e.rect.x += x_pos_change
+            for sprite in self.all_sprites:
+                if sprite != block:
+                    sprite.rect.x += x_pos_change
 
             # Damage the player if the block is a spike
             if block.damage_player:
@@ -296,10 +286,8 @@ class Room(object):
                 hero.run_timer = False
 
         # Move the blocks in the Y direction
-        for block in self.block_list:
-            block.movey(y)
-        for e in self.enemy_list:
-            e.movey(y)
+        for sprite in self.all_sprites:
+            sprite.movey(y)
 
         # Check for block-hero collisions
         block_hit_list = pygame.sprite.spritecollide(hero, self.block_list, False)
@@ -307,7 +295,7 @@ class Room(object):
             old_y_pos = block.rect.y
 
             if hero.take_falldamage:
-                damage = -self.yspeed - 30
+                damage = -self.yspeed - 50
                 if damage > 0:
                     hero.damage(damage)
 
@@ -318,14 +306,13 @@ class Room(object):
                 self.yspeed = 0
                 hero.jumping = False
                 hero.double_jumping = False
+
             y_pos_change = block.rect.y - old_y_pos
 
-                 # Shift the rest of the room to stay in line with the block that collided
-            for block2 in self.block_list:
-                if block2 != block:
-                    block2.rect.y += y_pos_change
-            for e in self.enemy_list:
-                e.rect.y += y_pos_change
+            # Shift the rest of the room to stay in line with the block that collided
+            for sprite in self.all_sprites:
+                if sprite != block:
+                    sprite.rect.y += y_pos_change
 
             # Damage the player if the block is a spike
             if block.damage_player:
@@ -335,6 +322,7 @@ class Room(object):
             if block.end_timer:
                 hero.run_timer = False
 
+        # Deal contact damage with enemies
         enemy_hit_list = pygame.sprite.spritecollide(hero, self.enemy_list, False)
         for e in enemy_hit_list:
             if e.contact_damage:
@@ -342,13 +330,25 @@ class Room(object):
 
     def calc_gravity(self):
         """
-        Change self.xgravity and self.ygravity to change the world's gravity.
+        Change self.yspeed to cause an acceleration due to gravity.
         """
-        # TODO Make this work for x-gravity as well, (generalize more)
         if self.yspeed == 0:
             self.yspeed = self.base_y_gravity
         else:
             self.yspeed += self.gravity_acceleration
+
+    def check_chests(self, hero):
+        """
+        Check for a collision between the chest and a hero and spawn the proper item if a collision happens.
+        :param hero: The hero to check against.
+        """
+        hit_list = pygame.sprite.spritecollide(hero, self.chest_list, False)
+        for chest in hit_list:
+            contents = chest.generate_contents(hero)
+            for thing in contents:
+                self.all_sprites.add(thing)
+
+            chest.kill()
 
     def cause_ranged_attacks(self, hero):
         """
@@ -361,6 +361,7 @@ class Room(object):
                 if e.ranged_attack_cooldown == 0:
                     proj = e.ranged_attack(hero)
                     self.enemy_projectile_list.add(proj)
+                    self.all_sprites.add(proj)
                 else:
                     e.ranged_attack_cooldown -= 1
 
@@ -369,12 +370,16 @@ class Room(object):
         Check collisions between projectiles and walls, and destroy projectiles appropriately.
         """
         for block in self.block_list:
-            pygame.sprite.spritecollide(block, self.enemy_projectile_list, True)
+            hit_list = pygame.sprite.spritecollide(block, self.enemy_projectile_list, False)
+            for proj in hit_list:
+                proj.kill()
 
         for proj in self.enemy_projectile_list:
-            hit_list = pygame.sprite.spritecollide(proj, self.hero_projectile_list, True)
+            hit_list = pygame.sprite.spritecollide(proj, self.hero_projectile_list, False) # Remove the hero proj too
             if len(hit_list) > 0:
-                self.enemy_projectile_list.remove(proj)
+                proj.kill()
+            for hero_proj in hit_list:
+                hero_proj.kill()
 
     def det_bombs(self, hero):
         """
@@ -386,7 +391,7 @@ class Room(object):
                 for block in self.block_list:
                     distance = hypot(block.rect.centerx - bomb.rect.centerx, block.rect.centery - bomb.rect.centery)
                     if distance < bomb.radius and block.breakable:
-                        self.block_list.remove(block)
+                        block.kill()
 
                 for e in self.enemy_list:
                     distance = hypot(e.rect.centerx - bomb.rect.centerx, e.rect.centery - bomb.rect.centery)
@@ -396,12 +401,18 @@ class Room(object):
                         else:
                             e.damage(150)
 
+                for chest in self.chest_list:
+                    distance = hypot(chest.rect.centerx - bomb.rect.centerx, chest.rect.centery - bomb.rect.centery)
+                    if distance < bomb.radius:
+                        if not hero.bomb_control:
+                            chest.kill()
+
                 hero_distance = hypot(hero.rect.centerx - bomb.rect.centerx, hero.rect.centery - bomb.rect.centery)
                 if hero_distance < bomb.radius:
                     if not hero.bomb_control:
                         hero.damage(25)
 
-                self.bomb_list.remove(bomb)
+                bomb.kill()
 
     def cause_projectile_damage(self, hero):
         """
@@ -435,13 +446,13 @@ class Room(object):
         for e in self.enemy_list:
             if e.current_hp <= 0:
                 self.enemy_list.remove(e)
+                self.all_sprites.remove(e)
 
         # Use ranged attacks
         self.cause_ranged_attacks(hero)
 
         # Deal damage from ranged attacks
         self.cause_projectile_damage(hero)
-
 
         # Update the enemies
         self.enemy_list.update(hero)
@@ -462,10 +473,7 @@ class Room(object):
         if not self.array_parsed:
             self.parse_room_array(settings['SCREEN_RESOLUTION'][0] / 2 - 128, settings['SCREEN_RESOLUTION'][1] / 2 - 128)
 
-        self.block_list.draw(screen)
-        self.enemy_list.draw(screen)
-        self.enemy_projectile_list.draw(screen)
-        self.bomb_list.draw(screen)
+        self.all_sprites.draw(screen)
 
     def setspeed(self, setx, sety):
         """
@@ -501,27 +509,36 @@ class Room(object):
                     if col == "S":
                         wall = Wall(x, y, h.load('stone.png'))
                         self.block_list.add(wall)
+                        self.all_sprites.add(wall)
 
                     if col == "T":
                         wall = Wall(x, y, h.load('stone.png'), end_timer=True)
                         self.block_list.add(wall)
+                        self.all_sprites.add(wall)
 
                     elif col == "P":
                         wall = Wall(x, y, h.load('spikes.png'), damage_player=True)
                         self.block_list.add(wall)
+                        self.all_sprites.add(wall)
 
                     elif col == "B":
                         wall = Wall(x, y, h.load('broken_stone.png'), breakable=True)
                         self.block_list.add(wall)
+                        self.all_sprites.add(wall)
 
                     elif col == "R":
                         new_enemy = enemy.Turret()
                         new_enemy.rect.x = x + 8
                         new_enemy.rect.y = y + 16
                         self.enemy_list.add(new_enemy)
+                        self.all_sprites.add(new_enemy)
 
-                    elif col == "C":
-                        chest = 0
+                    elif col == "W":
+                        chest = Chest(x, y, weapon=True)
+                        chest.rect.x += 8
+                        chest.rect.y += 16
+                        self.chest_list.add(chest)
+                        self.all_sprites.add(chest)
 
                     x += 64
                 y += 64
