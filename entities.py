@@ -64,24 +64,3 @@ class Bomb(h.Sprite):
 
         self.controlled = controlled
 
-    def update(self, xgrav, ygrav):
-        """
-        Change the bomb's location based on changex and changey
-
-        :param xgrav: The x component of gravity, passed to calc_gravity
-        :param ygrav: The y component of gravity, passed to calc_gravity
-        """
-        self.calc_gravity(xgrav, ygrav)
-        self.movex(self.changex)
-        self.movey(self.changey)
-
-    def calc_gravity(self, xgrav=0, ygrav=0):
-        """
-        Change the bomb's motion based on world gravity.
-
-        :param xgrav: The x component of gravity - modifies self.changex.
-        :param ygrav: The y component of gravity - modifies self.changey
-        """
-
-        self.changex += xgrav
-        self.changey -= ygrav

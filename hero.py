@@ -105,9 +105,14 @@ class Hero(pygame.sprite.Sprite):
 
         Thanks to the pyganim example code for the basis of this code.
         """
-        standing = [(os.path.join('Sprites', self.name, 'standing{num}.png'.format(num=num)), 0.1) for num in range(3)]
-        walking = [(os.path.join('Sprites', self.name, 'walking{num}.png'.format(num=num)), 0.1) for num in range(8)]
-        jumping = [(os.path.join('Sprites', self.name, 'jumping{num}.png'.format(num=num)), 0.1) for num in range(4)]
+        standing = [(os.path.join('Sprites', self.name, 'standing{num}.png'.format(num=num)), 0.1)
+                    for num in range(3)]
+
+        walking = [(os.path.join('Sprites', self.name, 'walking{num}.png'.format(num=num)), 0.1)
+                   for num in range(8)]
+
+        jumping = [(os.path.join('Sprites', self.name, 'jumping{num}.png'.format(num=num)), 0.1)
+                   for num in range(4)]
 
         self.animation_obj['stand_right'] = pyganim.PygAnimation(standing)
 
@@ -163,23 +168,25 @@ class Hero(pygame.sprite.Sprite):
     def damage(self, amount):
         """
         Reduces the Hero's health based on an event.
+
         :param amount: Int representing how much damage was taken
         """
         self.hp -= amount
 
     def drop_bomb(self):
         """
-        Drop a bomb that destroys surronding blocks and damages enemies.
+        Drop a bomb that destroys surrounding blocks and damages enemies.
+
         :returns bomb: A bomb entity
         """
         self.bombs -= 1
         if self.last_motion == "right":
-            x = 8
+            x = 13
         elif self.last_motion == "left":
-            x = -8
+            x = -13
         else:
             x = 0
-        bomb = entities.Bomb(h.load('bomb.png'), self.rect.center, x, -8, controlled=self.bomb_control)
+        bomb = entities.Bomb(h.load('bomb.png'), self.rect.center, x, -20, controlled=self.bomb_control)
         return bomb
 
     def reset_all(self):

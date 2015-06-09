@@ -257,6 +257,9 @@ class Room(object):
         # Calculate the effect of gravity
         self.calc_gravity()
 
+        # Move the player's bombs through the world
+        self.cause_bomb_gravity()
+
         #Blow up the bombs that hit walls
         self.det_bombs(hero)
 
@@ -265,7 +268,6 @@ class Room(object):
 
         # Update all the blocks in the room
         self.block_list.update()
-        self.bomb_list.update(0, self.gravity_acceleration)
 
         # Check if the player hit a chest
         self.check_chests(hero)
@@ -503,6 +505,15 @@ class Room(object):
                         hero.damage(25)
 
                 bomb.kill()
+
+    def cause_bomb_gravity(self):
+        """
+        Make the bombs obey gravity regardless of world motion
+        """
+        for bomb in self.bomb_list:
+            bomb.changey -= self.base_y_gravity
+            bomb.movex(bomb.changex)
+            bomb.movey(bomb.changey)
 
     def cause_projectile_damage(self, hero):
         """
