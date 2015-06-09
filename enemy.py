@@ -37,6 +37,7 @@ class Enemy(h.Sprite):
     def __init__(self):
         """
         create the class.
+
         note damage_player_on_touch means that when the player is hitting the bad guy damage is done. T
         his would be true of a brawler type character
         """
@@ -59,6 +60,7 @@ class Enemy(h.Sprite):
     def damage(self, amount):
         """
         Reduces the Enemy's health based on an event.
+
         :param amount: Int representing how much damage was taken
         """
         self.current_hp -= amount
@@ -78,18 +80,21 @@ class Enemy(h.Sprite):
     def update(self, hero):
         """
         cause animation of the enemies.
-        They move toward the positon of the hero's center
+        They move toward the position of the hero's center
         :param hero: The hero to move towards
         """
         if not self.stationary:
             if hero.rect.centerx > self.rect.centerx:
-                self.movex(4)
+                self.movex(self.speed)
             if hero.rect.centery > self.rect.centery:
-                self.movey(4)
+                self.movey(self.speed)
             if hero.rect.centerx < self.rect.centerx:
-                self.movex(-4)
+                self.movex(-self.speed)
             if hero.rect.centery < self.rect.centery:
-                self.movey(-4)
+                self.movey(-self.speed)
+
+        if self.current_hp <= 0:
+            self.kill()
 
 
 class Turret(Enemy):

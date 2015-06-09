@@ -141,7 +141,8 @@ def blit_text(text, screen, position):
 
 def create_menu(screen, title, options, descriptions=None,
                 title_font=None, option_font=None, description_font=None,
-                title_color=constants.BLACK, option_color=constants.BLACK, description_color=constants.BLACK):
+                title_color=constants.BLACK, option_color=constants.BLACK,
+                description_color=constants.BLACK):
     """
     Dynamically create a menu of options for the user to move between.
 

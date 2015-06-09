@@ -1,5 +1,6 @@
 """
 Exports entities that get spawned in over time
+
 The only exceptions are weapons and items,
 The entities associated with them are stored in their respective files.
 
@@ -50,10 +51,6 @@ class Bomb(h.Sprite):
     Stores the data for one of the Hero's bombs.
     """
     def __init__(self, image, center, changex, changey, radius=128, controlled=False):
-        """
-
-        :return:
-        """
         super().__init__()
 
         self.image = image
@@ -70,6 +67,7 @@ class Bomb(h.Sprite):
     def update(self, xgrav, ygrav):
         """
         Change the bomb's location based on changex and changey
+
         :param xgrav: The x component of gravity, passed to calc_gravity
         :param ygrav: The y component of gravity, passed to calc_gravity
         """
@@ -80,6 +78,7 @@ class Bomb(h.Sprite):
     def calc_gravity(self, xgrav=0, ygrav=0):
         """
         Change the bomb's motion based on world gravity.
+
         :param xgrav: The x component of gravity - modifies self.changex.
         :param ygrav: The y component of gravity - modifies self.changey
         """

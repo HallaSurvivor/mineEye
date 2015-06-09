@@ -177,9 +177,9 @@ class Chest(h.Sprite):
         """
         contents = []
         if self.is_weapon_chest:
-            contents.append(random.choice(weapons.all_weapons))
+            contents.append(random.choice(weapons.all_weapons)(self.rect.center))
             if hero.multiple_weapon_drops:
-                contents.append(random.choice(weapons.all_weapons))
+                contents.append(random.choice(weapons.all_weapons)(self.rect.center))
         elif self.is_item_chest:
             pass
 
@@ -213,6 +213,7 @@ class Room(object):
 
     block_list = None
     chest_list = None
+    drops_list = None
     enemy_list = None
     enemy_projectile_list = None
     hero_projectile_list = None
@@ -251,34 +252,35 @@ class Room(object):
 
     def update(self, hero):
         """
-        Update all of the blocks in the room,
-        Update all of the enemies.
         :param hero: An instance of the Hero class to pass to self.move_world()
         """
         # Calculate the effect of gravity
         self.calc_gravity()
 
-        #Stick the bombs to walls
+        #Blow up the bombs that hit walls
         self.det_bombs(hero)
 
-        # Control the world via user input
+        # Control the world via user input and gravity
         self.move_world(hero, self.xspeed, self.yspeed)
 
         # Update all the blocks in the room
         self.block_list.update()
         self.bomb_list.update(0, self.gravity_acceleration)
 
-        # Remove enemies that are dead
-        for e in self.enemy_list:
-            if e.current_hp <= 0:
-                self.enemy_list.remove(e)
-                self.all_sprites.remove(e)
+        # Check if the player hit a chest
+        self.check_chests(hero)
+
+        # Make the chest's drops follow gravity
+        self.cause_dropped_item_gravity()
 
         # Use ranged attacks
         self.cause_ranged_attacks(hero)
 
         # Deal damage from ranged attacks
         self.cause_projectile_damage(hero)
+
+        # Deal contact damage
+        self.cause_contact_damage(hero)
 
         # Update the enemies
         self.enemy_list.update(hero)
@@ -376,7 +378,11 @@ class Room(object):
             if block.end_timer:
                 hero.run_timer = False
 
-        # Deal contact damage with enemies
+    def cause_contact_damage(self, hero):
+        """
+        Damage the hero if he collides with an enemy dealing contact damage
+        :param hero: A hero to damage
+        """
         enemy_hit_list = pygame.sprite.spritecollide(hero, self.enemy_list, False)
         for e in enemy_hit_list:
             if e.contact_damage:
@@ -400,9 +406,39 @@ class Room(object):
         for chest in hit_list:
             contents = chest.generate_contents(hero)
             for thing in contents:
-                self.all_sprites.add(thing)
+                self.all_sprites.add(thing.sprite)
+                self.drops_list.add(thing.sprite)
 
             chest.kill()
+
+    def cause_dropped_item_gravity(self):
+        """
+        Cause gravity for drops and stop any dropping items/weapons from falling through the floor.
+        """
+        for drop in self.drops_list:
+            drop.movex(drop.changex)
+            hit_list = pygame.sprite.spritecollide(drop, self.block_list, False)
+            for block in hit_list:
+                if drop.changex > 0:
+                    drop.rect.right = block.rect.left
+                elif drop.changex < 0:
+                    drop.rect.left = block.rect.right
+                drop.changex = 0
+
+            if drop.changey == 0:
+                drop.changey = -self.base_y_gravity
+            else:
+                drop.changey -= self.gravity_acceleration
+
+            drop.movey(drop.changey)
+            hit_list = pygame.sprite.spritecollide(drop, self.block_list, False)
+            for block in hit_list:
+                if drop.changey > 0:
+                    drop.rect.bottom = block.rect.top
+                elif drop.changey < 0:
+                    drop.rect.top = block.rect.bottom
+                drop.changey = 0
+                drop.changex = 0
 
     def cause_ranged_attacks(self, hero):
         """
@@ -535,12 +571,12 @@ class Room(object):
                         self.enemy_list.add(new_enemy)
                         self.all_sprites.add(new_enemy)
 
-                    elif col == "G":
-                        new_enemy = enemy.Ghost()
-                        new_enemy.rect.x = x + 3
-                        new_enemy.rect.y = y + 10
-                        self.enemy_list.add(new_enemy)
-                        self.all_sprites.add(new_enemy)
+                    # elif col == "G":
+                    #     new_enemy = enemy.Ghost()
+                    #     new_enemy.rect.x = x + 3
+                    #     new_enemy.rect.y = y + 10
+                    #     self.enemy_list.add(new_enemy)
+                    #     self.all_sprites.add(new_enemy)
 
                     elif col == "W":
                         chest = Chest(x, y, weapon=True)

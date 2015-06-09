@@ -13,6 +13,7 @@ import hero
 
 pygame.init()
 
+
 class GameState(object):
     """
     A superclass for all the states the game can be in.
@@ -215,6 +216,7 @@ class ChangeBinds(Menu):
     allow_on_off = False
 
     def __init__(self):
+
         super().__init__()
 
         self.modifying = False
@@ -242,7 +244,6 @@ class ChangeBinds(Menu):
                     elif e.key == pygame.K_SPACE or e.key == settings['RIGHT'] or e.key == pygame.K_RIGHT:
                         self.options[self.selected] = ">" + self.options[self.selected]
                         self.modifying = True
-
                 else:
                     if e.key == pygame.K_ESCAPE:
                         self.options[self.selected] = self.options[self.selected][1:]
