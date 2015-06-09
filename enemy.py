@@ -6,7 +6,7 @@ import helpers as h
 import entities
 
 
-class Enemy(pygame.sprite.Sprite):
+class Enemy(h.Sprite):
     """
     An Enemy superclass meant to be subclassed by individual enemies.
 
@@ -26,6 +26,7 @@ class Enemy(pygame.sprite.Sprite):
     is_melee = False
     is_ranged = False
 
+    clips = True
     stationary = False
 
     attack_range = 256
@@ -33,11 +34,11 @@ class Enemy(pygame.sprite.Sprite):
     projectile_damage = 3
     attack_period = 16
 
-
     def __init__(self):
         """
         create the class.
-        note damage_player_on_touch means that when the player is hitting the bad guy damage is done. This would be true of a bwarler type chractor
+        note damage_player_on_touch means that when the player is hitting the bad guy damage is done. T
+        his would be true of a brawler type character
         """
         super().__init__()
 
@@ -74,20 +75,6 @@ class Enemy(pygame.sprite.Sprite):
         """
         pass
 
-    def movex(self, xspeed):
-        """
-        Move the enemy by a certain amount in the x direction.
-        :param xspeed: Int representing the change in x direction
-        """
-        self.rect.x += xspeed
-
-    def movey(self, yspeed):
-        """
-        Move the enemy by a certain amount in the x direction.
-        :param yspeed:  Int representing the change in y direction
-        """
-        self.rect.y += yspeed
-
     def update(self, hero):
         """
         cause animation of the enemies.
@@ -103,20 +90,15 @@ class Enemy(pygame.sprite.Sprite):
                 self.movex(-4)
             if hero.rect.centery < self.rect.centery:
                 self.movey(-4)
-            if hero.rect.center is self.rect.center:
-                self.rect.y = 0
-                self.rect.x = 0
-
 
 
 class Turret(Enemy):
     """
     A stationary turret that fires projectiles at the player.
     """
-
+    stationary = True
     is_ranged = True
     contact_damage = 0
-    stationary = True
 
     def __init__(self):
         super().__init__()
@@ -137,3 +119,17 @@ class Turret(Enemy):
         self.ranged_attack_cooldown += self.attack_period
 
         return proj
+
+
+class Ghost(Enemy):
+    """
+    A moving ghost that can clip though walls and attacks the hero on contact
+    """
+    is_ranged = False
+    contact_damage = 1
+    Clips = False
+
+    def __init__(self):
+        super().__init__()
+
+        self.image = h.load('ghost.png')

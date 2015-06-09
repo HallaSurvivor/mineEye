@@ -83,7 +83,7 @@ room_dict = {
                "SSDDSSSSSSSS",
                "S          S",
                "S      B   S",
-               "S     BB   S",
+               "S  G  BB   S",
                "SSSSSSSSDDSS"
     ],
     "Room07": [MoveDown,
@@ -248,6 +248,58 @@ class Room(object):
         self.room_array = []
 
         self.array_parsed = False
+
+    def update(self, hero):
+        """
+        Update all of the blocks in the room,
+        Update all of the enemies.
+        :param hero: An instance of the Hero class to pass to self.move_world()
+        """
+        # Calculate the effect of gravity
+        self.calc_gravity()
+
+        #Stick the bombs to walls
+        self.det_bombs(hero)
+
+        # Control the world via user input
+        self.move_world(hero, self.xspeed, self.yspeed)
+
+        # Update all the blocks in the room
+        self.block_list.update()
+        self.bomb_list.update(0, self.gravity_acceleration)
+
+        # Remove enemies that are dead
+        for e in self.enemy_list:
+            if e.current_hp <= 0:
+                self.enemy_list.remove(e)
+                self.all_sprites.remove(e)
+
+        # Use ranged attacks
+        self.cause_ranged_attacks(hero)
+
+        # Deal damage from ranged attacks
+        self.cause_projectile_damage(hero)
+
+        # Update the enemies
+        self.enemy_list.update(hero)
+
+        # Destroy any projectiles that hit walls or opposing projectiles
+        self.destroy_projectiles()
+
+        #Update the entities
+        self.enemy_projectile_list.update()
+
+    def draw(self, screen):
+        """
+        Draw everything in the room
+        :param screen: A pygame surface to blit everything onto.
+        """
+        screen.blit(self.background, (0, 0))
+
+        if not self.array_parsed:
+            self.parse_room_array(settings['SCREEN_RESOLUTION'][0] / 2 - 128, settings['SCREEN_RESOLUTION'][1] / 2 - 128)
+
+        self.all_sprites.draw(screen)
 
     def move_world(self, hero, x, y):
         """
@@ -423,58 +475,6 @@ class Room(object):
         for proj in hit_list:
             hero.damage(proj.damage)
 
-    def update(self, hero):
-        """
-        Update all of the blocks in the room,
-        Update all of the enemies.
-        :param hero: An instance of the Hero class to pass to self.move_world()
-        """
-        # Calculate the effect of gravity
-        self.calc_gravity()
-
-        #Stick the bombs to walls
-        self.det_bombs(hero)
-
-        # Control the world via user input
-        self.move_world(hero, self.xspeed, self.yspeed)
-
-        # Update all the blocks in the room
-        self.block_list.update()
-        self.bomb_list.update(0, self.gravity_acceleration)
-
-        # Remove enemies that are dead
-        for e in self.enemy_list:
-            if e.current_hp <= 0:
-                self.enemy_list.remove(e)
-                self.all_sprites.remove(e)
-
-        # Use ranged attacks
-        self.cause_ranged_attacks(hero)
-
-        # Deal damage from ranged attacks
-        self.cause_projectile_damage(hero)
-
-        # Update the enemies
-        self.enemy_list.update(hero)
-
-        # Destroy any projectiles that hit walls or opposing projectiles
-        self.destroy_projectiles()
-
-        #Update the entities
-        self.enemy_projectile_list.update()
-
-    def draw(self, screen):
-        """
-        Draw everything in the room
-        :param screen: A pygame surface to blit everything onto.
-        """
-        screen.blit(self.background, (0, 0))
-
-        if not self.array_parsed:
-            self.parse_room_array(settings['SCREEN_RESOLUTION'][0] / 2 - 128, settings['SCREEN_RESOLUTION'][1] / 2 - 128)
-
-        self.all_sprites.draw(screen)
-
     def setspeed(self, setx, sety):
         """
         Set a new x and y speed instead of changing the current one.
@@ -530,6 +530,13 @@ class Room(object):
                         new_enemy = enemy.Turret()
                         new_enemy.rect.x = x + 8
                         new_enemy.rect.y = y + 16
+                        self.enemy_list.add(new_enemy)
+                        self.all_sprites.add(new_enemy)
+
+                    elif col == "G":
+                        new_enemy = enemy.Ghost()
+                        new_enemy.rect.x = x + 3
+                        new_enemy.rect.y = y + 10
                         self.enemy_list.add(new_enemy)
                         self.all_sprites.add(new_enemy)
 
