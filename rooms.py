@@ -82,7 +82,7 @@ room_dict = {
                "SSDDSSSSSSSS",
                "S          S",
                "S      B   S",
-               "S     BB   S",
+               "S  G  BB   S",
                "SSSSSSSSDDSS"
     ],
     "Room07": [MoveDown,
@@ -518,6 +518,11 @@ class Room(object):
                         new_enemy = enemy.Turret()
                         new_enemy.rect.x = x + 8
                         new_enemy.rect.y = y + 16
+                        self.enemy_list.add(new_enemy)
+                    elif col == "G":
+                        new_enemy = enemy.Ghost()
+                        new_enemy.rect.x = x + 3
+                        new_enemy.rect.y = y + 10
                         self.enemy_list.add(new_enemy)
 
                     elif col == "C":

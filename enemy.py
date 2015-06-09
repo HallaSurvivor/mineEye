@@ -22,6 +22,7 @@ class Enemy(pygame.sprite.Sprite):
     hp = 100
     speed = 3
     contact_damage = 3
+    Clips = True
 
     is_melee = False
     is_ranged = False
@@ -94,18 +95,19 @@ class Enemy(pygame.sprite.Sprite):
         They move toward the positon of the hero's center
         :param hero: The hero to move towards
         """
-        if not self.stationary:
-            if hero.rect.centerx > self.rect.centerx:
-                self.movex(4)
-            if hero.rect.centery > self.rect.centery:
-                self.movey(4)
-            if hero.rect.centerx < self.rect.centerx:
-                self.movex(-4)
-            if hero.rect.centery < self.rect.centery:
-                self.movey(-4)
-            if hero.rect.center is self.rect.center:
-                self.rect.y = 0
-                self.rect.x = 0
+        if not self.Clips:
+            if not self.stationary:
+                if hero.rect.centerx > self.rect.centerx:
+                    self.movex(4)
+                if hero.rect.centery > self.rect.centery:
+                    self.movey(4)
+                if hero.rect.centerx < self.rect.centerx:
+                    self.movex(-4)
+                if hero.rect.centery < self.rect.centery:
+                    self.movey(-4)
+                if hero.rect.center is self.rect.center:
+                    self.rect.y = 0
+                    self.rect.x = 0
 
 
 
@@ -113,10 +115,10 @@ class Turret(Enemy):
     """
     A stationary turret that fires projectiles at the player.
     """
-
+    stationary = True
     is_ranged = True
     contact_damage = 0
-
+    Clips = False
     def __init__(self):
         super().__init__()
 
@@ -136,3 +138,18 @@ class Turret(Enemy):
         self.ranged_attack_cooldown += self.attack_period
 
         return proj
+
+
+class Ghost(Enemy):
+    """
+    A moving ghost that can clip though walls and attacks the hero on contact
+    """
+    stationary = False
+    is_ranged = False
+    contact_damage = 1
+    Clips = False
+
+    def __init__(self):
+        super().__init__()
+
+        self.image = h.load('ghost.png')
