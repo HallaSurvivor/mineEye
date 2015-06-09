@@ -5,6 +5,7 @@ Adds individual subclasses of Room with information specific to each room.
 """
 from math import hypot
 import pygame
+import pyganim
 from config import settings
 import enemy
 import helpers as h
@@ -22,7 +23,7 @@ room_dict = {
     "StartingRoom": [MoveRight,
                      "SSSSSSSS",
                      "S      S",
-                     "S      S",
+                     "SC     S",
                      "SSSSSDDS"
     ],
     "EndingRoom": [MoveDown,
@@ -173,6 +174,27 @@ class Wall(pygame.sprite.Sprite):
         """
 
         self.rect.y += yspeed
+
+
+class Chest(pygame.sprite.Sprite):
+    """
+    A chest that can hold either items or weapons.
+    """
+
+    def __init__(self, x, y, item=False, weapon=False):
+        """
+        Create the chest.
+        :param x: Int representing the x position of the chest's top left corner
+        :param y: Int representing the y position of the chest's top left corner
+        :param item: Bool. True if the chest has an item. False by default
+        :param weapon: Bool. True of the chest has a weapon. False by default
+        """
+        super().__init__()
+
+        self.image = h.load('Chest0.png', 'Chest')
+
+    def update(self):
+        pass
 
 
 class Room(object):
@@ -497,6 +519,9 @@ class Room(object):
                         new_enemy.rect.x = x + 8
                         new_enemy.rect.y = y + 16
                         self.enemy_list.add(new_enemy)
+
+                    elif col == "C":
+                        chest = 0
 
                     x += 64
                 y += 64

@@ -1,7 +1,12 @@
 """
 Exports entities that get spawned in over time
+The only exceptions are weapons and items,
+The entities associated with them are stored in their respective files.
 
-Bullets
+Exports:
+
+Projectile
+Bombs
 """
 import pygame
 
@@ -14,7 +19,7 @@ class Projectile(pygame.sprite.Sprite):
         """
         Create the projectile with a certain image, center, and speed
         :param image: a pygame image to associate with the projectile
-        :param center: Int representing the starting point of the projectile
+        :param center: Int tuple representing the starting point of the projectile
         :param changex: Int representing how quickly the projectile moves in the x direction
         :param changey: Int representing how quickly the projectile moves in the y direction
         :param damage: Int representing the amount of damage the projectile does on contact

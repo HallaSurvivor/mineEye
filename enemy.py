@@ -26,6 +26,8 @@ class Enemy(pygame.sprite.Sprite):
     is_melee = False
     is_ranged = False
 
+    stationary = False
+
     attack_range = 256
     projectile_speed = 16
     projectile_damage = 3
@@ -86,23 +88,24 @@ class Enemy(pygame.sprite.Sprite):
         """
         self.rect.y += yspeed
 
-    def update(self,hero):
+    def update(self, hero):
         """
         cause animation of the enemies.
         They move toward the positon of the hero's center
+        :param hero: The hero to move towards
         """
-
-        if(hero.rect.centerx > self.rect.centerx):
-           self.movex(4)
-        if(hero.rect.centery > self.rect.centery):
-           self.movey(4)
-        if(hero.rect.centerx < self.rect.centerx):
-           self.movex(-4)
-        if(hero.rect.centery < self.rect.centery):
-           self.movey(-4)
-        if(hero.rect.center is self.rect.center):
-           self.rect.y = 0
-           self.rect.x = 0
+        if not self.stationary:
+            if hero.rect.centerx > self.rect.centerx:
+                self.movex(4)
+            if hero.rect.centery > self.rect.centery:
+                self.movey(4)
+            if hero.rect.centerx < self.rect.centerx:
+                self.movex(-4)
+            if hero.rect.centery < self.rect.centery:
+                self.movey(-4)
+            if hero.rect.center is self.rect.center:
+                self.rect.y = 0
+                self.rect.x = 0
 
 
 
