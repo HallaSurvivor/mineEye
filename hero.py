@@ -57,6 +57,8 @@ class Hero(pygame.sprite.Sprite):
     bomb_control = False
     base_bomb_count = 3
 
+    multiple_weapon_drops = False
+
     def __init__(self):
         """
         create the class.

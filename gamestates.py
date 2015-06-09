@@ -432,6 +432,7 @@ class InGame(GameState):
                     if self.hero.bombs > 0:
                         bomb = self.hero.drop_bomb()
                         self.world.bomb_list.add(bomb)
+                        self.world.all_sprites.add(bomb)
 
                 elif event.key == settings['DOWN']:
                     pass

@@ -8,10 +8,10 @@ Exports:
 Projectile
 Bombs
 """
-import pygame
+import helpers as h
 
 
-class Projectile(pygame.sprite.Sprite):
+class Projectile(h.Sprite):
     """
     Stores all the data for a projectile.
     """
@@ -45,7 +45,7 @@ class Projectile(pygame.sprite.Sprite):
         self.rect.y += self.changey
 
 
-class Bomb(pygame.sprite.Sprite):
+class Bomb(h.Sprite):
     """
     Stores the data for one of the Hero's bombs.
     """
@@ -74,7 +74,8 @@ class Bomb(pygame.sprite.Sprite):
         :param ygrav: The y component of gravity, passed to calc_gravity
         """
         self.calc_gravity(xgrav, ygrav)
-        self.move(self.changex, self.changey)
+        self.movex(self.changex)
+        self.movey(self.changey)
 
     def calc_gravity(self, xgrav=0, ygrav=0):
         """
@@ -85,12 +86,3 @@ class Bomb(pygame.sprite.Sprite):
 
         self.changex += xgrav
         self.changey -= ygrav
-
-    def move(self, changex, changey):
-        """
-        Move the bomb according to some parameters
-        :param changex: the X distance to move the bomb
-        :param changey: the Y distance to move the bomb
-        """
-        self.rect.x += changex
-        self.rect.y += changey

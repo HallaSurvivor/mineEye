@@ -10,6 +10,46 @@ _image_library = {}
 _font_library = {}
 
 
+class Sprite(pygame.sprite.Sprite):
+    """
+    Add movement functions to the default pygame sprites.
+    """
+    def __init__(self):
+        super().__init__()
+
+    def update(self, *args):
+        """
+        A dummy function meant to be subclassed later.
+        """
+        pass
+
+    def movex(self, xspeed):
+        """
+        Move the sprite in the X direction.
+        Collisions are handled in the Room class, since the entire room
+            needs to stop moving when a single Wall collides with the hero.
+        Movement is split between X and Y so that collision checking only has to deal with
+            one at a time.
+
+        :param xspeed: Int representing the change in x direction
+        """
+
+        self.rect.x += xspeed
+
+    def movey(self, yspeed):
+        """
+        Move the sprite in the Y direction.
+        Collisions are handled in the Room class, since the entire room
+            needs to stop moving when a single Wall collides with the hero.
+        Movement is split between X and Y so that collision checking only has to deal with
+            one at a time.
+
+        :param yspeed:  Int representing the change in y direction
+        """
+
+        self.rect.y += yspeed
+
+
 def load(imagename, subfolder=None):
     """
     Retrieves previously loaded images from _image_library, and stores newly created ones there as they are called.

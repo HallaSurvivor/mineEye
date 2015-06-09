@@ -4,6 +4,7 @@ A module for all the possible weapons in the game
 
 import pygame
 
+
 class Weapon(object):
     """
     An object for containing the data in each weapon.
@@ -32,3 +33,5 @@ class WeaponSprite(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = center
 
+
+all_weapons = []
