@@ -420,8 +420,9 @@ class Room(object):
         # Deal damage from ranged attacks
         self.cause_projectile_damage(hero)
 
+
         # Update the enemies
-        self.enemy_list.update()
+        self.enemy_list.update(hero)
 
         # Destroy any projectiles that hit walls or opposing projectiles
         self.destroy_projectiles()

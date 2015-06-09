@@ -86,11 +86,24 @@ class Enemy(pygame.sprite.Sprite):
         """
         self.rect.y += yspeed
 
-    def update(self):
+    def update(self,hero):
         """
-        Eventually, cause animations
+        cause animation of the enemies.
+        They move toward the positon of the hero's center
         """
-        pass
+
+        if(hero.rect.centerx > self.rect.centerx):
+           self.movex(4)
+        if(hero.rect.centery > self.rect.centery):
+           self.movey(4)
+        if(hero.rect.centerx < self.rect.centerx):
+           self.movex(-4)
+        if(hero.rect.centery < self.rect.centery):
+           self.movey(-4)
+        if(hero.rect.center is self.rect.center):
+           self.rect.y = 0
+           self.rect.x = 0
+
 
 
 class Turret(Enemy):
