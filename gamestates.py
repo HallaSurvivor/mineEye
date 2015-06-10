@@ -273,6 +273,8 @@ class ChangeBinds(Menu):
                         f = open('settings', 'wb')
                         f.write(pickle.dumps(settings))
                         f.close()
+            else:
+                pass
 
 
 class InGame(GameState):

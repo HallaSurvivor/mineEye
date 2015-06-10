@@ -59,6 +59,9 @@ class Hero(pygame.sprite.Sprite):
 
     multiple_weapon_drops = False
 
+    melee_weapon = None
+    ranged_weapon = None
+
     def __init__(self):
         """
         create the class.

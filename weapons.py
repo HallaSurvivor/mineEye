@@ -17,6 +17,12 @@ class Weapon(object):
     image = None
     sprite = None
 
+    def attack(self):
+        """
+        A blank method meant to be overwritten in each weapon.
+        """
+        pass
+
 
 class WeaponSprite(h.Sprite):
     """
