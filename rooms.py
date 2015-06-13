@@ -51,7 +51,7 @@ room_dict = {
     "Room02": [MoveLeft,
                "SSSSSSSSSDDS",
                "P          P",
-               "P       S  P",
+               "P      WS  P",
                "SSDDSSSSSSSS",
     ],
     "Room03": [MoveRight,

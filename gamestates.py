@@ -455,9 +455,16 @@ class InGame(GameState):
                             if (hypot(drop.rect.centerx - c.CENTER[0], drop.rect.centery - c.CENTER[1])
                                     <= self.hero.weapon_pickup_range):
                                 if drop.weapon.style == 0: # Melee
+                                    if self.hero.melee_weapon is not None:
+                                        self.world.all_sprites.add(self.hero.melee_weapon.sprite)
+                                        self.world.drops_list.add(self.hero.melee_weapon.sprite)
                                     self.hero.melee_weapon = drop.weapon
                                 elif drop.weapon.style == 1: # Ranged
+                                    if self.hero.ranged_weapon is not None:
+                                        self.world.all_sprites.add(self.hero.ranged_weapon.sprite)
+                                        self.world.all_sprites.add(self.hero.ranged_weapon.sprite)
                                     self.hero.ranged_weapon = drop.weapon
+                                drop.kill()
 
                 # Quit to TitleScreen (eventually pause menu) if the user presses escape
                 elif event.key == settings['PAUSE']:
