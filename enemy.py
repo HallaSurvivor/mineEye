@@ -1,8 +1,10 @@
 """
 Exports the Enemy class that the User actually controls.
 """
+from math import hypot
 import pygame
 import helpers as h
+import constants as c
 import entities
 
 
@@ -27,6 +29,7 @@ class Enemy(h.Sprite):
     is_ranged = False
 
     clips = True
+    activation_range = 0
     stationary = False
 
     attack_range = 256
@@ -83,7 +86,7 @@ class Enemy(h.Sprite):
         They move toward the position of the hero's center
         :param hero: The hero to move towards
         """
-        if not self.stationary:
+        if not self.stationary and self.get_dist() <= self.activation_range:
             if hero.rect.centerx > self.rect.centerx:
                 self.movex(self.speed)
             if hero.rect.centery > self.rect.centery:
@@ -95,6 +98,15 @@ class Enemy(h.Sprite):
 
         if self.current_hp <= 0:
             self.kill()
+
+    def get_dist(self):
+        """
+        Return the distance from the enemy's center to the Hero's center.
+        """
+        dist = hypot(self.rect.centerx - c.CENTER[0], self.rect.centery - c.CENTER[1])
+
+        return dist
+
 
 
 class Turret(Enemy):
@@ -132,6 +144,7 @@ class Ghost(Enemy):
     """
     is_ranged = False
     contact_damage = 1
+    activation_range = 1024
     Clips = False
 
     def __init__(self):
