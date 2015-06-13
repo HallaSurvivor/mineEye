@@ -30,3 +30,7 @@ HP_BAR_POS = (4, 4)
 BOMB_POS = (0, 64)
 MELEE_POS = (144, 64)
 RANGED_POS = (192, 64)
+
+# Enums
+MELEE = 0
+RANGED = 1

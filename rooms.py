@@ -8,7 +8,7 @@ from math import hypot
 import pygame
 from config import settings
 import enemy
-import weapons
+import drops
 import helpers as h
 
 MoveRight = 0
@@ -177,9 +177,9 @@ class Chest(h.Sprite):
         """
         contents = []
         if self.is_weapon_chest:
-            contents.append(random.choice(weapons.all_weapons)(self.rect.center))
+            contents.append(random.choice(drops.all_weapons)(self.rect.center))
             if hero.multiple_weapon_drops:
-                contents.append(random.choice(weapons.all_weapons)(self.rect.center))
+                contents.append(random.choice(drops.all_weapons)(self.rect.center))
         elif self.is_item_chest:
             pass
 

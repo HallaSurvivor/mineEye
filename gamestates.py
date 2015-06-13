@@ -395,8 +395,31 @@ class InGame(GameState):
     def handle_events(self, events):
         """
         Parse all of the events that pygame registers inside the class.
-        These events include:
-            key presses
+
+        All of the keys are defined inside of config.py, but can be
+        overwritten by the user inside of the Change Keybinds menu
+        defined above as ChangeBinds()
+
+        Pushing Keys:
+            Left:
+                Move to the left
+            Right:
+                Move to the right
+            Up:
+                Jump
+            Down:
+                Change Weapons
+            Bomb:
+                Throw a bomb
+            Pause:
+                Exit to title screen
+
+        Clicking:
+            Mouse1:
+                Use Melee weapon
+            Mouse2:
+                Use Ranged weapon
+
         :param events: a list of pygame events, get via pygame.event.get()
         """
 
@@ -501,6 +524,14 @@ class InGame(GameState):
 
                 elif event.key == settings['DOWN']:
                     pass
+
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    pass
+                elif event.button == 3:
+                    pass
+            else:
+                pass
 
     def die(self):
         self.manager.go_to(DeathScreen())

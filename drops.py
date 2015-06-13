@@ -1,28 +1,22 @@
 """
-A module for all the possible weapons in the game
+A module for all the possible weapons and items in the game
 """
 
 import random
 import helpers as h
+import constants as c
 
-MELEE = 0
-RANGED = 1
 
 class Weapon(object):
     """
     An object for containing the data in each weapon.
     """
-    style = MELEE
+    style = c.MELEE
 
     image = None
     sprite = None
     top_sprite = None
 
-    def attack(self):
-        """
-        A blank method meant to be overwritten in each weapon.
-        """
-        pass
 
 
 class WeaponSprite(h.Sprite):
@@ -73,7 +67,7 @@ class Weapon1(Weapon):
     """
     The first weapon
     """
-    style = MELEE
+    style = c.MELEE
 
     def __init__(self, center):
         self.sprite = WeaponSprite(h.load('weapon.png'), center, self)
