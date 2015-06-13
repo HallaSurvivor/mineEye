@@ -15,10 +15,16 @@ class Weapon(object):
     power = 0
     range = 0
     arcs = False
+    sprite_to_load = ''
+    top_sprite_to_load = ''
 
     image = None
     sprite = None
     top_sprite = None
+
+    def __init__(self, center):
+        self.sprite = DropSprite(h.load(self.sprite_to_load), center, self)
+        self.top_sprite = TopSprite(h.load(self.top_sprite_to_load), self)
 
 
 class DropSprite(h.Sprite):
@@ -71,10 +77,27 @@ class Weapon1(Weapon):
     """
     style = c.MELEE
     power = 50
-    range = 32
+    range = 128
+
+    sprite_to_load = 'weapon.png'
+    top_sprite_to_load = 'top_weapon.png'
 
     def __init__(self, center):
-        self.sprite = DropSprite(h.load('weapon.png'), center, self)
-        self.top_sprite = TopSprite(h.load('top_weapon.png'), self)
+        super().__init__(center)
 
-all_weapons = [Weapon1]
+
+class Weapon2(Weapon):
+    """
+    Another weapon
+    """
+    style = c.MELEE
+    power = 100
+    range = 64
+
+    sprite_to_load = 'weapon2.png'
+    top_sprite_to_load = 'top_weapon2.png'
+
+    def __init__(self, center):
+        super().__init__(center)
+
+all_weapons = [Weapon1, Weapon2]
