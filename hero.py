@@ -58,6 +58,7 @@ class Hero(pygame.sprite.Sprite):
     base_bomb_count = 3
 
     multiple_weapon_drops = False
+    weapon_pickup_range = 192
 
     melee_weapon = None
     ranged_weapon = None
