@@ -477,17 +477,29 @@ class InGame(GameState):
                         if drop.is_weapon:
                             if (hypot(drop.rect.centerx - c.CENTER[0], drop.rect.centery - c.CENTER[1])
                                     <= self.hero.weapon_pickup_range):
-                                if drop.weapon.style == 0: # Melee
+                                if drop.drop.style == 0: # Melee
                                     if self.hero.melee_weapon is not None:
                                         self.world.all_sprites.add(self.hero.melee_weapon.sprite)
                                         self.world.drops_list.add(self.hero.melee_weapon.sprite)
-                                    self.hero.melee_weapon = drop.weapon
-                                elif drop.weapon.style == 1: # Ranged
+                                    self.hero.melee_weapon = drop.drop
+                                elif drop.drop.style == 1: # Ranged
                                     if self.hero.ranged_weapon is not None:
                                         self.world.all_sprites.add(self.hero.ranged_weapon.sprite)
                                         self.world.all_sprites.add(self.hero.ranged_weapon.sprite)
-                                    self.hero.ranged_weapon = drop.weapon
+                                    self.hero.ranged_weapon = drop.drop
                                 drop.kill()
+
+                elif event.key == settings['MELEE']:
+                    if self.hero.melee_weapon is not None:
+                        for e in self.world.enemy_list:
+                            dist = hypot(e.rect.centerx - c.CENTER[0], e.rect.centery - c.CENTER[1])
+                            if dist <= 500:
+                                print(dist)
+                            if dist <= self.hero.melee_weapon.range:
+                                e.damage(self.hero.melee_weapon.power)
+
+                elif event.key == settings['RANGED']:
+                    pass
 
                 # Quit to TitleScreen (eventually pause menu) if the user presses escape
                 elif event.key == settings['PAUSE']:
@@ -527,7 +539,13 @@ class InGame(GameState):
 
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
-                    pass
+                    if self.hero.melee_weapon is not None:
+                        for e in self.world.enemy_list:
+                            dist = hypot(e.rect.centerx - c.CENTER[0], e.rect.centery - c.CENTER[1])
+                            if dist <= 500:
+                                print(dist)
+                            if dist <= self.hero.melee_weapon.range:
+                                e.damage(self.hero.melee_weapon.power)
                 elif event.button == 3:
                     pass
             else:

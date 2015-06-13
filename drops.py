@@ -11,24 +11,26 @@ class Weapon(object):
     """
     An object for containing the data in each weapon.
     """
-    style = c.MELEE
+    style = None
+    power = 0
+    range = 0
+    arcs = False
 
     image = None
     sprite = None
     top_sprite = None
 
 
-
-class WeaponSprite(h.Sprite):
+class DropSprite(h.Sprite):
     """
-    A weapon's sprite to be shown before being picked up.
+    A sprite to be shown while the drop is in the world.
     """
     is_weapon = True
     is_item = False
 
-    def __init__(self, image, center, weapon):
+    def __init__(self, image, center, drop):
         """
-        Create the weapon sprite with a certain image at a certain spot
+        Create the sprite with a certain image at a certain spot
 
         The sprite will move to the ground with the world's gravity, but it
         has a random x component so that it moves away from the chest on spawn.
@@ -39,7 +41,7 @@ class WeaponSprite(h.Sprite):
         """
         super().__init__()
 
-        self.weapon = weapon
+        self.drop = drop
 
         self.image = image
 
@@ -68,9 +70,11 @@ class Weapon1(Weapon):
     The first weapon
     """
     style = c.MELEE
+    power = 50
+    range = 32
 
     def __init__(self, center):
-        self.sprite = WeaponSprite(h.load('weapon.png'), center, self)
+        self.sprite = DropSprite(h.load('weapon.png'), center, self)
         self.top_sprite = TopSprite(h.load('top_weapon.png'), self)
 
 all_weapons = [Weapon1]
