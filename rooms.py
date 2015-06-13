@@ -582,12 +582,12 @@ class Room(object):
                         self.enemy_list.add(new_enemy)
                         self.all_sprites.add(new_enemy)
 
-                    # elif col == "G":
-                    #     new_enemy = enemy.Ghost()
-                    #     new_enemy.rect.x = x + 3
-                    #     new_enemy.rect.y = y + 10
-                    #     self.enemy_list.add(new_enemy)
-                    #     self.all_sprites.add(new_enemy)
+                    elif col == "G":
+                        new_enemy = enemy.Ghost()
+                        new_enemy.rect.x = x + 3
+                        new_enemy.rect.y = y + 10
+                        self.enemy_list.add(new_enemy)
+                        self.all_sprites.add(new_enemy)
 
                     elif col == "W":
                         chest = Chest(x, y, weapon=True)
