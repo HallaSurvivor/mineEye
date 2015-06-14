@@ -1,13 +1,7 @@
 """
-Exports entities that get spawned in over time
+Exports all entities other than weapons and items.
 
-The only exceptions are weapons and items,
-The entities associated with them are stored in their respective files.
-
-Exports:
-
-Projectile
-Bombs
+Weapons and Items can be found inside drops.py
 """
 import helpers as h
 
@@ -15,6 +9,8 @@ import helpers as h
 class Projectile(h.Sprite):
     """
     Stores all the data for a projectile.
+
+    This includes an image, a speed, and the damage it does.
     """
     def __init__(self, image, center, changex, changey, damage):
         """
@@ -49,8 +45,18 @@ class Projectile(h.Sprite):
 class Bomb(h.Sprite):
     """
     Stores the data for one of the Hero's bombs.
+
+    This includes an image, a speed, and an explosion radius
     """
-    def __init__(self, image, center, changex, changey, radius=128, controlled=False):
+    def __init__(self, image, center, changex, changey, radius=128):
+        """
+        Create the bomb at a certain center, with a certain speed and explosion radius
+        :param image: The pygame surface associated with the bomb
+        :param center: The spawn location of the bomb
+        :param changex: The x component of the bomb's velocity
+        :param changey: The y component of the bomb's velocity
+        :param radius: Radius (in px) of blocks to destroy/enemies to damage. Defaults to 128 (2 blocks)
+        """
         super().__init__()
 
         self.image = image
@@ -61,6 +67,3 @@ class Bomb(h.Sprite):
         self.changey = changey
 
         self.radius = radius
-
-        self.controlled = controlled
-

@@ -1,7 +1,10 @@
 """
 A place for all the constants to be stored.
+
+Uses the settings dictionary in order to automatically calculate some values based on screen resolution.
 """
 from config import settings
+
 # Colors
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
@@ -15,13 +18,13 @@ WIDTH = settings['SCREEN_RESOLUTION'][0]
 HEIGHT = settings['SCREEN_RESOLUTION'][1]
 
 HP_BACKGROUND_SIZE = (1/6 * WIDTH, 48)
-HP_BAR_SIZE = ((1/6 * WIDTH - 4), 44)
+HP_BAR_SIZE = (1/6 * WIDTH - 4, 44)
 
 # Locations
 TOP_LEFT = (0, 0)
-TOP_RIGHT = (settings['SCREEN_RESOLUTION'][0], 0)
-BOTTOM_LEFT = (0, settings['SCREEN_RESOLUTION'][1])
-BOTTOM_RIGHT = settings['SCREEN_RESOLUTION']
+TOP_RIGHT = (WIDTH, 0)
+BOTTOM_LEFT = (0, HEIGHT)
+BOTTOM_RIGHT = (WIDTH, HEIGHT)
 CENTER = (WIDTH/2, HEIGHT/2)
 
 HP_BACKGROUND_POS = (2, 2)

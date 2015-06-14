@@ -6,6 +6,7 @@ import pygame
 from config import settings
 import constants
 
+# Caches for sprites and fonts to mitigate the slow loading process
 _image_library = {}
 _font_library = {}
 
@@ -75,14 +76,11 @@ def load(imagename, subfolder=None):
 
 def create_background(background_tile):
     """
-    Creates a surface made by tiling the background_tile image
-
-    TODO: store it in _image_library for future use
+    Creates a surface made by tiling the background_tile image. Not stored in cache to allow background changes
 
     :param background_tile: a pygame surface that can be tiled
     :returns background: a pygame surface consisting of the tiled background_tile
     """
-
     background = pygame.Surface(settings['SCREEN_RESOLUTION'])
     for i in range(0, settings['SCREEN_RESOLUTION'][0], background_tile.get_width()):
         for n in range(0, settings['SCREEN_RESOLUTION'][1], background_tile.get_height()):
@@ -110,7 +108,10 @@ def load_font(fontname, size):
 
 def play_music(musicname):
     """
-    Load a pygame music object from a music file and play it if config.PLAY_MUSIC is True.
+    Load a pygame music object from a music file and play it.
+
+    Called inside of gamestates.py as background music if and only if the PLAY_MUSIC setting is True
+
     :param musicname: The name of the music file to be loaded and played, including extension.
         must be located in /Music
     """
@@ -125,6 +126,7 @@ def play_music(musicname):
 def blit_text(text, screen, position):
     """
     Automatically blit text to a certain position on the screen.
+
     :param text: the pygame text to be blitted
     :param screen: the screen to blit to
     :param position: the vertical position to blit to
@@ -133,7 +135,7 @@ def blit_text(text, screen, position):
 
     rect = text.get_rect()
     rect.centerx = constants.CENTER[0]
-    rect.centery = .125*(position + 1)*settings['SCREEN_RESOLUTION'][1]
+    rect.centery = .125*(position + 1)*constants.HEIGHT
     screen.blit(text, rect)
 
     return rect

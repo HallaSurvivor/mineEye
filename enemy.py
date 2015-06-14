@@ -1,5 +1,5 @@
 """
-Exports the Enemy class that the User actually controls.
+Exports the Enemy classes that the Hero has to battle.
 """
 from math import hypot
 import pygame
@@ -12,13 +12,35 @@ class Enemy(h.Sprite):
     """
     An Enemy superclass meant to be subclassed by individual enemies.
 
-    contact_damage - the amount of damage the enemy does when the player touches it.
+    hp:
+        the health the enemy has
 
-    attack_range - the number of pixels away before the ranged attack takes place
+    speed:
+        the enemy's speed in px/tick
 
-    projectile_speed - the number of pixels per tick the projectile moves
+    contact_damage:
+        the amount of damage the enemy does when the player touches it.
 
-    attack_period - the number of frames to wait before attacking again.
+    is_melee/is_ranged:
+        A flag for how the enemy damages the user.
+        The correct flag is set to True in the individual Enemy subclass
+
+    clips:
+        boolean for if the enemy clips.
+        True if it doesn't move through walls
+        False if it does move through walls
+
+    attack_range:
+        the number of pixels away before the ranged attack takes place
+
+    projectile_speed:
+        the number of pixels per tick the projectile moves
+
+    projectile_damage:
+        the amount of damage a projectile does
+
+    attack_period:
+        the number of frames to wait before attacking again.
     """
 
     hp = 100
@@ -41,8 +63,11 @@ class Enemy(h.Sprite):
         """
         create the class.
 
-        note damage_player_on_touch means that when the player is hitting the bad guy damage is done. T
-        his would be true of a brawler type character
+        Cooldown serves to prevent an enemy from firing
+        or attacking every single tick. It increases by
+        the attack_period every tick that it shoots,
+        and then decreases by 1 every tick it doesn't shoot.
+        It only shoots when the cooldown == 0.
         """
         super().__init__()
 
@@ -51,12 +76,7 @@ class Enemy(h.Sprite):
         self.world = None
 
         self.current_hp = self.hp
-
-        self.melee_attack_cooldown = 0
-
-        self.ranged_attack_cooldown = 0
-
-        self.damage_player_on_touch = True
+        self.cooldown = 0
 
         self.rect = self.image.get_rect()
 
@@ -108,7 +128,6 @@ class Enemy(h.Sprite):
         return dist
 
 
-
 class Turret(Enemy):
     """
     A stationary turret that fires projectiles at the player.
@@ -133,7 +152,7 @@ class Turret(Enemy):
 
         proj = entities.Projectile(h.load('bullet.png'), self.rect.center, changex, changey, self.projectile_damage)
 
-        self.ranged_attack_cooldown += self.attack_period
+        self.cooldown += self.attack_period
 
         return proj
 

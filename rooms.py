@@ -1,7 +1,14 @@
 """
-Adds the Room class which stores data about any room that can be called via random generation.
+Adds the room_dict dictionary, storing the room layouts, as well as the Room() class, which parses those layouts
 
-Adds individual subclasses of Room with information specific to each room.
+room_dict is a dictionary of lists of strings, where each list begins
+with a header describing the direction of motion in the room.
+This list of strings is then parsed character by character to create the
+walls, enemies, and chests that make up the world.
+
+World is a Room created by putting groups of room_dict items next to each other.
+This larger room, comprised of a semi-random selection of the rooms inside room_dict,
+is what makes up the Hero's world. The semi-random generation takes place inside gamestates.py
 """
 import random
 from math import hypot
@@ -190,13 +197,18 @@ class Room(object):
     """
     A superclass to define rooms.
 
-    block_list is a sprite group comprising all blocks in a given level instance
-    enemy_list is a sprite group comprising all the enemies in a given level instance
+    Sprite Groups:
+        block_list comprises all the walls
+        chest_list comprises all the chests
+        drops_list comprises all the weapons/items on the floor
+        enemy_list comprises all the enemies
+        enemy_projectile_list comprises all the shots fired by the enemy
+        hero_projectile_list comprises all the shots fired by the hero
+        bomb_list comprises all the bombs thrown by the hero
+
+        all_sprite_list comprises all the sprites that move alongside the world.
 
     background is a pygame Surface that is displayed behind the level
-
-    world_shift_x represents how far to the left the world has moved to give a sense of motion
-    world_shift_y represents how far up the world has moved to give a sense of motion
 
     region is a value representing what part of the mine the hero is in.
         This effects color scheme, block types, potential enemies, etc.
@@ -206,26 +218,15 @@ class Room(object):
         P is spike
         B is a breakable wall
         R is a turret
+        G is a ghost
         T is a block that stops the timer
         W is a weapon chest
         D is door <- IMPORTANT, you need a door at the top and bottom to make the logic work
     """
 
-    block_list = None
-    chest_list = None
-    drops_list = None
-    enemy_list = None
-    enemy_projectile_list = None
-    hero_projectile_list = None
-    bomb_list = None
-
-    background = None
-
-    region = None
-
     def __init__(self):
         """
-        Set the blocklist and enemylist to be sprite groups, and the background to be a surface.
+        Create the room based on a certain room_array
 
         room_array is a list of strings that will be rendered into the room
         """
@@ -239,6 +240,7 @@ class Room(object):
         self.bomb_list = pygame.sprite.Group()
 
         self.background = pygame.Surface(settings['SCREEN_RESOLUTION'])
+        self.region = None
 
         self.xspeed = 0
         self.yspeed = 0
@@ -252,6 +254,8 @@ class Room(object):
 
     def update(self, hero):
         """
+        Cause all of the effects and changes that take place between game ticks
+
         :param hero: An instance of the Hero class to pass to self.move_world()
         """
         # Calculate the effect of gravity
@@ -296,6 +300,7 @@ class Room(object):
     def draw(self, screen):
         """
         Draw everything in the room
+
         :param screen: A pygame surface to blit everything onto.
         """
         screen.blit(self.background, (0, 0))
@@ -309,8 +314,14 @@ class Room(object):
 
     def move_world(self, hero, x, y):
         """
-        Move all of the blocks by x and y,
-        Check for collisions.
+        Move the world based on Hero speed and user input
+
+        first move by x,
+        check for collisions,
+        stop the world moving if the hero collides with the world,
+        damage the hero if standing on a spike,
+        repeat for moving by y
+
         :param hero: An instance of the Hero class that walls can collide with.
         :param x: The Int of how far to shift the world's x
         :param y: the Int of how far to shift the world's y
@@ -383,6 +394,7 @@ class Room(object):
     def cause_contact_damage(self, hero):
         """
         Damage the hero if he collides with an enemy dealing contact damage
+
         :param hero: A hero to damage
         """
         enemy_hit_list = pygame.sprite.spritecollide(hero, self.enemy_list, False)
@@ -402,6 +414,7 @@ class Room(object):
     def check_chests(self, hero):
         """
         Check for a collision between the chest and a hero and spawn the proper item if a collision happens.
+
         :param hero: The hero to check against.
         """
         hit_list = pygame.sprite.spritecollide(hero, self.chest_list, False)
@@ -444,22 +457,25 @@ class Room(object):
 
     def cause_ranged_attacks(self, hero):
         """
-        Cause every enemy with a ranged attack to attack the hero, if in range
+        Cause every enemy with a ranged attack to attack the hero, if within range
+
         :param hero: The hero to target
         """
         for e in self.enemy_list:
             distance = hypot(e.rect.centerx - hero.rect.centerx, e.rect.centery - hero.rect.centery)
-            if e.is_ranged and distance < e.attack_range:
-                if e.ranged_attack_cooldown == 0:
+            if e.is_ranged and distance <= e.attack_range:
+                if e.cooldown == 0:
                     proj = e.ranged_attack(hero)
                     self.enemy_projectile_list.add(proj)
                     self.all_sprites.add(proj)
                 else:
-                    e.ranged_attack_cooldown -= 1
+                    e.cooldown -= 1
 
     def destroy_projectiles(self):
         """
-        Check collisions between projectiles and walls, and destroy projectiles appropriately.
+        Destroy projectiles that should be destroyed.
+
+        This includes projectiles hitting walls, and hero projectiles hitting enemy projectiles
         """
         for block in self.block_list:
             hit_list = pygame.sprite.spritecollide(block, self.enemy_projectile_list, False)
@@ -467,7 +483,7 @@ class Room(object):
                 proj.kill()
 
         for proj in self.enemy_projectile_list:
-            hit_list = pygame.sprite.spritecollide(proj, self.hero_projectile_list, False) # Remove the hero proj too
+            hit_list = pygame.sprite.spritecollide(proj, self.hero_projectile_list, False)
             if len(hit_list) > 0:
                 proj.kill()
             for hero_proj in hit_list:
@@ -475,7 +491,13 @@ class Room(object):
 
     def det_bombs(self, hero):
         """
-        Check collisions between bombs and walls, and have them stick until they detonate.
+        Check collisions between bombs and walls, and have them detonate, damaging things within their explosion radius.
+
+        Destroy breakable walls
+        Damage enemies
+        If the hero doesn't have bomb_control:
+            Destroy chests
+            Damage the Hero
         """
         for bomb in self.bomb_list:
             hit_list = pygame.sprite.spritecollide(bomb, self.block_list, False)
@@ -518,6 +540,7 @@ class Room(object):
     def cause_projectile_damage(self, hero):
         """
         Cause damage to the player from projectiles
+
         :param hero: The hero to check against the projectiles, and damage for a hit.
         """
         hit_list = pygame.sprite.spritecollide(hero, self.enemy_projectile_list, True)
@@ -527,6 +550,7 @@ class Room(object):
     def setspeed(self, setx, sety):
         """
         Set a new x and y speed instead of changing the current one.
+
         :param setx: Int representing the new self.xspeed
         :param sety: Int representing the new self.yspeed
         """
@@ -538,6 +562,7 @@ class Room(object):
     def changespeed(self, changex, changey):
         """
         Change the Room's velocity vector.
+
         :param changex: Int representing the amount by which to change self.xspeed
         :param changey: Int representing the amount by which to change self.yspeed
         """
@@ -547,6 +572,22 @@ class Room(object):
     def parse_room_array(self, xstart, ystart):
         """
         Turn a list of strings into an array of walls and enemies.
+
+        Move top -> bottom through the rows, and go left -> through each character in a given row
+
+        Add a block, enemy, chest, etc. with the characteristics below at a given position
+        for each character in the room. Each block unit is 64x64 px
+
+        KEY for room_array:
+        S is stone
+        P is spike
+        B is a breakable wall
+        R is a turret
+        G is a ghost
+        T is a block that stops the timer
+        W is a weapon chest
+        D is door <- IMPORTANT, you need a door at the top and bottom to make the logic work
+
         :param xstart: Int representing the starting x location
         :param ystart: Int representing the starting y location
         """

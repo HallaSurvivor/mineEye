@@ -1,5 +1,7 @@
 """
-Exports the Hero class that the User actually controls.
+Exports the Heroes that the User can control as a list.
+
+All Heroes subclass Hero, which in turn subclasses pygame Sprites.
 """
 import os
 import pygame
@@ -13,29 +15,49 @@ class Hero(pygame.sprite.Sprite):
     """
     A superclass to be inherited by all the possible Heroes that the user can control.
 
-    name is the name of the hero to be displayed on screen during hero selection
+    all of the base stats can be modified by items, and so are recreated as actual
+    values inside of __init__()
 
-    description is a description of the hero to be displayed during hero selection
+    name:
+        the name of the hero to be displayed on screen during hero selection
 
-    base_hp is the base health of the heroes
+    description:
+        a description of the hero to be displayed during hero selection
 
-    base_speed is the base speed of the heroes
+    base_hp:
+        the base health of the hero
 
-    base_jump_height is the base jump height of the heroes
+    base_damage_multiplier:
+        the amount by which to multiply a weapon's power when used
 
-    base_double_jump_height is the base height of the second jump for those heroes who can
+    base_speed:
+        the base left/right speed of the hero
 
-    self.image is the picture associated with the Hero, should be 48x48
+    base_jump_height:
+        the base upward speed of the hero
 
-    self.world is the world in which the hero is placed
+    base_double_jump_height:
+        the base upward speed for the second jump for those heroes who can
 
-    self.hp is the current health of the hero
+    self.image:
+        the pygame Sprite associated with the Hero, should be 48x48
 
-    self.can_doublejump is True if the hero can doublejump. False by default
+    self.world:
+        the world in which the hero is placed
 
-    self.can_take_falldamage is False if the hero never takes fall damage. True by default
+    self.hp:
+        the current health of the hero
 
-    self.rect is the Hero's bounding box
+    self.can_doublejump:
+        True if the hero can doublejump.
+        False by default
+
+    self.can_take_falldamage:
+        False if the hero never takes fall damage.
+        True by default
+
+    self.rect:
+        the Hero's bounding box
         .rect.y is the box's top left corner's y position
         .rect.x is the box's top left corner's x position
 
@@ -46,6 +68,7 @@ class Hero(pygame.sprite.Sprite):
     description = ""
 
     base_hp = 500
+    base_damage_multiplier = 1
     base_speed = 7
     base_jump_height = 12
     base_double_jump_height = 0
@@ -65,18 +88,23 @@ class Hero(pygame.sprite.Sprite):
 
     def __init__(self):
         """
-        create the class.
+        create the class, and create local variables based on the base variables that can be modified.
         """
         super().__init__()
 
         self.world = None
 
+        # Mutable variables that items, etc. can change
         self.hp = self.base_hp
+        self.actual_damage_multiplier = self.base_damage_multiplier
         self.actual_speed = self.base_speed
         self.jump_height = self.base_jump_height
         self.double_jump_height = self.base_double_jump_height
         self.take_falldamage = self.can_take_falldamage
 
+        self.bombs = self.base_bomb_count
+
+        # Flags to help control motion
         self.start_jump = False
         self.start_double_jump = False
 
@@ -88,14 +116,14 @@ class Hero(pygame.sprite.Sprite):
         self.moving_right = False
         self.last_motion = 'right'
 
+        # A timer variable to control when it's running
         self.run_timer = True
 
+        # Sprite and PygAnim stuff
         self.animation_obj = {}
         self.conductor = None
         self.rect = pygame.Rect(0, 0, 48, 48)
         self.rect.center = constants.CENTER
-
-        self.bombs = self.base_bomb_count
 
     def create_animation_dict(self):
         """
@@ -139,6 +167,10 @@ class Hero(pygame.sprite.Sprite):
         self.conductor = pyganim.PygConductor(self.animation_obj)
 
     def draw(self, screen):
+        """
+        Draw the animated Hero to the screen in a certain way based on user input
+        :param screen: The screen on which to draw
+        """
         if self.jump_count >= 4:
             self.jump_count = 0
             self.start_jump = False
@@ -190,14 +222,15 @@ class Hero(pygame.sprite.Sprite):
             x = -13
         else:
             x = 0
-        bomb = entities.Bomb(h.load('bomb.png'), self.rect.center, x, -20, controlled=self.bomb_control)
+        bomb = entities.Bomb(h.load('bomb.png'), self.rect.center, x, -20)
         return bomb
 
     def reset_all(self):
         """
-        Resets the speed, jump_height, double_jump_height, and bomb_count to the hero's baseline.
+        Resets all mutable variables to the hero's baseline.
         """
         self.hp = self.base_hp
+        self.actual_damage_multiplier = self.base_damage_multiplier
         self.actual_speed = self.base_speed
         self.jump_height = self.base_jump_height
         self.double_jump_height = self.base_double_jump_height
