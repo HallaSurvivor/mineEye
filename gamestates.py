@@ -172,6 +172,9 @@ class Menu(GameState):
                         else:
                             self.manager.go_to(self.selections[self.selected])
 
+                if self.title == 'Custom Seeded Maps' and e.key == pygame.K_BACKSPACE:
+                    self.manager.go_to(AddSeed(self.selected))
+
 
 class TitleScreen(Menu):
     """
@@ -197,8 +200,8 @@ class PlayerMaps(Menu):
     certain "good" maps to more directly compare skill to other players.
     """
     title = 'Custom Seeded Maps'
+    descriptions = ['', '', '', '', '', 'use backspace to change an existing seed']
     options = ['EMPTY'] * 6
-
 
     def __init__(self):
         super().__init__()
@@ -216,6 +219,9 @@ class PlayerMaps(Menu):
 
 
 class AddSeed(Menu):
+    """
+    Provide a means of adding/changing a seed to use to spawn a world.
+    """
     title = 'Add Custom Seeds'
     options = ['Push Space To Edit Seed:', 'Save']
 
