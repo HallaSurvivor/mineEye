@@ -13,7 +13,6 @@ import rooms
 import hero
 
 pygame.init()
-_state_cache = {}
 
 
 class GameState(object):
@@ -60,7 +59,7 @@ class GameStateManager(object):
     def __init__(self):
         self.state = None
         self.done = False
-        self.go_to(TitleScreen)
+        self.go_to(TitleScreen())
 
     def go_to(self, gamestate):
         """
@@ -68,16 +67,8 @@ class GameStateManager(object):
 
         If the new gamestate has a music file associated with it, play that music.
         """
-        global _state_cache
-        new_state = _state_cache.get(gamestate)
-        if new_state is None:
-            if type(gamestate) is tuple:
-                new_state = gamestate[0](*gamestate[1:])
-            else:
-                new_state = gamestate()
-            _state_cache[gamestate] = new_state
 
-        self.state = new_state
+        self.state = gamestate
         self.state.manager = self
 
         if gamestate.musicfile and settings['PLAY_MUSIC']:
@@ -153,7 +144,7 @@ class Menu(GameState):
                         self.selected -= 1
 
                 elif e.key == settings['LEFT'] or e.key == pygame.K_LEFT:
-                    self.manager.go_to(TitleScreen)
+                    self.manager.go_to(TitleScreen())
 
                 elif e.key == pygame.K_SPACE or e.key == settings['RIGHT'] or e.key == pygame.K_RIGHT:
                     if self.selections is not None:
@@ -185,7 +176,7 @@ class TitleScreen(Menu):
     def __init__(self):
         super().__init__()
 
-        self.selections = [(ChooseHero, ('timer', True)), PlayerMaps1, ChangeSettings, Quit]
+        self.selections = [ChooseHero(timer=True), PlayerMaps1(), ChangeSettings(), Quit()]
 
 
 class PlayerMaps1(Menu):
@@ -197,8 +188,7 @@ class PlayerMaps1(Menu):
     """
 
     title = 'Custom Seeded Maps'
-    options = ['EMPTY'] * 5
-    options.append('Next Page')
+    options = ['EMPTY'] * 6
 
     def __init__(self):
         super().__init__()
@@ -206,32 +196,7 @@ class PlayerMaps1(Menu):
         self.selections = []
         for option in self.options:
             if option == 'EMPTY':
-                self.selections.append(AddSeed)
-            elif option == 'Next Page':
-                self.selections.append(PlayerMaps2)
-
-
-class PlayerMaps2(Menu):
-    """
-    A place for the player to store maps based on certain seeds. (page 2)
-
-    This helps with speed running by allowing the user to save/add
-    certain "good" maps to more directly compare skill to other players.
-    """
-
-    title = 'Custom Seeded Maps'
-    options = ['EMPTY'] * 5
-    options.append('Last Page')
-
-    def __init__(self):
-        super().__init__()
-
-        self.selections = []
-        for option in self.options:
-            if option == 'EMPTY':
-                self.selections.append(AddSeed)
-            elif option == 'Last Page':
-                self.selections.append(PlayerMaps1)
+                self.selections.append(AddSeed())
 
 
 class AddSeed(GameState):
