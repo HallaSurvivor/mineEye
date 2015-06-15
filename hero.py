@@ -39,6 +39,10 @@ class Hero(pygame.sprite.Sprite):
     base_double_jump_height:
         the base upward speed for the second jump for those heroes who can
 
+    base_bomb_refill_requirement:
+        the base value for how many enemies need to be killed before
+        the hero recovers a bomb
+
     self.image:
         the pygame Sprite associated with the Hero, should be 48x48
 
@@ -72,6 +76,7 @@ class Hero(pygame.sprite.Sprite):
     base_speed = 7
     base_jump_height = 12
     base_double_jump_height = 0
+    base_bomb_refill_requirement = 4
 
     can_doublejump = False
 
@@ -102,7 +107,10 @@ class Hero(pygame.sprite.Sprite):
         self.double_jump_height = self.base_double_jump_height
         self.take_falldamage = self.can_take_falldamage
 
+        self.max_bombs = self.base_bomb_count
         self.bombs = self.base_bomb_count
+        self.bomb_refill_counter = 0
+        self.bomb_refill_requirement = self.base_bomb_refill_requirement
 
         # Flags to help control motion
         self.start_jump = False
@@ -257,6 +265,22 @@ class Hero(pygame.sprite.Sprite):
         :param amount: A multiplier to change doublejump height
         """
         self.double_jump_height = amount*self.base_double_jump_height
+
+    def increment_bomb_counter(self):
+        """
+        Add 1 to the bomb counter, recover a bomb if the counter fills
+        """
+        self.bomb_refill_counter += 1
+        if self.bomb_refill_counter >= self.bomb_refill_requirement:
+            self.bomb_refill_counter = 0
+            self.recover_bomb()
+
+    def recover_bomb(self):
+        """
+        If the bombs are not full, add another bomb.
+        """
+        if self.bombs < self.max_bombs:
+            self.bombs += 1
 
 
 class Demo(Hero):

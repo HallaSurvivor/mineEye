@@ -493,7 +493,7 @@ class InGame(GameState):
                     if self.hero.melee_weapon is not None:
                         for e in self.world.enemy_list:
                             if e.get_dist() <= self.hero.melee_weapon.range:
-                                e.damage(self.hero.melee_weapon.power)
+                                e.damage(self.hero.melee_weapon.power * self.hero.actual_damage_multiplier)
 
                 elif event.key == settings['RANGED']:
                     pass
@@ -542,7 +542,7 @@ class InGame(GameState):
                             if dist <= 500:
                                 print(dist)
                             if dist <= self.hero.melee_weapon.range:
-                                e.damage(self.hero.melee_weapon.power)
+                                e.damage(self.hero.melee_weapon.power * self.hero.actual_damage_multiplier)
                 elif event.button == 3:
                     pass
             else:

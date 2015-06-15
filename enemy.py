@@ -118,6 +118,7 @@ class Enemy(h.Sprite):
 
         if self.current_hp <= 0:
             self.kill()
+            hero.increment_bomb_counter()
 
     def get_dist(self):
         """
