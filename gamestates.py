@@ -13,6 +13,15 @@ import rooms
 import hero
 
 pygame.init()
+try:
+    f = open('seeds', 'rb')
+    seeds = pickle.loads(f.read())
+    f.close()
+except FileNotFoundError:
+    seeds = [''] * 6
+    f = open('seeds', 'wb')
+    f.write(pickle.dumps(seeds))
+    f.close()
 
 
 class GameState(object):
@@ -181,7 +190,7 @@ class TitleScreen(Menu):
 
 class PlayerMaps1(Menu):
     """
-    A place for the player to store maps based on certain seeds. (page 1)
+    A place for the player to store maps based on certain seeds.
 
     This helps with speed running by allowing the user to save/add
     certain "good" maps to more directly compare skill to other players.
@@ -189,18 +198,69 @@ class PlayerMaps1(Menu):
 
     title = 'Custom Seeded Maps'
     options = ['EMPTY'] * 6
+    for index, seed in enumerate(seeds):
+        if seed != '':
+            options[index] = seed
 
     def __init__(self):
         super().__init__()
 
         self.selections = []
-        for option in self.options:
+        for index, option in enumerate(self.options):
             if option == 'EMPTY':
-                self.selections.append(AddSeed())
+                self.selections.append(AddSeed(index))
+            else:
+                self.selections.append(ChooseHero(timer=True, seed=option))
 
 
-class AddSeed(GameState):
-    pass
+class AddSeed(Menu):
+    title = 'Add Custom Seeds'
+    options = ['Push Space To Edit Seed:', 'Save']
+
+    def __init__(self, index):
+        super().__init__()
+        self.modifying = False
+        self.index = index
+        self.seed = ""
+        self.descriptions = [self.seed, ""]
+
+    def handle_events(self, events):
+        """
+        Override the default event checking in order to check for any key press.
+        """
+        self.descriptions = [self.seed, ""]
+        for e in events:
+            if e.type == pygame.KEYDOWN:
+                if not self.modifying:
+                    if e.key == settings['DOWN'] or e.key == pygame.K_DOWN:
+                        if self.selected < self.list_size:
+                            self.selected += 1
+                    elif e.key == settings['UP'] or e.key == pygame.K_UP:
+                        if self.selected > 0:
+                            self.selected -= 1
+
+                    elif e.key == settings['LEFT'] or e.key == pygame.K_LEFT:
+                        self.manager.go_to(TitleScreen())
+
+                    elif e.key == pygame.K_SPACE or e.key == settings['RIGHT'] or e.key == pygame.K_RIGHT:
+                        if self.selected == 0:
+                            self.options[self.selected] = ">" + self.options[self.selected] + ">"
+                            self.modifying = True
+                        else:
+                            seeds[self.index] = self.seed
+                            f = open('seeds', 'wb')
+                            f.write(pickle.dumps(seeds))
+                            f.close()
+                else:
+                    if e.key == pygame.K_ESCAPE or e.key == pygame.K_SPACE:
+                        self.modifying = False
+                        self.options[self.selected] = self.options[self.selected][1:-1]
+
+                    else:
+                        if True:  # Eventually, check for alphanumeric values
+                            self.seed += pygame.key.name(e.key)
+            else:
+                pass
 
 
 class ChooseHero(Menu):
@@ -212,11 +272,11 @@ class ChooseHero(Menu):
     options = [player.name for player in hero.hero_list]
     descriptions = [player.description for player in hero.hero_list]
 
-    def __init__(self, timer=False):
+    def __init__(self, timer=False, seed=None):
         super().__init__()
         self.timer = timer
-
-        self.selections = [InGame(timer=self.timer, chosen_hero=player) for player in hero.hero_list]
+        self.seed = seed
+        self.selections = [InGame(timer=self.timer, chosen_hero=player, seed=self.seed) for player in hero.hero_list]
 
 
 class ChangeSettings(Menu):
