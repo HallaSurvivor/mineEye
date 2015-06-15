@@ -14,7 +14,6 @@ import hero
 
 pygame.init()
 
-
 class GameState(object):
     """
     A superclass for all the states the game can be in.
@@ -551,11 +550,20 @@ class InGame(GameState):
     def die(self):
         self.manager.go_to(DeathScreen())
 
-    def generate_world(self, n):
+    def generate_world(self, n, seed=None):
         """
-        Generate the world by randomly selecting n rooms.
+        Generate the world by pseudo-randomly selecting n rooms.
+
         :param n: The Int number of rooms to randomly choose
+        :param seed: The seed to use to generate the world. If none,
+            a random seed is generated.
         """
+
+        if seed is None:
+            seed = random.random()
+
+        random.seed(seed)
+
         room_list = []
         possible_rooms = dict([(k, v) for k, v in rooms.room_dict.items() if k not in
                               ["StartingRoom", "EndingRoom"]])
@@ -567,12 +575,11 @@ class InGame(GameState):
         move_right_counter = 0
 
         total_displacement = 0
-
         for i in range(n):
             matched = False
             while not matched:
                 possible_next_room = random.choice(list(possible_rooms.values()))
-
+                print(possible_next_room)
                 if possible_next_room[0] == rooms.MoveDown:
                     if move_down_counter <= 3:
                         room_list.append(possible_next_room)

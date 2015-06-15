@@ -26,8 +26,7 @@ room_dict = {
     # A dictionary of all the rooms to randomly select from.
     # Each entry takes the form:
     # ROOM_NAME: [PrimaryPlayerMotion, *room_layout]
-    # The First room must be StartingRoom,
-    # The Second room must be EndingRoom
+    # StartingRoom and EndingRoom must exist somewhere
     "StartingRoom": [MoveRight,
                      "SSSSSSSS",
                      "S      S",
