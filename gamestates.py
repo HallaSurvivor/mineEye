@@ -205,7 +205,7 @@ class PlayerMaps(Menu):
 
     def __init__(self):
         super().__init__()
-
+        self.options = ['EMPTY'] * 6
         for index, seed in enumerate(seeds):
             if seed != '':
                 self.options[index] = seed
