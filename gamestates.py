@@ -13,6 +13,8 @@ import rooms
 import hero
 
 pygame.init()
+_state_cache = {}
+
 
 class GameState(object):
     """
@@ -58,7 +60,7 @@ class GameStateManager(object):
     def __init__(self):
         self.state = None
         self.done = False
-        self.go_to(TitleScreen())
+        self.go_to(TitleScreen)
 
     def go_to(self, gamestate):
         """
@@ -66,7 +68,16 @@ class GameStateManager(object):
 
         If the new gamestate has a music file associated with it, play that music.
         """
-        self.state = gamestate
+        global _state_cache
+        new_state = _state_cache.get(gamestate)
+        if new_state is None:
+            if type(gamestate) is tuple:
+                new_state = gamestate[0](*gamestate[1:])
+            else:
+                new_state = gamestate()
+            _state_cache[gamestate] = new_state
+
+        self.state = new_state
         self.state.manager = self
 
         if gamestate.musicfile and settings['PLAY_MUSIC']:
@@ -142,7 +153,7 @@ class Menu(GameState):
                         self.selected -= 1
 
                 elif e.key == settings['LEFT'] or e.key == pygame.K_LEFT:
-                    self.manager.go_to(TitleScreen())
+                    self.manager.go_to(TitleScreen)
 
                 elif e.key == pygame.K_SPACE or e.key == settings['RIGHT'] or e.key == pygame.K_RIGHT:
                     if self.selections is not None:
@@ -169,12 +180,62 @@ class TitleScreen(Menu):
     musicfile = 'O_Fortuna.mp3'
 
     title = 'Press Space to begin!'
-    options = ['Start!', 'Time Trial!', 'Settings!', 'Quit!']
+    options = ['Start!', 'My Maps', 'Settings!', 'Quit!']
 
     def __init__(self):
         super().__init__()
 
-        self.selections = [ChooseHero(), ChooseHero(timer=True), ChangeSettings(), Quit()]
+        self.selections = [(ChooseHero, ('timer', True)), PlayerMaps1, ChangeSettings, Quit]
+
+
+class PlayerMaps1(Menu):
+    """
+    A place for the player to store maps based on certain seeds. (page 1)
+
+    This helps with speed running by allowing the user to save/add
+    certain "good" maps to more directly compare skill to other players.
+    """
+
+    title = 'Custom Seeded Maps'
+    options = ['EMPTY'] * 5
+    options.append('Next Page')
+
+    def __init__(self):
+        super().__init__()
+
+        self.selections = []
+        for option in self.options:
+            if option == 'EMPTY':
+                self.selections.append(AddSeed)
+            elif option == 'Next Page':
+                self.selections.append(PlayerMaps2)
+
+
+class PlayerMaps2(Menu):
+    """
+    A place for the player to store maps based on certain seeds. (page 2)
+
+    This helps with speed running by allowing the user to save/add
+    certain "good" maps to more directly compare skill to other players.
+    """
+
+    title = 'Custom Seeded Maps'
+    options = ['EMPTY'] * 5
+    options.append('Last Page')
+
+    def __init__(self):
+        super().__init__()
+
+        self.selections = []
+        for option in self.options:
+            if option == 'EMPTY':
+                self.selections.append(AddSeed)
+            elif option == 'Last Page':
+                self.selections.append(PlayerMaps1)
+
+
+class AddSeed(GameState):
+    pass
 
 
 class ChooseHero(Menu):
@@ -284,13 +345,22 @@ class InGame(GameState):
 
     musicfile = 'Pathetique.mp3'
 
-    def __init__(self, timer=False, chosen_hero=hero.Demo):
+    def __init__(self, timer=False, chosen_hero=hero.Demo, seed=None):
         """
         Instantiate the primary Game State.
+
         :param timer: A boolean. True if a timer is to be displayed in the top right, False if not.
+        :param seed: The seed to use to generate the world.
         """
         super().__init__()
         self.manager = None
+
+        if seed is None:
+            self.seed = random.random()
+        else:
+            self.seed = seed
+
+        random.seed(self.seed)
 
         self.all_sprites_list = pygame.sprite.Group()
 
@@ -550,7 +620,7 @@ class InGame(GameState):
     def die(self):
         self.manager.go_to(DeathScreen())
 
-    def generate_world(self, n, seed=None):
+    def generate_world(self, n):
         """
         Generate the world by pseudo-randomly selecting n rooms.
 
@@ -559,14 +629,8 @@ class InGame(GameState):
             a random seed is generated.
         """
 
-        if seed is None:
-            seed = random.random()
-
-        random.seed(seed)
-
         room_list = []
-        possible_rooms = dict([(k, v) for k, v in rooms.room_dict.items() if k not in
-                              ["StartingRoom", "EndingRoom"]])
+        possible_rooms = [v for k, v in sorted(rooms.room_dict.items()) if k not in ["StartingRoom", "EndingRoom"]]
 
         room_list.append(rooms.room_dict["StartingRoom"])
 
@@ -578,8 +642,8 @@ class InGame(GameState):
         for i in range(n):
             matched = False
             while not matched:
-                possible_next_room = random.choice(list(possible_rooms.values()))
-                print(possible_next_room)
+                possible_next_room = random.choice(possible_rooms)
+
                 if possible_next_room[0] == rooms.MoveDown:
                     if move_down_counter <= 3:
                         room_list.append(possible_next_room)
@@ -615,7 +679,7 @@ class InGame(GameState):
 
         room_list.append(rooms.room_dict["EndingRoom"])
 
-        self.world = rooms.World(room_list)
+        self.world = rooms.World(room_list, self.seed)
 
 
 class DeathScreen(GameState):

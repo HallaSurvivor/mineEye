@@ -185,7 +185,7 @@ def create_menu(screen, title, options, descriptions=None,
             option_surf = option_font.render(option, 1, option_color)
             rect = blit_text(option_surf, screen, i)
 
-            description_surf = description_font.render(descriptions[i -1], 1, description_color)
+            description_surf = description_font.render(descriptions[i - 1], 1, description_color)
             desc_rect = description_surf.get_rect()
             desc_rect.top = rect.bottom
             desc_rect.centerx = rect.centerx

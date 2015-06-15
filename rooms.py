@@ -223,12 +223,20 @@ class Room(object):
         D is door <- IMPORTANT, you need a door at the top and bottom to make the logic work
     """
 
-    def __init__(self):
+    def __init__(self, seed=None):
         """
         Create the room based on a certain room_array
 
         room_array is a list of strings that will be rendered into the room
+
+        :param seed: The seed to use to generate the world. Passed from
+            the generateworld() operation to allow for users to save everything
+            about a room.
         """
+
+        self.seed = seed
+        random.seed(self.seed)
+
         self.all_sprites = pygame.sprite.Group()
         self.block_list = pygame.sprite.Group()
         self.chest_list = pygame.sprite.Group()
@@ -648,12 +656,19 @@ class World(Room):
     The complete world to be drawn to the screen.
     """
 
-    def __init__(self, rooms):
+    def __init__(self, rooms, seed=None):
         """
         Initialize the world.
+
+        * Cycle through the first door block at the bottom of the last room,
+        * Then find the first door block at the top of the new room,
+        * Finally add a bunch of blank characters (spaces) to offset the new room until
+            the doors line up
+
         :param rooms: A list of all the Room objects in the order they appear.
+        :param seed: The seed to use in random generation.
         """
-        super().__init__()
+        super().__init__(seed=seed)
         self.background = h.create_background(h.load('background.png'))
 
         self.room_array = []
