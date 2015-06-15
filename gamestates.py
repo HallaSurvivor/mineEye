@@ -13,6 +13,7 @@ import rooms
 import hero
 
 pygame.init()
+
 try:
     f = open('seeds', 'rb')
     seeds = pickle.loads(f.read())
@@ -185,25 +186,26 @@ class TitleScreen(Menu):
     def __init__(self):
         super().__init__()
 
-        self.selections = [ChooseHero(timer=True), PlayerMaps1(), ChangeSettings(), Quit()]
+        self.selections = [ChooseHero(timer=True), PlayerMaps(), ChangeSettings(), Quit()]
 
 
-class PlayerMaps1(Menu):
+class PlayerMaps(Menu):
     """
     A place for the player to store maps based on certain seeds.
 
     This helps with speed running by allowing the user to save/add
     certain "good" maps to more directly compare skill to other players.
     """
-
     title = 'Custom Seeded Maps'
     options = ['EMPTY'] * 6
-    for index, seed in enumerate(seeds):
-        if seed != '':
-            options[index] = seed
+
 
     def __init__(self):
         super().__init__()
+
+        for index, seed in enumerate(seeds):
+            if seed != '':
+                self.options[index] = seed
 
         self.selections = []
         for index, option in enumerate(self.options):
@@ -247,10 +249,12 @@ class AddSeed(Menu):
                             self.options[self.selected] = ">" + self.options[self.selected] + ">"
                             self.modifying = True
                         else:
+                            global seeds
                             seeds[self.index] = self.seed
                             f = open('seeds', 'wb')
                             f.write(pickle.dumps(seeds))
                             f.close()
+                            self.manager.go_to(PlayerMaps())
                 else:
                     if e.key == pygame.K_ESCAPE or e.key == pygame.K_SPACE:
                         self.modifying = False
