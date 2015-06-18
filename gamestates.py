@@ -416,6 +416,8 @@ class InGame(GameState):
     def draw_hud(self, screen):
         """
         Draw the user Heads Up Display to the screen, includes HP, timer, Ammo, etc.
+
+        If the timer ends, go to WinScreen.
         :param screen: The screen on which to draw
         """
         # Draw the HP Bar
@@ -452,8 +454,8 @@ class InGame(GameState):
             screen.blit(self.hero.ranged_weapon.top_sprite.image, c.RANGED_POS)
 
         # Draw the timer
-        if self.timer:
-            if self.hero.run_timer:
+        if self.hero.run_timer:
+            if self.timer:
                 self.elapsed_time = datetime.datetime.now() - self.start_time
                 formatted_elapsed_time = self.elapsed_time.total_seconds()
 
@@ -463,14 +465,8 @@ class InGame(GameState):
 
                 time_pos = (c.TOP_RIGHT[0] - elapsed_time_display.get_rect().width - 16, 0)
                 screen.blit(elapsed_time_display, time_pos)
-            else:
-                formatted_elapsed_time = self.elapsed_time.total_seconds()
-                elapsed_time_display = h.load_font('BLKCHCRY.TTF', 48).render(
-                    "Final Time: {ElapsedTime}".format(ElapsedTime=formatted_elapsed_time), 1, c.GREEN
-                )
-                elapsed_time_display_rect = elapsed_time_display.get_rect()
-                elapsed_time_display_rect.center = c.CENTER
-                screen.blit(elapsed_time_display, elapsed_time_display_rect)
+        else:
+            self.manager.go_to(WinScreen(self.seed))
 
     def draw(self, screen):
         """
@@ -494,7 +490,7 @@ class InGame(GameState):
         self.world.update(self.hero)
 
         if self.hero.hp <= 0:
-            self.manager.go_to(DeathScreen())
+            self.die()
 
     def handle_events(self, events):
         """
@@ -651,7 +647,7 @@ class InGame(GameState):
                 pass
 
     def die(self):
-        self.manager.go_to(DeathScreen())
+        self.manager.go_to(DeathScreen(self.seed))
 
     def generate_world(self, n):
         """
@@ -722,9 +718,10 @@ class DeathScreen(GameState):
 
     musicfile = 'Raven.mp3'
 
-    def __init__(self):
+    def __init__(self, seed):
         super().__init__()
         self.manager = None
+        self.seed = seed
 
     def draw(self, screen):
         screen.fill(c.BLACK)
@@ -737,6 +734,11 @@ class DeathScreen(GameState):
 
         screen.blit(death_text, centered_pos)
 
+        seed_text = h.load_font("Melma.ttf", 16).render(
+            "SEED: {0}".format(self.seed), 1, c.BLUE
+        )
+        screen.blit(seed_text, c.SEED_POS)
+
     def update(self):
         pass
 
@@ -745,6 +747,40 @@ class DeathScreen(GameState):
             if event.type == pygame.KEYDOWN:
                 self.manager.go_to(TitleScreen())
 
+
+class WinScreen(GameState):
+    """
+    A gamestate for showing a victory.
+    """
+
+    def __init__(self, seed):
+        super().__init__()
+        self.manager = None
+        self.seed = seed
+
+    def draw(self, screen):
+        screen.fill(c.BLACK)
+        win_text = h.load_font("Melma.ttf", 32).render(
+            "You Win! \n Press any key to try again.", 1, c.GREEN
+        )
+        win_text_x = win_text.get_rect().width / 2
+        win_text_y = win_text.get_rect().height / 2
+        centered_pos = (c.CENTER[0] - win_text_x, c.CENTER[1] - win_text_y)
+
+        screen.blit(win_text, centered_pos)
+
+        seed_text = h.load_font("Melma.ttf", 16).render(
+            "SEED: {0}".format(self.seed), 1, c.BLUE
+        )
+        screen.blit(seed_text, c.SEED_POS)
+
+    def update(self):
+        pass
+
+    def handle_events(self, events):
+        for event in events:
+            if event.type == pygame.KEYDOWN:
+                self.manager.go_to(TitleScreen())
 
 class Quit(GameState):
     """
