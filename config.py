@@ -17,6 +17,16 @@ until the old settings file is deleted.
 
 Likewise, any options that you add will cause a KeyError until the
 settings file that does not include the new options is deleted.
+
+>> DEBUG <<
+if True -
+lets the user go into God Mode
+    * Infinite health
+    * Super high jumps
+    * Infinite ammo
+
+This is meant to test world generation and enemy effects
+in a way that allows the user to remain alive indefinitely.
 """
 import os
 import pickle
@@ -24,6 +34,7 @@ import pygame
 
 #Defaults:
 SCREEN_RESOLUTION = (1366, 768)
+DEBUG = True
 
 PLAY_MUSIC = True
 PLAY_SFX = False
@@ -55,3 +66,5 @@ else:
     f = open('settings', 'rb')
     settings = pickle.loads(f.read())
     f.close()
+
+settings['GOD MODE'] = False

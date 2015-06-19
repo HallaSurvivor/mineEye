@@ -156,7 +156,8 @@ class Menu(GameState):
                 elif e.key == settings['LEFT'] or e.key == pygame.K_LEFT:
                     self.manager.go_to(TitleScreen())
 
-                elif e.key == pygame.K_SPACE or e.key == settings['RIGHT'] or e.key == pygame.K_RIGHT:
+                elif e.key == pygame.K_SPACE or e.key == settings['RIGHT'] or \
+                            e.key == pygame.K_RIGHT or e.key == pygame.K_RETURN:
                     if self.selections is not None:
                         if type(self.selections[self.selected]) == str:
                             if settings[self.selections[self.selected]]:
@@ -501,6 +502,7 @@ class InGame(GameState):
         Additionally, check the Hero's health
         """
         self.world.update(self.hero)
+        self.hero.update()
 
         if self.hero.hp <= 0:
             self.die()
@@ -613,7 +615,13 @@ class InGame(GameState):
 
                 # Quit to TitleScreen (eventually pause menu) if the user presses escape
                 elif event.key == settings['PAUSE']:
-                    self.manager.go_to(TitleScreen())
+                    if settings['DEBUG']:
+                        if pygame.key.get_mods() & pygame.KMOD_LSHIFT:
+                            settings['GOD MODE'] = True
+                        else:
+                            self.manager.go_to(TitleScreen())
+                    else:
+                        self.manager.go_to(TitleScreen())
 
             elif event.type == pygame.KEYUP:
                 # Cancel the motion by adding the opposite of the keydown situation

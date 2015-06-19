@@ -9,6 +9,7 @@ import pyganim
 import constants
 import entities
 import helpers as h
+from config import settings
 
 
 class Hero(pygame.sprite.Sprite):
@@ -209,13 +210,18 @@ class Hero(pygame.sprite.Sprite):
             elif self.last_motion == 'left':
                 self.animation_obj['stand_left'].blit(screen, self.rect)
 
+    def update(self):
+        if settings['GOD MODE']:
+            self.jump_height = 50
+
     def damage(self, amount):
         """
         Reduces the Hero's health based on an event.
 
         :param amount: Int representing how much damage was taken
         """
-        self.hp -= amount
+        if not settings['GOD MODE']:
+            self.hp -= amount
 
     def drop_bomb(self):
         """
@@ -223,7 +229,8 @@ class Hero(pygame.sprite.Sprite):
 
         :returns bomb: A bomb entity
         """
-        self.bombs -= 1
+        if not settings['GOD MODE']:
+            self.bombs -= 1
         if self.last_motion == "right":
             x = 13
         elif self.last_motion == "left":
