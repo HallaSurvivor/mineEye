@@ -848,6 +848,7 @@ class WinScreen(GameState):
             if event.type == pygame.KEYDOWN:
                 self.manager.go_to(TitleScreen())
 
+
 class Quit(GameState):
     """
     A gamestate to quit. Done to make things more general.
