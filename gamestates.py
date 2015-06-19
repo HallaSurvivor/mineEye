@@ -253,7 +253,7 @@ class AddSeed(Menu):
 
                     elif e.key == pygame.K_SPACE or e.key == settings['RIGHT'] or e.key == pygame.K_RIGHT:
                         if self.selected == 0:
-                            self.options[self.selected] = ">" + self.options[self.selected] + ">"
+                            self.options[self.selected] = ">" + self.options[self.selected] + "<"
                             self.modifying = True
                         else:
                             global seeds
@@ -365,7 +365,7 @@ class ChangeBinds(Menu):
                         self.manager.go_to(TitleScreen())
                     elif e.key == pygame.K_SPACE or e.key == settings['RIGHT'] or \
                             e.key == pygame.K_RIGHT or e.key == pygame.K_RETURN:
-                        self.options[self.selected] = ">" + self.options[self.selected] + ">"
+                        self.options[self.selected] = ">" + self.options[self.selected] + "<"
                         self.modifying = True
 
                 else:  # If we are modifying a bind
