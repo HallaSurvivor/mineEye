@@ -480,7 +480,7 @@ class InGame(GameState):
                 time_pos = (c.TOP_RIGHT[0] - elapsed_time_display.get_rect().width - 16, 0)
                 screen.blit(elapsed_time_display, time_pos)
         else:
-            self.manager.go_to(WinScreen(self.seed))
+            self.manager.go_to(WinScreen(self.seed, self.elapsed_time))
 
     def draw(self, screen):
         """
@@ -800,22 +800,33 @@ class WinScreen(GameState):
     that was played.
     """
 
-    def __init__(self, seed):
+    def __init__(self, seed, elapsed_time):
         super().__init__()
         self.manager = None
         self.seed = seed
+        self.elapsed_time = elapsed_time
 
     def draw(self, screen):
         screen.fill(c.BLACK)
+        # Print the "YOU WIN!" text
         win_text = h.load_font("Melma.ttf", 32).render(
             "You Win! \n Press any key to try again.", 1, c.GREEN
         )
-        win_text_x = win_text.get_rect().width / 2
-        win_text_y = win_text.get_rect().height / 2
-        centered_pos = (c.CENTER[0] - win_text_x, c.CENTER[1] - win_text_y)
-
+        centered_pos = win_text.get_rect()
+        centered_pos.center = c.CENTER
         screen.blit(win_text, centered_pos)
 
+        # Print the final time
+        formatted_elapsed_time = self.elapsed_time.total_seconds()
+        elapsed_time_display = h.load_font('BLKCHCRY.TTF', 48).render(
+            "Final Time: {ElapsedTime}".format(ElapsedTime=formatted_elapsed_time), 1, c.GREEN
+        )
+        elapsed_time_display_rect = elapsed_time_display.get_rect()
+        elapsed_time_display_rect.center = c.CENTER
+        elapsed_time_display_rect.y += .15*c.HEIGHT
+        screen.blit(elapsed_time_display, elapsed_time_display_rect)
+
+        # Print the seed
         seed_text = h.load_font("Melma.ttf", 16).render(
             "SEED: {0}".format(self.seed), 1, c.BLUE
         )
