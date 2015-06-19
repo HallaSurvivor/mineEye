@@ -230,7 +230,7 @@ class AddSeed(Menu):
         super().__init__()
         self.modifying = False
         self.index = index
-        self.seed = ""
+        self.seed = str(seeds[self.index])
         self.descriptions = [self.seed, ""]
 
     def handle_events(self, events):
@@ -262,13 +262,19 @@ class AddSeed(Menu):
                             f.write(pickle.dumps(seeds))
                             f.close()
                             self.manager.go_to(PlayerMaps())
+
                 else:
-                    if e.key == pygame.K_ESCAPE or e.key == pygame.K_SPACE:
+                    if e.key == pygame.K_ESCAPE or e.key == pygame.K_SPACE or e.key == pygame.K_RETURN:
                         self.modifying = False
                         self.options[self.selected] = self.options[self.selected][1:-1]
 
+                    elif e.key == pygame.K_BACKSPACE:
+                        self.seed = self.seed[:-1]
+
                     else:
-                        if True:  # Eventually, check for alphanumeric values
+                        if e.key in [pygame.K_0, pygame.K_1, pygame.K_2, pygame.K_3,
+                                     pygame.K_4, pygame.K_5, pygame.K_6, pygame.K_7,
+                                     pygame.K_8, pygame.K_9]:
                             self.seed += pygame.key.name(e.key)
             else:
                 pass
@@ -325,6 +331,27 @@ class ChangeBinds(Menu):
         """
         self.descriptions = [pygame.key.name(settings[option]) for option in self.selections]
 
+        valid_options = [
+            # letters
+            pygame.K_a, pygame.K_b, pygame.K_c, pygame.K_d, pygame.K_e, pygame.K_f, pygame.K_g,
+            pygame.K_h, pygame.K_i, pygame.K_j, pygame.K_k, pygame.K_l, pygame.K_m, pygame.K_n,
+            pygame.K_o, pygame.K_p, pygame.K_q, pygame.K_r, pygame.K_s, pygame.K_t, pygame.K_u,
+            pygame.K_v, pygame.K_w, pygame.K_x, pygame.K_y, pygame.K_z,
+            # numpad
+            pygame.K_KP0, pygame.K_KP1, pygame.K_KP2, pygame.K_KP3, pygame.K_KP4, pygame.K_KP5,
+            pygame.K_KP6, pygame.K_KP7, pygame.K_KP8, pygame.K_KP9, pygame.K_KP_ENTER,
+            pygame.K_KP_DIVIDE, pygame.K_KP_EQUALS, pygame.K_KP_MINUS, pygame.K_KP_MULTIPLY,
+            pygame.K_KP_PERIOD, pygame.K_KP_PLUS,
+            # misc
+            pygame.K_SEMICOLON, pygame.K_COMMA, pygame.K_PERIOD, pygame.K_SLASH, pygame.K_SPACE,
+            pygame.K_MINUS, pygame.K_EQUALS, pygame.K_LEFTBRACKET, pygame.K_RIGHTBRACKET,
+            pygame.K_BACKSLASH, pygame.K_QUOTE,
+            # numbers
+            pygame.K_0, pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4, pygame.K_5, pygame.K_6,
+            pygame.K_7, pygame.K_8, pygame.K_9
+
+        ]
+
         for e in events:
             if e.type == pygame.KEYDOWN:
                 if not self.modifying:
@@ -334,42 +361,41 @@ class ChangeBinds(Menu):
                     elif e.key == settings['UP'] or e.key == pygame.K_UP:
                         if self.selected > 0:
                             self.selected -= 1
-
                     elif e.key == settings['LEFT'] or e.key == pygame.K_LEFT:
                         self.manager.go_to(TitleScreen())
-
-                    elif e.key == pygame.K_SPACE or e.key == settings['RIGHT'] or e.key == pygame.K_RIGHT:
-                        self.options[self.selected] = ">" + self.options[self.selected]
+                    elif e.key == pygame.K_SPACE or e.key == settings['RIGHT'] or \
+                            e.key == pygame.K_RIGHT or e.key == pygame.K_RETURN:
+                        self.options[self.selected] = ">" + self.options[self.selected] + ">"
                         self.modifying = True
-                else:
-                    if e.key == pygame.K_ESCAPE:
-                        self.options[self.selected] = self.options[self.selected][1:]
+
+                else:  # If we are modifying a bind
+                    if e.key == pygame.K_ESCAPE or e.key == pygame.K_RETURN or e.key == pygame.K_LEFT:
+                        self.options[self.selected] = self.options[self.selected][1:-1]
                         self.modifying = False
 
                     else:
-                        if e.key not in [settings[selection] for selection in self.selections]:
-                            settings[self.selections[self.selected]] = e.key
-                            self.options[self.selected] = self.options[self.selected][1:]
+                        if e.key in valid_options:
+                            # If the key is not already bound
+                            if e.key not in [settings[selection] for selection in self.selections]:
+                                settings[self.selections[self.selected]] = e.key
+
+                            else:  # If the key is already bound, pick a random key and bind it to the old option
+                                for selection in self.selections:
+                                    if settings[selection] == e.key:
+                                        # Get a list of all the unbound, legal, keys
+                                        unbound = [key for key in valid_options if key not in
+                                                   [settings[selection] for selection in self.selections]]
+
+                                        new_key = random.choice(unbound)
+                                        settings[selection] = new_key
+
+                                settings[self.selections[self.selected]] = e.key
+
+                            self.options[self.selected] = self.options[self.selected][1:-1]
                             self.modifying = False
-
-                        else:  # If the key is already bound, pick a random key and bind it to the old option
-                            for selection in self.selections:
-                                if settings[selection] == e.key:
-                                    found = False
-                                    while not found:
-                                        new_key = random.randint(10, 99)
-                                        if new_key not in [settings[selection] for selection in self.selections]:
-                                            found = True
-
-                                    settings[selection] = new_key
-
-                            settings[self.selections[self.selected]] = e.key
-                            self.options[self.selected] = self.options[self.selected][1:]
-                            self.modifying = False
-
-                        f = open('settings', 'wb')
-                        f.write(pickle.dumps(settings))
-                        f.close()
+                            f = open('settings', 'wb')
+                            f.write(pickle.dumps(settings))
+                            f.close()
             else:
                 pass
 
@@ -604,15 +630,6 @@ class InGame(GameState):
                                     self.hero.ranged_weapon = drop.drop
                                 drop.kill()
 
-                elif event.key == settings['MELEE']:
-                    if self.hero.melee_weapon is not None:
-                        for e in self.world.enemy_list:
-                            if e.get_dist() <= self.hero.melee_weapon.range:
-                                e.damage(self.hero.melee_weapon.power * self.hero.actual_damage_multiplier)
-
-                elif event.key == settings['RANGED']:
-                    pass
-
                 # Quit to TitleScreen (eventually pause menu) if the user presses escape
                 elif event.key == settings['PAUSE']:
                     if settings['DEBUG']:
@@ -656,13 +673,13 @@ class InGame(GameState):
                     pass
 
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1:
+                if event.button == 1:  # Left Click
                     if self.hero.melee_weapon is not None:
                         for e in self.world.enemy_list:
                             dist = hypot(e.rect.centerx - c.CENTER[0], e.rect.centery - c.CENTER[1])
                             if dist <= self.hero.melee_weapon.range:
                                 e.damage(self.hero.melee_weapon.power * self.hero.actual_damage_multiplier)
-                elif event.button == 3:
+                elif event.button == 3:  # Right Click
                     pass
             else:
                 pass
