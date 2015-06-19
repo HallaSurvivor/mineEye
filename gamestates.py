@@ -375,7 +375,21 @@ class ChangeBinds(Menu):
 
 class InGame(GameState):
     """
-    A game state for moving and falling through the mine
+    A game state for moving and falling through the mine.
+
+    Drawn:
+        Draw the World - enemies, blocks, particles, drops
+        Draw the Hero - always centered
+        Draw the HUD - Timer, HP, Ammo, etc.
+    Events:
+        Check the mvt keys (defined in settings dict)
+        Check the mouse position/mouse buttons
+        Check for clicking
+    Create the World:
+        Semi-Randomly create the world based on a seed
+        and the criteria that prevents generation bugs
+        and keeps the game interesting, i.e. no more than
+        3 right moving rooms in a row.
     """
 
     musicfile = 'Pathetique.mp3'
@@ -473,9 +487,7 @@ class InGame(GameState):
         Overwrites draw in the GameState class. Draws all of the blocks and enemies in the levels in this
         game state to the screen.
 
-        Additionally, a HUD is displayed at the top of the screen, showing:
-            the Hero's HP
-            the
+        Additionally, a HUD is displayed at the top of the screen.
         :param screen: The pygame screen on which to draw.
         """
         self.world.draw(screen)
@@ -484,8 +496,9 @@ class InGame(GameState):
 
     def update(self):
         """
-        Redraw all of the blocks and enemies in their updated positions as the player interacts with the world,
-        items drop, enemies move, etc.
+        Recalculate the positions of everything in the world.
+
+        Additionally, check the Hero's health
         """
         self.world.update(self.hero)
 
@@ -651,11 +664,37 @@ class InGame(GameState):
 
     def generate_world(self, n):
         """
-        Generate the world by pseudo-randomly selecting n rooms.
+        Generate the world by semi-randomly selecting n rooms.
+
+        Creates a list of rooms that gets turned into a list of strings inside
+        rooms.Room.parse_room_array()
+        From there, each character in the list of strings is turned into its
+        appropriate block.
+
+        * Make an empty list - room_list
+        * Make a list of the rooms to choose from (not StartingRoom and EndingRoom)
+        * Add StartingRoom to the beginning
+        * Create counters to remember how often we move to the right/left/down
+        * Create a total_displacement counter to prevent a bug
+            The bug is caused by having a net negative displacement,
+            i.e. the room need to generate blocks to the left of the leftmost
+            block in StartingRoom.
+            To mitigate this, total_displacement counts the number of blocks to the right
+            the current door is, and then compares it to how far left the room needs to
+            render itself. If the room needs to render too far to the left, a new room is
+            chosen
+        * Iterate n times through the list of possible rooms
+        * Using the game seed, randomly select a room on each pass
+        * If the selected room matches the selection criteria, add it to the list,
+        otherwise, try again with a different room.
+            * Criteria are as follows:
+                * Don't move in the same direction more than 5 times
+                * Don't move down more than 3 times
+                * Total Displacement must be more than twice the length of a left-moving room
+                    (the factor of two is for complete certainty)
+        * Finally, add the ending room
 
         :param n: The Int number of rooms to randomly choose
-        :param seed: The seed to use to generate the world. If none,
-            a random seed is generated.
         """
 
         room_list = []
@@ -714,6 +753,10 @@ class InGame(GameState):
 class DeathScreen(GameState):
     """
     A game state for showing the hero's death.
+
+    Returns to title screen when any button is pressed,
+    Show "you lose" text alongside the seed of the world
+    that was played.
     """
 
     musicfile = 'Raven.mp3'
@@ -751,6 +794,10 @@ class DeathScreen(GameState):
 class WinScreen(GameState):
     """
     A gamestate for showing a victory.
+
+    Returns to title screen when any button is pressed,
+    Show "you win" text alongside the seed of the world
+    that was played.
     """
 
     def __init__(self, seed):
