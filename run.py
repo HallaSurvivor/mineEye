@@ -3,7 +3,6 @@ Run the game.
 """
 import pygame
 from config import settings
-from constants import calc_sizes, SCREEN_SIZE
 import gamestates
 
 pygame.init()
@@ -21,8 +20,8 @@ while not manager.done:
     for event in pygame.event.get(pygame.VIDEORESIZE):
         screen = pygame.display.set_mode(event.dict['size'], pygame.RESIZABLE)
         settings['SCREEN_RESOLUTION'] = event.dict['size']
-        calc_sizes()
-        print(SCREEN_SIZE)
+        settings['WIDTH'] = event.dict['w']
+        settings['HEIGHT'] = event.dict['h']
 
     manager.state.handle_events(pygame.event.get())
     manager.state.update()

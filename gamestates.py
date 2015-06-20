@@ -120,9 +120,7 @@ class Menu(GameState):
         off = h.load_font('MelmaCracked.ttf', 16).render(
             'Off', 1, c.BLACK
         )
-        # print(self.default_background.get_size(), c.SCREEN_SIZE)
-        if self.default_background.get_size() != c.SCREEN_SIZE:
-            print('updated')
+        if self.default_background.get_size() != screen.get_size():
             self.default_background = h.create_background(h.load(self.background_tile))
 
         screen.blit(self.default_background, (0, 0))
@@ -467,37 +465,51 @@ class InGame(GameState):
         :param screen: The screen on which to draw
         """
         # Draw the HP Bar
-        hp_background = pygame.Surface(c.HP_BACKGROUND_SIZE)
+        hp_background = pygame.Surface((int(c.HP_BAR_WIDTH*settings['WIDTH']), int(c.HP_BAR_HEIGHT*settings['HEIGHT'])))
         hp_background.fill(c.BLACK)
-        screen.blit(hp_background, c.HP_BACKGROUND_POS)
+        hp_background_rect = hp_background.get_rect()
+        hp_background_rect.x = 2
+        hp_background_rect.y = 2
+        screen.blit(hp_background, hp_background_rect)
 
-        hp_bar = pygame.Surface((int(self.hero.hp*(c.HP_BAR_SIZE[0]/self.hero.base_hp)), int(c.HP_BAR_SIZE[1])))
+        hp_bar = pygame.Surface(
+            (int((c.HP_BAR_WIDTH*settings['WIDTH'] - 4) * self.hero.hp/self.hero.base_hp),
+             int(c.HP_BAR_HEIGHT*settings['HEIGHT'] - 4)
+            )
+        )
+
         if self.hero.hp/self.hero.base_hp > .25:
             hp_bar.fill(c.BLUE)
         else:
             hp_bar.fill(c.RED)
-        screen.blit(hp_bar, c.HP_BAR_POS)
+
+        hp_bar_rect = hp_bar.get_rect()
+        hp_bar_rect.center = hp_background_rect.center
+
+        screen.blit(hp_bar, hp_bar_rect)
 
         # Draw the HP text
         hp_text = h.load_font('BLKCHCRY.TTF', 32).render(
             "{0}/{1}".format(self.hero.hp, self.hero.base_hp), 1, c.WHITE
         )
         hp_text_rect = hp_text.get_rect()
-        hp_text_rect.center = hp_background.get_rect().center
+        hp_text_rect.center = hp_background_rect.center
         screen.blit(hp_text, hp_text_rect)
 
         # Draw the number of bombs
         bomb_ammo = h.load_font('BLKCHCRY.TTF', 32).render(
             "Bombs: {0}".format(self.hero.bombs), 1, c.WHITE
         )
-        screen.blit(bomb_ammo, c.BOMB_POS)
+        screen.blit(bomb_ammo, (c.BOMB_POS_X*settings['WIDTH'], c.BOMB_POS_Y*settings['HEIGHT']))
 
         # Draw the equipped weapons
         if self.hero.melee_weapon is not None:
-            screen.blit(self.hero.melee_weapon.top_sprite.image, c.MELEE_POS)
+            screen.blit(self.hero.melee_weapon.top_sprite.image,
+                        (c.MELEE_POS_X*settings['WIDTH'], c.MELEE_POS_Y*settings['HEIGHT']))
 
         if self.hero.ranged_weapon is not None:
-            screen.blit(self.hero.ranged_weapon.top_sprite.image, c.RANGED_POS)
+            screen.blit(self.hero.ranged_weapon.top_sprite.image,
+                        (c.RANGED_POS_X*settings['WIDTH'], c.RANGED_POS_Y*settings['HEIGHT']))
 
         # Draw the timer
         if self.hero.run_timer:
@@ -509,8 +521,10 @@ class InGame(GameState):
                     "{ElapsedTime}".format(ElapsedTime=formatted_elapsed_time), 1, c.WHITE
                 )
 
-                time_pos = (c.TOP_RIGHT[0] - elapsed_time_display.get_rect().width - 16, 0)
-                screen.blit(elapsed_time_display, time_pos)
+                elapsed_rect = elapsed_time_display.get_rect()
+                elapsed_rect.top = 0
+                elapsed_rect.right = settings['WIDTH']
+                screen.blit(elapsed_time_display, elapsed_rect)
         else:
             self.manager.go_to(WinScreen(self.seed, self.elapsed_time))
 
@@ -621,13 +635,15 @@ class InGame(GameState):
                 elif event.key == settings['DOWN']:
                     for drop in self.world.drops_list:
                         if drop.is_weapon:
-                            if (hypot(drop.rect.centerx - c.CENTER[0], drop.rect.centery - c.CENTER[1])
-                                    <= self.hero.weapon_pickup_range):
+                            if hypot(drop.rect.centerx - self.hero.rect.centerx,
+                                     drop.rect.centery - self.hero.rect.centery) <= self.hero.weapon_pickup_range:
+
                                 if drop.drop.style == 0: # Melee
                                     if self.hero.melee_weapon is not None:
                                         self.world.all_sprites.add(self.hero.melee_weapon.sprite)
                                         self.world.drops_list.add(self.hero.melee_weapon.sprite)
                                     self.hero.melee_weapon = drop.drop
+
                                 elif drop.drop.style == 1: # Ranged
                                     if self.hero.ranged_weapon is not None:
                                         self.world.all_sprites.add(self.hero.ranged_weapon.sprite)
@@ -681,7 +697,8 @@ class InGame(GameState):
                 if event.button == 1:  # Left Click
                     if self.hero.melee_weapon is not None:
                         for e in self.world.enemy_list:
-                            dist = hypot(e.rect.centerx - c.CENTER[0], e.rect.centery - c.CENTER[1])
+                            dist = hypot(e.rect.centerx - self.hero.rect.centerx,
+                                         e.rect.centery - self.hero.rect.centery)
                             if dist <= self.hero.melee_weapon.range:
                                 e.damage(self.hero.melee_weapon.power * self.hero.actual_damage_multiplier)
                 elif event.button == 3:  # Right Click
@@ -803,14 +820,17 @@ class DeathScreen(GameState):
         )
         death_text_x = death_text.get_rect().width / 2
         death_text_y = death_text.get_rect().height / 2
-        centered_pos = (c.CENTER[0] - death_text_x, c.CENTER[1] - death_text_y)
+        centered_pos = (settings['WIDTH']/2 - death_text_x, settings['HEIGHT']/2 - death_text_y)
 
         screen.blit(death_text, centered_pos)
 
         seed_text = h.load_font("Melma.ttf", 16).render(
             "SEED: {0}".format(self.seed), 1, c.BLUE
         )
-        screen.blit(seed_text, c.SEED_POS)
+        seed_rect = seed_text.get_rect()
+        seed_rect.right = settings['WIDTH']
+        seed_rect.bottom = settings['HEIGHT']
+        screen.blit(seed_text, seed_rect)
 
     def update(self):
         pass
@@ -843,7 +863,7 @@ class WinScreen(GameState):
             "You Win! \n Press any key to try again.", 1, c.GREEN
         )
         centered_pos = win_text.get_rect()
-        centered_pos.center = c.CENTER
+        centered_pos.center = (settings['WIDTH']/2, settings['HEIGHT']/2)
         screen.blit(win_text, centered_pos)
 
         # Print the final time
@@ -852,15 +872,18 @@ class WinScreen(GameState):
             "Final Time: {ElapsedTime}".format(ElapsedTime=formatted_elapsed_time), 1, c.GREEN
         )
         elapsed_time_display_rect = elapsed_time_display.get_rect()
-        elapsed_time_display_rect.center = c.CENTER
-        elapsed_time_display_rect.y += .15*c.HEIGHT
+        elapsed_time_display_rect.center = (settings['WIDTH']/2, settings['HEIGHT']/2)
+        elapsed_time_display_rect.y += .15*settings['HEIGHT']
         screen.blit(elapsed_time_display, elapsed_time_display_rect)
 
         # Print the seed
         seed_text = h.load_font("Melma.ttf", 16).render(
             "SEED: {0}".format(self.seed), 1, c.BLUE
         )
-        screen.blit(seed_text, c.SEED_POS)
+        seed_rect = seed_text.get_rect()
+        seed_rect.right = settings['WIDTH']
+        seed_rect.bottom = settings['HEIGHT']
+        screen.blit(seed_text, seed_rect)
 
     def update(self):
         pass

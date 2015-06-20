@@ -6,7 +6,6 @@ All Heroes subclass Hero, which in turn subclasses pygame Sprites.
 import os
 import pygame
 import pyganim
-import constants
 import entities
 import helpers as h
 from config import settings
@@ -132,7 +131,7 @@ class Hero(pygame.sprite.Sprite):
         self.animation_obj = {}
         self.conductor = None
         self.rect = pygame.Rect(0, 0, 48, 48)
-        self.rect.center = constants.CENTER
+        self.rect.center = (settings['WIDTH']/2, settings['HEIGHT']/2)
 
     def create_animation_dict(self):
         """

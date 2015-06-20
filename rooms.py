@@ -246,6 +246,7 @@ class Room(object):
         self.hero_projectile_list = pygame.sprite.Group()
         self.bomb_list = pygame.sprite.Group()
 
+        self.background_string = ''
         self.background = pygame.Surface(settings['SCREEN_RESOLUTION'])
         self.region = None
 
@@ -310,6 +311,8 @@ class Room(object):
 
         :param screen: A pygame surface to blit everything onto.
         """
+        if self.background.get_size() != screen.get_size():
+            self.background = h.create_background(h.load(self.background_string))
         screen.blit(self.background, (0, 0))
 
         if not self.array_parsed:
@@ -669,7 +672,8 @@ class World(Room):
         :param seed: The seed to use in random generation.
         """
         super().__init__(seed=seed)
-        self.background = h.create_background(h.load('background.png'))
+        self.background_string = 'background.png'
+        self.background = h.create_background(h.load(self.background_string))
 
         self.room_array = []
         for room in rooms:

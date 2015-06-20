@@ -4,7 +4,7 @@ Exports the Enemy classes that the Hero has to battle.
 from math import hypot
 import pygame
 import helpers as h
-import constants as c
+from config import settings
 import entities
 
 
@@ -124,7 +124,7 @@ class Enemy(h.Sprite):
         """
         Return the distance from the enemy's center to the Hero's center.
         """
-        dist = hypot(self.rect.centerx - c.CENTER[0], self.rect.centery - c.CENTER[1])
+        dist = hypot(self.rect.centerx - settings['HEIGHT']/2, self.rect.centery - settings['WIDTH']/2)
 
         return dist
 

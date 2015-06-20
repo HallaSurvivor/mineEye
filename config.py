@@ -34,6 +34,8 @@ import pygame
 
 #Defaults:
 SCREEN_RESOLUTION = (1366, 768)
+WIDTH = 1366
+HEIGHT = 768
 DEBUG = True
 
 PLAY_MUSIC = True

@@ -3,6 +3,7 @@ Exports a variety of helper functions to cut down on repetitive code.
 """
 import os
 import pygame
+from config import settings
 import constants as c
 
 # Caches for sprites and fonts to mitigate the slow loading process
@@ -80,9 +81,9 @@ def create_background(background_tile):
     :param background_tile: a pygame surface that can be tiled
     :returns background: a pygame surface consisting of the tiled background_tile
     """
-    background = pygame.Surface(c.SCREEN_SIZE)
-    for i in range(0, c.WIDTH, background_tile.get_width()):
-        for n in range(0, c.HEIGHT, background_tile.get_height()):
+    background = pygame.Surface(settings['SCREEN_RESOLUTION'])
+    for i in range(0, settings['WIDTH'], background_tile.get_width()):
+        for n in range(0, settings['HEIGHT'], background_tile.get_height()):
             background.blit(background_tile, (i, n))
 
     return background
@@ -133,8 +134,8 @@ def blit_text(text, screen, position):
     """
 
     rect = text.get_rect()
-    rect.centerx = c.CENTER[0]
-    rect.centery = .125*(position + 1)*c.HEIGHT
+    rect.centerx = screen.get_rect().centerx
+    rect.centery = .125*(position + 1)*settings['HEIGHT']
     screen.blit(text, rect)
 
     return rect
