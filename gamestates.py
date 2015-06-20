@@ -484,7 +484,8 @@ class InGame(GameState):
             hp_bar.fill(c.RED)
 
         hp_bar_rect = hp_bar.get_rect()
-        hp_bar_rect.center = hp_background_rect.center
+        hp_bar_rect.centery = hp_background_rect.centery
+        hp_bar_rect.left = hp_background_rect.left + 2
 
         screen.blit(hp_bar, hp_bar_rect)
 
