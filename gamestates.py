@@ -33,9 +33,10 @@ class GameState(object):
     """
 
     musicfile = None
+    background_tile = 'sand.jpg'
 
     def __init__(self):
-        self.default_background = h.create_background(h.load('sand.jpg'))
+        self.default_background = h.create_background(h.load(self.background_tile))
 
     def draw(self, screen):
         """
@@ -119,6 +120,10 @@ class Menu(GameState):
         off = h.load_font('MelmaCracked.ttf', 16).render(
             'Off', 1, c.BLACK
         )
+        # print(self.default_background.get_size(), c.SCREEN_SIZE)
+        if self.default_background.get_size() != c.SCREEN_SIZE:
+            print('updated')
+            self.default_background = h.create_background(h.load(self.background_tile))
 
         screen.blit(self.default_background, (0, 0))
 
