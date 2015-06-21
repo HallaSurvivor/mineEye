@@ -371,11 +371,11 @@ class ChangeSettings(Menu):
     A game state for changing local variables like PLAY_MUSIC.
     """
     title = "Settings"
-    options = ["Play Music", "Play Sound Effects", "Change Keybinds", "Change Aspect Ratio"]
+    options = ["Play Music", "Play Sound Effects", "Change Keybinds"]
 
     def __init__(self):
         super().__init__()
-        self.selections = ['PLAY_MUSIC', 'PLAY_SFX', ChangeBinds(), ChangeRatio()]
+        self.selections = ['PLAY_MUSIC', 'PLAY_SFX', ChangeBinds()]
 
 
 class ChangeBinds(Menu):
@@ -469,15 +469,6 @@ class ChangeBinds(Menu):
                             f.close()
             else:
                 pass
-
-
-class ChangeRatio(Menu):
-    title = "Change Aspect Ratio"
-    options = ["16:9", "4:3"]
-
-    def __init__(self):
-        super().__init__()
-        self.selections = [(1600, 900), (640, 480)]
 
 
 class InGame(GameState):
