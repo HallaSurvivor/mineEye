@@ -2,7 +2,6 @@
 Store all the game states as classes that are instantiated.
 """
 from math import hypot
-import datetime
 import pickle
 import random
 import pygame
@@ -79,7 +78,7 @@ class GameStateManager(object):
 
         If the new gamestate has a music file associated with it, play that music.
         """
-        if type(gamestate) is not TitleScreen:
+        if type(gamestate) is not TitleScreen and type(self.state) is not AddSeed:
             self.previous_state = self.state
         else:
             self.previous_state = None
@@ -122,17 +121,28 @@ class Menu(GameState):
         self.selected = 0
         self.list_size = len(self.options) - 1
 
+    def extra_draw(self, screen):
+        """
+        A blank draw method called in the main draw function.
+
+        Meant to be overwritten to draw menu specific items without
+        overwriting the entire draw method.
+        :param screen: The screen on which to draw
+        """
+
+        pass
+
     def draw(self, screen):
         """
         Draw the title and all the options/descriptions to the screen.
         :param screen: The pygame screen on which to draw
         """
 
-        on = h.load_font('MelmaCracked.ttf', 16).render(
+        on = h.load_font('melma.ttf', 16).render(
             'On', 1, c.BLACK
         )
 
-        off = h.load_font('MelmaCracked.ttf', 16).render(
+        off = h.load_font('melma.ttf', 16).render(
             'Off', 1, c.BLACK
         )
         if self.default_background.get_size() != screen.get_size():
@@ -157,6 +167,8 @@ class Menu(GameState):
         selected_rect = selected_indicator.get_rect()
         selected_rect.bottomleft = rect_list[self.selected].bottomright
         screen.blit(selected_indicator, selected_rect)
+
+        self.extra_draw(screen)
 
     def update(self):
         pass
@@ -503,17 +515,17 @@ class InGame(GameState):
         self.manager = None
 
         if seed is None:
-            self.seed = random.random()
+            self.seed = random.randint(0, 100000000000)
         else:
             self.seed = seed
 
         random.seed(self.seed)
 
         self.all_sprites_list = pygame.sprite.Group()
-
-        self.hero = chosen_hero()
-
-        self.start_time = datetime.datetime.now()
+        try:
+            self.hero = chosen_hero()
+        except TypeError:
+            self.hero = chosen_hero
 
         self.world = None
         self.generate_world(30)
@@ -558,7 +570,7 @@ class InGame(GameState):
         screen.blit(hp_bar, hp_bar_rect)
 
         # Draw the HP text
-        hp_text = h.load_font('BLKCHCRY.TTF', 32).render(
+        hp_text = h.load_font('luximb.ttf', 32).render(
             "{0}/{1}".format(self.hero.hp, self.hero.base_hp), 1, c.WHITE
         )
         hp_text_rect = hp_text.get_rect()
@@ -566,7 +578,7 @@ class InGame(GameState):
         screen.blit(hp_text, hp_text_rect)
 
         # Draw the number of bombs
-        bomb_ammo = h.load_font('BLKCHCRY.TTF', 32).render(
+        bomb_ammo = h.load_font('luximb.ttf', 32).render(
             "Bombs: {0}".format(self.hero.bombs), 1, c.WHITE
         )
         screen.blit(bomb_ammo, (c.BOMB_POS_X*settings['WIDTH'], c.BOMB_POS_Y*settings['HEIGHT']))
@@ -583,10 +595,19 @@ class InGame(GameState):
         # Draw the timer
         if self.hero.run_timer:
             if self.timer:
-                self.elapsed_time = datetime.datetime.now() - self.start_time
-                formatted_elapsed_time = self.elapsed_time.total_seconds()
+                self.elapsed_time += 1
+                partials = self.elapsed_time % 60
+                seconds = ((self.elapsed_time - partials) // 60) % 60
+                minutes = (((self.elapsed_time - partials) // 60) - seconds) // 60
+                if len(str(partials)) != 2:
+                    partials = "0" + str(partials)
+                if len(str(seconds)) != 2:
+                    seconds = "0" + str(seconds)
+                if len(str(minutes)) != 2:
+                    minutes = "0" + str(minutes)
+                formatted_elapsed_time = "{minutes}:{seconds}:{partials}".format(minutes=minutes, seconds=seconds, partials=partials)
 
-                elapsed_time_display = h.load_font('BLKCHCRY.TTF', 20).render(
+                elapsed_time_display = h.load_font('luximb.ttf', 32).render(
                     "{ElapsedTime}".format(ElapsedTime=formatted_elapsed_time), 1, c.WHITE
                 )
 
@@ -726,9 +747,9 @@ class InGame(GameState):
                         if pygame.key.get_mods() & pygame.KMOD_LSHIFT:
                             settings['GOD MODE'] = True
                         else:
-                            self.manager.go_to(TitleScreen())
+                            self.manager.go_to(PauseScreen(chosen_hero=self.hero, timer=self.timer, seed=self.seed))
                     else:
-                        self.manager.go_to(TitleScreen())
+                        self.manager.go_to(PauseScreen(chosen_hero=self.hero, timer=self.timer, seed=self.seed))
 
             elif event.type == pygame.KEYUP:
                 # Cancel the motion by adding the opposite of the keydown situation
@@ -884,8 +905,8 @@ class DeathScreen(GameState):
 
     def draw(self, screen):
         screen.fill(c.BLACK)
-        death_text = h.load_font("Melma.ttf", 32).render(
-            "You Died! \n Press any key to try again.", 1, c.RED
+        death_text = h.load_font("luximb.ttf", 32).render(
+            "You Died! Press any key to try again.", 1, c.RED
         )
         death_text_x = death_text.get_rect().width / 2
         death_text_y = death_text.get_rect().height / 2
@@ -893,7 +914,7 @@ class DeathScreen(GameState):
 
         screen.blit(death_text, centered_pos)
 
-        seed_text = h.load_font("Melma.ttf", 16).render(
+        seed_text = h.load_font("luximb.ttf", 16).render(
             "SEED: {0}".format(self.seed), 1, c.BLUE
         )
         seed_rect = seed_text.get_rect()
@@ -928,16 +949,25 @@ class WinScreen(GameState):
     def draw(self, screen):
         screen.fill(c.BLACK)
         # Print the "YOU WIN!" text
-        win_text = h.load_font("Melma.ttf", 32).render(
-            "You Win! \n Press any key to try again.", 1, c.GREEN
+        win_text = h.load_font("luximb.ttf", 32).render(
+            "You Win! Press any key to try again.", 1, c.GREEN
         )
         centered_pos = win_text.get_rect()
         centered_pos.center = (settings['WIDTH']/2, settings['HEIGHT']/2)
         screen.blit(win_text, centered_pos)
 
         # Print the final time
-        formatted_elapsed_time = self.elapsed_time.total_seconds()
-        elapsed_time_display = h.load_font('BLKCHCRY.TTF', 48).render(
+        partials = self.elapsed_time % 60
+        seconds = ((self.elapsed_time - partials) // 60) % 60
+        minutes = (((self.elapsed_time - partials) // 60) - seconds) // 60
+        if len(str(partials)) != 2:
+            partials = "0" + str(partials)
+        if len(str(seconds)) != 2:
+            seconds = "0" + str(seconds)
+        if len(str(minutes)) != 2:
+            minutes = "0" + str(minutes)
+        formatted_elapsed_time = "{minutes}:{seconds}:{partials}".format(minutes=minutes, seconds=seconds, partials=partials)
+        elapsed_time_display = h.load_font('luximb.ttf', 48).render(
             "Final Time: {ElapsedTime}".format(ElapsedTime=formatted_elapsed_time), 1, c.GREEN
         )
         elapsed_time_display_rect = elapsed_time_display.get_rect()
@@ -946,7 +976,7 @@ class WinScreen(GameState):
         screen.blit(elapsed_time_display, elapsed_time_display_rect)
 
         # Print the seed
-        seed_text = h.load_font("Melma.ttf", 16).render(
+        seed_text = h.load_font("luximb.ttf", 16).render(
             "SEED: {0}".format(self.seed), 1, c.BLUE
         )
         seed_rect = seed_text.get_rect()
@@ -961,6 +991,30 @@ class WinScreen(GameState):
         for event in events:
             if event.type == pygame.KEYDOWN:
                 self.manager.go_to(TitleScreen())
+
+
+class PauseScreen(Menu):
+    title = "Pause"
+    options = ["Resume", "Restart", "Quit"]
+
+    def __init__(self, timer, chosen_hero, seed):
+        super().__init__()
+        self.timer = timer
+        self.chosen_hero = chosen_hero
+        self.seed = seed
+        self.selections = ['go back', InGame(timer=self.timer, chosen_hero=self.chosen_hero, seed=self.seed), TitleScreen()]
+
+    def extra_draw(self, screen):
+        """
+        Print the seed
+        """
+        seed_text = h.load_font("luximb.ttf", 16).render(
+            "SEED: {0}".format(self.seed), 1, c.BLUE
+        )
+        seed_rect = seed_text.get_rect()
+        seed_rect.right = settings['WIDTH']
+        seed_rect.bottom = settings['HEIGHT']
+        screen.blit(seed_text, seed_rect)
 
 
 class Quit(GameState):
