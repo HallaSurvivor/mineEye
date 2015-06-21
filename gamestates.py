@@ -19,7 +19,7 @@ try:
     seeds = pickle.loads(f.read())
     f.close()
 except FileNotFoundError:
-    seeds = [''] * 6
+    seeds = [''] * 10
     f = open('seeds', 'wb')
     f.write(pickle.dumps(seeds))
     f.close()
@@ -71,6 +71,7 @@ class GameStateManager(object):
         self.state = None
         self.done = False
         self.go_to(TitleScreen())
+        self.previous_state = None
 
     def go_to(self, gamestate):
         """
@@ -78,6 +79,10 @@ class GameStateManager(object):
 
         If the new gamestate has a music file associated with it, play that music.
         """
+        if type(gamestate) is not TitleScreen:
+            self.previous_state = self.state
+        else:
+            self.previous_state = None
 
         self.state = gamestate
         self.state.manager = self
@@ -86,6 +91,16 @@ class GameStateManager(object):
             h.play_music(gamestate.musicfile)
         if not settings['PLAY_MUSIC']:
             pygame.mixer.music.stop()
+
+    def go_back(self):
+        """
+        Return to the previous gamestate to fix an infinite recursion bug with menus.
+        """
+        if self.previous_state is not None:
+            self.state = self.previous_state
+        else:
+            self.go_to(TitleScreen())
+        self.previous_state = None
 
 
 class Menu(GameState):
@@ -128,7 +143,7 @@ class Menu(GameState):
         rect_list = h.create_menu(screen, self.title, self.options, self.descriptions)
         if self.selections is not None:
             for index, option in enumerate(self.selections):
-                if type(option) == str and self.allow_on_off:
+                if type(option) == str and self.allow_on_off and option != 'go back':
                     if settings[option]:
                         on_rect = on.get_rect()
                         on_rect.bottomright = rect_list[index].bottomleft
@@ -149,6 +164,7 @@ class Menu(GameState):
     def handle_events(self, events):
         for e in events:
             if e.type == pygame.KEYDOWN:
+                # Moving the Selection Cursor
                 if e.key == settings['DOWN'] or e.key == pygame.K_DOWN:
                     if self.selected < self.list_size:
                         self.selected += 1
@@ -156,22 +172,30 @@ class Menu(GameState):
                     if self.selected > 0:
                         self.selected -= 1
 
+                # Going back a screen
                 elif e.key == settings['LEFT'] or e.key == pygame.K_LEFT:
-                    self.manager.go_to(TitleScreen())
+                    self.manager.go_back()
 
+                # Selecting an option
                 elif e.key == pygame.K_SPACE or e.key == settings['RIGHT'] or \
                             e.key == pygame.K_RIGHT or e.key == pygame.K_RETURN:
                     if self.selections is not None:
                         if type(self.selections[self.selected]) == str:
-                            if settings[self.selections[self.selected]]:
-                                settings[self.selections[self.selected]] = False
+                            # if it's a back button
+                            if self.selections[self.selected] == 'go back':
+                                self.manager.go_back()
 
+                            # if it's a settings modifier
                             else:
-                                settings[self.selections[self.selected]] = True
+                                if settings[self.selections[self.selected]]:
+                                    settings[self.selections[self.selected]] = False
 
-                            f = open('settings', 'wb')
-                            f.write(pickle.dumps(settings))
-                            f.close()
+                                else:
+                                    settings[self.selections[self.selected]] = True
+
+                                f = open('settings', 'wb')
+                                f.write(pickle.dumps(settings))
+                                f.close()
 
                         else:
                             self.manager.go_to(self.selections[self.selected])
@@ -192,32 +216,67 @@ class TitleScreen(Menu):
 
     def __init__(self):
         super().__init__()
-
         self.selections = [ChooseHero(timer=True), PlayerMaps(), ChangeSettings(), Quit()]
 
 
 class PlayerMaps(Menu):
     """
-    A place for the player to store maps based on certain seeds.
+    A place for the player to store maps based on certain seeds. (page 1)
 
     This helps with speed running by allowing the user to save/add
     certain "good" maps to more directly compare skill to other players.
     """
     title = 'Custom Seeded Maps'
     descriptions = ['', '', '', '', '', 'use backspace to change an existing seed']
-    options = ['EMPTY'] * 6
+    options = ['EMPTY'] * 5
+    options.append('NEXT PAGE')
 
     def __init__(self):
         super().__init__()
-        self.options = ['EMPTY'] * 6
+        self.options = ['EMPTY'] * 5
+        self.options.append('NEXT PAGE')
         for index, seed in enumerate(seeds):
-            if seed != '':
-                self.options[index] = seed
+            if index < 5:
+                if seed != '':
+                    self.options[index] = seed
 
         self.selections = []
         for index, option in enumerate(self.options):
             if option == 'EMPTY':
                 self.selections.append(AddSeed(index))
+            elif option == 'NEXT PAGE':
+                self.selections.append(PlayerMaps2())
+            else:
+                self.selections.append(ChooseHero(timer=True, seed=option))
+
+
+class PlayerMaps2(Menu):
+    """
+    A place for the player to store maps based on certain seeds. (page 2)
+
+    This helps with speed running by allowing the user to save/add
+    certain "good" maps to more directly compare skill to other players.
+    """
+    title = 'Custom Seeded Maps'
+    descriptions = ['', '', '', '', '', 'use backspace to change an existing seed']
+    options = ['EMPTY'] * 5
+    options.append('LAST PAGE')
+
+    def __init__(self):
+        super().__init__()
+        self.options = ['EMPTY'] * 5
+        self.options.append('LAST PAGE')
+        for index, seed in enumerate(seeds):
+            if index > 4:
+                if seed != '':
+                    self.options[index - 5] = seed
+
+        self.selections = []
+        for index, option in enumerate(self.options):
+            if option == 'EMPTY':
+                self.selections.append(AddSeed(index + 5))
+            elif option == 'LAST PAGE':
+                self.selections.append('go back')
             else:
                 self.selections.append(ChooseHero(timer=True, seed=option))
 
@@ -252,7 +311,7 @@ class AddSeed(Menu):
                             self.selected -= 1
 
                     elif e.key == settings['LEFT'] or e.key == pygame.K_LEFT:
-                        self.manager.go_to(TitleScreen())
+                        self.manager.go_back()
 
                     elif e.key == pygame.K_SPACE or e.key == settings['RIGHT'] or e.key == pygame.K_RIGHT:
                         if self.selected == 0:
@@ -365,7 +424,7 @@ class ChangeBinds(Menu):
                         if self.selected > 0:
                             self.selected -= 1
                     elif e.key == settings['LEFT'] or e.key == pygame.K_LEFT:
-                        self.manager.go_to(TitleScreen())
+                        self.manager.go_back()
                     elif e.key == pygame.K_SPACE or e.key == settings['RIGHT'] or \
                             e.key == pygame.K_RIGHT or e.key == pygame.K_RETURN:
                         self.options[self.selected] = ">" + self.options[self.selected] + "<"
@@ -396,6 +455,7 @@ class ChangeBinds(Menu):
 
                             self.options[self.selected] = self.options[self.selected][1:-1]
                             self.modifying = False
+
                             f = open('settings', 'wb')
                             f.write(pickle.dumps(settings))
                             f.close()
