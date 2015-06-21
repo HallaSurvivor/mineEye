@@ -34,8 +34,7 @@ import pygame
 
 #Defaults:
 SCREEN_RESOLUTION = (1366, 768)
-WIDTH = 1366
-HEIGHT = 768
+
 DEBUG = True
 
 PLAY_MUSIC = True
@@ -49,6 +48,9 @@ RIGHT = pygame.K_d
 BOMB = pygame.K_SPACE
 
 PAUSE = pygame.K_ESCAPE
+
+WIDTH = SCREEN_RESOLUTION[0]
+HEIGHT = SCREEN_RESOLUTION[1]
 
 
 if not os.path.exists('settings'):

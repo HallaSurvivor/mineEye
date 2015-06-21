@@ -196,7 +196,15 @@ class Menu(GameState):
                                 f = open('settings', 'wb')
                                 f.write(pickle.dumps(settings))
                                 f.close()
+                        elif type(self.selections[self.selected]) == tuple:
+                            # if it's a screen resolution
+                            settings['SCREEN_RESOLUTION'] = self.selections[self.selected]
+                            settings['WIDTH'] = self.selections[self.selected][0]
+                            settings['HEIGHT'] = self.selections[self.selected][1]
 
+                            f = open('settings', 'wb')
+                            f.write(pickle.dumps(settings))
+                            f.close()
                         else:
                             self.manager.go_to(self.selections[self.selected])
 
@@ -363,11 +371,11 @@ class ChangeSettings(Menu):
     A game state for changing local variables like PLAY_MUSIC.
     """
     title = "Settings"
-    options = ["Play Music", "Play Sound Effects", "Change Keybinds"]
+    options = ["Play Music", "Play Sound Effects", "Change Keybinds", "Change Aspect Ratio"]
 
     def __init__(self):
         super().__init__()
-        self.selections = ['PLAY_MUSIC', 'PLAY_SFX', ChangeBinds()]
+        self.selections = ['PLAY_MUSIC', 'PLAY_SFX', ChangeBinds(), ChangeRatio()]
 
 
 class ChangeBinds(Menu):
@@ -461,6 +469,15 @@ class ChangeBinds(Menu):
                             f.close()
             else:
                 pass
+
+
+class ChangeRatio(Menu):
+    title = "Change Aspect Ratio"
+    options = ["16:9", "4:3"]
+
+    def __init__(self):
+        super().__init__()
+        self.selections = [(1600, 900), (640, 480)]
 
 
 class InGame(GameState):
