@@ -32,7 +32,7 @@ class GameState(object):
     """
 
     musicfile = None
-    background_tile = 'sand.jpg'
+    background_tile = 'dirt.jpg'
 
     def __init__(self):
         self.default_background = h.create_background(h.load(self.background_tile))
@@ -122,8 +122,6 @@ class Menu(GameState):
         self.list_size = len(self.options) - 1
 
         self.rect_list = []
-
-
 
     def extra_draw(self, screen):
         """
