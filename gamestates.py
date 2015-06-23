@@ -18,7 +18,7 @@ try:
     seeds = pickle.loads(f.read())
     f.close()
 except FileNotFoundError:
-    seeds = [''] * 10
+    seeds = [''] * 11
     f = open('seeds', 'wb')
     f.write(pickle.dumps(seeds))
     f.close()
@@ -245,6 +245,10 @@ class Menu(GameState):
         elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             self.select_option()
 
+        elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
+            if self.title == 'Custom Seeded Maps':
+                self.manager.go_to(AddSeed(self.selected))
+
     def handle_keyboard(self, event):
         """
         Handle all of the keyboard inputs.
@@ -298,7 +302,7 @@ class PlayerMaps(Menu):
     certain "good" maps to more directly compare skill to other players.
     """
     title = 'Custom Seeded Maps'
-    descriptions = ['', '', '', '', '', 'use backspace to change an existing seed']
+    descriptions = ['', '', '', '', '', 'right click or use backspace to change an existing seed']
     options = ['EMPTY'] * 5
     options.append('NEXT PAGE')
 
@@ -329,14 +333,13 @@ class PlayerMaps2(Menu):
     certain "good" maps to more directly compare skill to other players.
     """
     title = 'Custom Seeded Maps'
-    descriptions = ['', '', '', '', '', 'use backspace to change an existing seed']
+    descriptions = ['', '', '', '', '', 'right click or use backspace to change an existing seed']
     options = ['EMPTY'] * 5
     options.append('LAST PAGE')
 
     def __init__(self):
         super().__init__()
-        self.options = ['EMPTY'] * 5
-        self.options.append('LAST PAGE')
+        self.options = ['EMPTY'] * 6
         for index, seed in enumerate(seeds):
             if index > 4:
                 if seed != '':
@@ -346,8 +349,6 @@ class PlayerMaps2(Menu):
         for index, option in enumerate(self.options):
             if option == 'EMPTY':
                 self.selections.append(AddSeed(index + 5))
-            elif option == 'LAST PAGE':
-                self.selections.append('go back')
             else:
                 self.selections.append(ChooseHero(timer=True, seed=option))
 
@@ -357,7 +358,9 @@ class AddSeed(Menu):
     Provide a means of adding/changing a seed to use to spawn a world.
     """
     title = 'Add Custom Seeds'
-    options = ['Push Space To Edit Seed:', 'Save']
+    options = ['Edit Seed:', 'Save']
+
+    show_back_button = False
 
     def __init__(self, index):
         super().__init__()
@@ -366,51 +369,59 @@ class AddSeed(Menu):
         self.seed = str(seeds[self.index])
         self.descriptions = [self.seed, ""]
 
-    def handle_events(self, events):
+    def select_option(self):
+        """
+        Overwrite the basic selection feature to enable seed modification and saving.
+        """
+        if self.selected == 0 and not self.modifying:
+            self.options[self.selected] = ">" + self.options[self.selected] + "<"
+            self.modifying = True
+        else:
+            global seeds
+            if self.options[0][0] == ">":
+                self.options[0] = self.options[0][1:-1]
+
+            seeds[self.index] = self.seed
+            f = open('seeds', 'wb')
+            f.write(pickle.dumps(seeds))
+            f.close()
+            self.manager.go_to(PlayerMaps())
+
+    def handle_keyboard(self, event):
         """
         Override the default event checking in order to check for any key press.
         """
         self.descriptions = [self.seed, ""]
-        for e in events:
-            if e.type == pygame.KEYDOWN:
-                if not self.modifying:
-                    if e.key == settings['DOWN'] or e.key == pygame.K_DOWN:
-                        if self.selected < self.list_size:
-                            self.selected += 1
-                    elif e.key == settings['UP'] or e.key == pygame.K_UP:
-                        if self.selected > 0:
-                            self.selected -= 1
+        if event.type == pygame.KEYDOWN:
+            if not self.modifying:
+                if event.key == settings['DOWN'] or event.key == pygame.K_DOWN:
+                    if self.selected < self.list_size:
+                        self.selected += 1
+                elif event.key == settings['UP'] or event.key == pygame.K_UP:
+                    if self.selected > 0:
+                        self.selected -= 1
 
-                    elif e.key == settings['LEFT'] or e.key == pygame.K_LEFT:
-                        self.manager.go_back()
+                elif event.key == settings['LEFT'] or event.key == pygame.K_LEFT:
+                    self.manager.go_back()
 
-                    elif e.key == pygame.K_SPACE or e.key == settings['RIGHT'] or e.key == pygame.K_RIGHT:
-                        if self.selected == 0:
-                            self.options[self.selected] = ">" + self.options[self.selected] + "<"
-                            self.modifying = True
-                        else:
-                            global seeds
-                            seeds[self.index] = self.seed
-                            f = open('seeds', 'wb')
-                            f.write(pickle.dumps(seeds))
-                            f.close()
-                            self.manager.go_to(PlayerMaps())
+                elif event.key == pygame.K_SPACE or event.key == settings['RIGHT'] or event.key == pygame.K_RIGHT:
+                    self.select_option()
+
+            else:
+                if event.key == pygame.K_ESCAPE or event.key == pygame.K_SPACE or event.key == pygame.K_RETURN:
+                    self.modifying = False
+                    self.options[self.selected] = self.options[self.selected][1:-1]
+
+                elif event.key == pygame.K_BACKSPACE:
+                    self.seed = self.seed[:-1]
 
                 else:
-                    if e.key == pygame.K_ESCAPE or e.key == pygame.K_SPACE or e.key == pygame.K_RETURN:
-                        self.modifying = False
-                        self.options[self.selected] = self.options[self.selected][1:-1]
-
-                    elif e.key == pygame.K_BACKSPACE:
-                        self.seed = self.seed[:-1]
-
-                    else:
-                        if e.key in [pygame.K_0, pygame.K_1, pygame.K_2, pygame.K_3,
-                                     pygame.K_4, pygame.K_5, pygame.K_6, pygame.K_7,
-                                     pygame.K_8, pygame.K_9]:
-                            self.seed += pygame.key.name(e.key)
-            else:
-                pass
+                    if event.key in [pygame.K_0, pygame.K_1, pygame.K_2, pygame.K_3,
+                                 pygame.K_4, pygame.K_5, pygame.K_6, pygame.K_7,
+                                 pygame.K_8, pygame.K_9]:
+                        self.seed += pygame.key.name(event.key)
+        else:
+            pass
 
 
 class ChooseHero(Menu):
