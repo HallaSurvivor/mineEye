@@ -123,6 +123,8 @@ class Menu(GameState):
 
         self.rect_list = []
 
+
+
     def extra_draw(self, screen):
         """
         A blank draw method called in the main draw function.
@@ -139,7 +141,6 @@ class Menu(GameState):
         Draw the title and all the options/descriptions to the screen.
         :param screen: The pygame screen on which to draw
         """
-
         on = h.load_font('melma.ttf', 16).render(
             'On', 1, c.BLACK
         )
@@ -187,6 +188,11 @@ class Menu(GameState):
             screen.blit(back_button, back_rect)
 
         self.extra_draw(screen)
+
+        cursor = h.load('cursor.png')
+        cursor_rect = cursor.get_rect()
+        cursor_rect.center = pygame.mouse.get_pos()
+        screen.blit(cursor, cursor_rect)
 
     def update(self):
         pass
@@ -680,6 +686,17 @@ class InGame(GameState):
         else:
             self.manager.go_to(WinScreen(self.seed, self.elapsed_time))
 
+    def draw_cursor(self, screen):
+        """
+        Draw a cursor to the screen
+
+        :param screen: the screen to draw to
+        """
+        cursor = h.load('cursor.png')
+        cursor_rect = cursor.get_rect()
+        cursor_rect.center = pygame.mouse.get_pos()
+        screen.blit(cursor, cursor_rect)
+
     def draw(self, screen):
         """
         Overwrites draw in the GameState class. Draws all of the blocks and enemies in the levels in this
@@ -691,6 +708,7 @@ class InGame(GameState):
         self.world.draw(screen)
         self.hero.draw(screen)
         self.draw_hud(screen)
+        self.draw_cursor(screen)
 
     def update(self):
         """
@@ -1058,6 +1076,8 @@ class WinScreen(GameState):
 class PauseScreen(Menu):
     title = "Pause"
     options = ["Resume", "Restart", "Quit"]
+
+    show_back_button = False
 
     def __init__(self, timer, chosen_hero, seed):
         super().__init__()
