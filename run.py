@@ -8,6 +8,7 @@ import gamestates
 pygame.init()
 screen = pygame.display.set_mode(settings['SCREEN_RESOLUTION'], pygame.FULLSCREEN)
 pygame.display.set_caption("mineEye")
+# pygame.mouse.set_visible(False)
 clock = pygame.time.Clock()
 
 manager = gamestates.GameStateManager()

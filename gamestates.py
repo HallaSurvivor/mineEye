@@ -112,7 +112,7 @@ class Menu(GameState):
     descriptions = None
     selections = None
 
-    allow_on_off = True
+    show_back_button = True
 
     def __init__(self):
         super().__init__()
@@ -120,6 +120,8 @@ class Menu(GameState):
 
         self.selected = 0
         self.list_size = len(self.options) - 1
+
+        self.rect_list = []
 
     def extra_draw(self, screen):
         """
@@ -150,23 +152,39 @@ class Menu(GameState):
 
         screen.blit(self.default_background, (0, 0))
 
-        rect_list = h.create_menu(screen, self.title, self.options, self.descriptions)
+        if not self.rect_list:
+            self.rect_list = h.create_menu(screen, self.title, self.options, self.descriptions)
+        else:
+            h.create_menu(screen, self.title, self.options, self.descriptions)
         if self.selections is not None:
             for index, option in enumerate(self.selections):
-                if type(option) == str and self.allow_on_off and option != 'go back':
+                if type(option) == str and option != 'go back':
                     if settings[option]:
                         on_rect = on.get_rect()
-                        on_rect.bottomright = rect_list[index].bottomleft
+                        on_rect.bottomright = self.rect_list[index].bottomleft
                         screen.blit(on, on_rect)
                     else:
                         off_rect = off.get_rect()
-                        off_rect.bottomright = rect_list[index].bottomleft
+                        off_rect.bottomright = self.rect_list[index].bottomleft
                         screen.blit(off, off_rect)
 
         selected_indicator = h.load('pickaxe.png')
         selected_rect = selected_indicator.get_rect()
-        selected_rect.bottomleft = rect_list[self.selected].bottomright
+        selected_rect.bottomleft = self.rect_list[self.selected].bottomright
         screen.blit(selected_indicator, selected_rect)
+
+        if self.show_back_button:
+            back_button = h.load_font('melma.ttf', 20).render(
+                'Back', 1, c.BLACK
+            )
+            back_rect = back_button.get_rect()
+            back_rect.bottomleft = (0, settings['HEIGHT'])
+            if back_rect not in self.rect_list:
+                self.rect_list.append(back_rect)
+                self.list_size += 1
+
+                self.selections.append('go back')
+            screen.blit(back_button, back_rect)
 
         self.extra_draw(screen)
 
@@ -174,54 +192,85 @@ class Menu(GameState):
         pass
 
     def handle_events(self, events):
-        for e in events:
-            if e.type == pygame.KEYDOWN:
-                # Moving the Selection Cursor
-                if e.key == settings['DOWN'] or e.key == pygame.K_DOWN:
-                    if self.selected < self.list_size:
-                        self.selected += 1
-                elif e.key == settings['UP'] or e.key == pygame.K_UP:
-                    if self.selected > 0:
-                        self.selected -= 1
+        for event in events:
+            self.handle_keyboard(event)
+            self.handle_mouse(event)
 
-                # Going back a screen
-                elif e.key == settings['LEFT'] or e.key == pygame.K_LEFT:
+    def select_option(self):
+        """
+        Activate the currently highlighted option.
+        """
+        if self.selections is not None:
+            if type(self.selections[self.selected]) == str:
+                # if it's a back button
+                if self.selections[self.selected] == 'go back':
                     self.manager.go_back()
 
-                # Selecting an option
-                elif e.key == pygame.K_SPACE or e.key == settings['RIGHT'] or \
-                            e.key == pygame.K_RIGHT or e.key == pygame.K_RETURN:
-                    if self.selections is not None:
-                        if type(self.selections[self.selected]) == str:
-                            # if it's a back button
-                            if self.selections[self.selected] == 'go back':
-                                self.manager.go_back()
+                # if it's a settings modifier
+                else:
+                    if settings[self.selections[self.selected]]:
+                        settings[self.selections[self.selected]] = False
 
-                            # if it's a settings modifier
-                            else:
-                                if settings[self.selections[self.selected]]:
-                                    settings[self.selections[self.selected]] = False
+                    else:
+                        settings[self.selections[self.selected]] = True
 
-                                else:
-                                    settings[self.selections[self.selected]] = True
+                    f = open('settings', 'wb')
+                    f.write(pickle.dumps(settings))
+                    f.close()
+            elif type(self.selections[self.selected]) == tuple:
+                # if it's a screen resolution
+                settings['SCREEN_RESOLUTION'] = self.selections[self.selected]
+                settings['WIDTH'] = self.selections[self.selected][0]
+                settings['HEIGHT'] = self.selections[self.selected][1]
 
-                                f = open('settings', 'wb')
-                                f.write(pickle.dumps(settings))
-                                f.close()
-                        elif type(self.selections[self.selected]) == tuple:
-                            # if it's a screen resolution
-                            settings['SCREEN_RESOLUTION'] = self.selections[self.selected]
-                            settings['WIDTH'] = self.selections[self.selected][0]
-                            settings['HEIGHT'] = self.selections[self.selected][1]
+                f = open('settings', 'wb')
+                f.write(pickle.dumps(settings))
+                f.close()
+            else:
+                self.manager.go_to(self.selections[self.selected])
 
-                            f = open('settings', 'wb')
-                            f.write(pickle.dumps(settings))
-                            f.close()
-                        else:
-                            self.manager.go_to(self.selections[self.selected])
+    def handle_mouse(self, event):
+        """
+        Handle all the clicking and mouse motion events.
 
-                if self.title == 'Custom Seeded Maps' and e.key == pygame.K_BACKSPACE:
-                    self.manager.go_to(AddSeed(self.selected))
+        :param event: A single event from the list.
+        """
+
+        if event.type == pygame.MOUSEMOTION:
+            pos = event.pos
+            for index, rect in enumerate(self.rect_list):
+                if rect.collidepoint(pos):
+                    self.selected = index
+
+        elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            self.select_option()
+
+    def handle_keyboard(self, event):
+        """
+        Handle all of the keyboard inputs.
+
+        :param event: An event from the pygame event list
+        """
+        if event.type == pygame.KEYDOWN:
+            # Moving the Selection Cursor
+            if event.key == settings['DOWN'] or event.key == pygame.K_DOWN:
+                if self.selected < self.list_size:
+                    self.selected += 1
+            elif event.key == settings['UP'] or event.key == pygame.K_UP:
+                if self.selected > 0:
+                    self.selected -= 1
+
+            # Going back a screen
+            elif event.key == settings['LEFT'] or event.key == pygame.K_LEFT:
+                self.manager.go_back()
+
+            # Selecting an option
+            elif event.key == pygame.K_SPACE or event.key == settings['RIGHT'] or \
+                        event.key == pygame.K_RIGHT or event.key == pygame.K_RETURN:
+                self.select_option()
+
+            if self.title == 'Custom Seeded Maps' and event.key == pygame.K_BACKSPACE:
+                self.manager.go_to(AddSeed(self.selected))
 
 
 class TitleScreen(Menu):
@@ -233,6 +282,8 @@ class TitleScreen(Menu):
 
     title = 'Press Space to begin!'
     options = ['Start!', 'My Maps', 'Settings!', 'Quit!']
+
+    show_back_button = False
 
     def __init__(self):
         super().__init__()
