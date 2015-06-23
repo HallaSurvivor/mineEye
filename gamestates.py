@@ -1,5 +1,27 @@
 """
-Store all the game states as classes that are instantiated.
+Store all the GameStates as classes that are instantiated.
+
+GameStates exist as classes that are drawn to the screen and updated.
+    Each GameState has three methods, draw, update, handle_events.
+
+    draw is called in run.py and draws everything in the game state
+
+    update is called in run.py immediately before draw, and changes the positions
+    of objects on screen based on user input, enemy motion algorithms, etc.
+
+    handle_events is called in run.py and is passed a list of all the pygame
+    events that occur. Depending on the event that occurs, i.e. pushing the W
+    key, a different change happens in the game.
+
+GameState is subclassed by Menu, which automatically creates a menu of items
+
+the GameState is changed via GameStateManager.
+    The GameStateManager has two methods, go_to and go_back.
+
+    go_to takes an instance of a GameState, and sets that to be the
+    active GameState - the one drawn and updated in run.py
+
+    go_back simply returns to the previous GameState.
 """
 from math import hypot
 import pickle
