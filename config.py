@@ -29,6 +29,7 @@ This is meant to test world generation and enemy effects
 in a way that allows the user to remain alive indefinitely.
 """
 import os
+import logging
 import pickle
 import pygame
 

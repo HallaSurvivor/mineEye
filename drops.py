@@ -61,6 +61,7 @@ class Weapon(object):
         they are included in case of an exception, such as
         creating a sprite dynamically.
     """
+    name = ""
     style = None
     power = 0
     range = 0
@@ -129,6 +130,7 @@ class Weapon1(Weapon):
     """
     The first weapon
     """
+    name = 'weapon 1'
     style = c.MELEE
     power = 50
     range = 128
@@ -144,6 +146,7 @@ class Weapon2(Weapon):
     """
     Another weapon
     """
+    name = 'weapon 2'
     style = c.MELEE
     power = 100
     range = 64

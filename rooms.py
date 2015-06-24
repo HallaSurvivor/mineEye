@@ -11,12 +11,15 @@ This larger room, comprised of a semi-random selection of the rooms inside room_
 is what makes up the Hero's world. The semi-random generation takes place inside gamestates.py
 """
 import random
+import logging
 from math import hypot
 import pygame
 from config import settings
 import enemy
 import drops
 import helpers as h
+
+module_logger = logging.getLogger('mineEye.rooms')
 
 MoveRight = 0
 MoveLeft = 1
@@ -188,7 +191,6 @@ class Chest(h.Sprite):
                 contents.append(random.choice(drops.all_weapons)(self.rect.center))
         elif self.is_item_chest:
             pass
-
         return contents
 
 
@@ -233,6 +235,8 @@ class Room(object):
             the generateworld() operation to allow for users to save everything
             about a room.
         """
+
+        self.logger = logging.getLogger('mineEye.rooms.Room')
 
         self.seed = seed
         random.seed(self.seed)
@@ -358,6 +362,7 @@ class Room(object):
 
             # Damage the player if the block is a spike
             if block.damage_player:
+                self.logger.info('player touched spike')
                 hero.damage(block.damage)
 
             # End the game timer if the block is the end
@@ -376,6 +381,7 @@ class Room(object):
             if hero.take_falldamage:
                 damage = -self.yspeed - 50
                 if damage > 0:
+                    self.logger.info('hero took fall damage')
                     hero.damage(damage)
 
             if y > 0:
@@ -395,6 +401,7 @@ class Room(object):
 
             # Damage the player if the block is a spike
             if block.damage_player:
+                self.logger.info('player touched spike')
                 hero.damage(block.damage)
 
             # End the game timer if the block is the end
@@ -410,6 +417,7 @@ class Room(object):
         enemy_hit_list = pygame.sprite.spritecollide(hero, self.enemy_list, False)
         for e in enemy_hit_list:
             if e.contact_damage:
+                self.logger.info('contact damage - {0}'.format(e))
                 hero.damage(e.contact_damage)
 
     def calc_gravity(self):
@@ -490,13 +498,16 @@ class Room(object):
         for block in self.block_list:
             hit_list = pygame.sprite.spritecollide(block, self.enemy_projectile_list, False)
             for proj in hit_list:
+                self.logger.debug('destroyed projectile fired by {0} because it hit a wall'.format(proj.owner))
                 proj.kill()
 
         for proj in self.enemy_projectile_list:
             hit_list = pygame.sprite.spritecollide(proj, self.hero_projectile_list, False)
             if len(hit_list) > 0:
+                self.logger.debug('destroyed enemy projectile fired by {0} because it hit a player projectile'.format(proj.owner))
                 proj.kill()
             for hero_proj in hit_list:
+                self.logger.debug('destroyed player projectile because it hit an enemy projectile')
                 hero_proj.kill()
 
     def det_bombs(self, hero):
@@ -515,11 +526,13 @@ class Room(object):
                 for block in self.block_list:
                     distance = hypot(block.rect.centerx - bomb.rect.centerx, block.rect.centery - bomb.rect.centery)
                     if distance < bomb.radius and block.breakable:
+                        self.logger.info('destroyed block at {0} with bomb'.format((block.rect.x, block.rect.y)))
                         block.kill()
 
                 for e in self.enemy_list:
                     distance = hypot(e.rect.centerx - bomb.rect.centerx, e.rect.centery - bomb.rect.centery)
                     if distance < bomb.radius:
+                        self.logger.info('damaged {0} with bomb'.format(e))
                         if not hero.bomb_control:
                             e.damage(100)
                         else:
@@ -529,11 +542,13 @@ class Room(object):
                     distance = hypot(chest.rect.centerx - bomb.rect.centerx, chest.rect.centery - bomb.rect.centery)
                     if distance < bomb.radius:
                         if not hero.bomb_control:
+                            self.logger.info('destroyed chest at {0} with bomb'.format((chest.rect.x, chest.rect.y)))
                             chest.kill()
 
                 hero_distance = hypot(hero.rect.centerx - bomb.rect.centerx, hero.rect.centery - bomb.rect.centery)
                 if hero_distance < bomb.radius:
                     if not hero.bomb_control:
+                        self.logger.info('damage self with bomb')
                         hero.damage(25)
 
                 bomb.kill()
@@ -555,6 +570,7 @@ class Room(object):
         """
         hit_list = pygame.sprite.spritecollide(hero, self.enemy_projectile_list, True)
         for proj in hit_list:
+            self.logger.info('Hero damaged by enemy projectile')
             hero.damage(proj.damage)
 
     def setspeed(self, setx, sety):
@@ -672,19 +688,30 @@ class World(Room):
         :param seed: The seed to use in random generation.
         """
         super().__init__(seed=seed)
+
+        random.seed(seed)
+
         self.background_string = 'background.png'
         self.background = h.create_background(h.load(self.background_string))
+        self.logger.debug('===Begin modifying rooms to align doors===')
 
         self.room_array = []
-        for room in rooms:
+        for index, room in enumerate(rooms):
+            self.logger.debug(' ')
+            self.logger.debug('next room: {0}'.format(index))
+            for row in room:
+                if type(row) != int:
+                    self.logger.debug(row)
+
             if len(self.room_array) == 0:
-                self.room_array += room
+                self.room_array += room[1:]  # get rid of the leading "move right" identifier
 
             else:
                 previous_door_location = 0
                 for char in self.room_array[-1]:
                     previous_door_location += 1
                     if char == "D":
+                        self.logger.debug("previous door location: {0}".format(previous_door_location))
                         break
 
                 new_door_location = 0
@@ -692,12 +719,15 @@ class World(Room):
                     if char != MoveDown and char != MoveLeft and char != MoveRight:
                         new_door_location += 1
                     if char == "D":
+                        self.logger.debug("new door location: {0}".format(new_door_location))
                         break
 
                 door_location = previous_door_location - new_door_location
+                self.logger.debug('net door location (prev - new): {0}'.format(door_location))
 
                 aligned_room = []
                 for row in room:
+                    # Add spaces (blank tile) to each row to line up its door with the previous room
                     if type(row) == str:
                         aligned_row = ""
                         for s in range(door_location):
@@ -706,3 +736,7 @@ class World(Room):
                         aligned_room.append(aligned_row)
 
                 self.room_array += aligned_room
+
+        self.logger.info('----====Finished World====----')
+        for row in self.room_array:
+            self.logger.info(row)

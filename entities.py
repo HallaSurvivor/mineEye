@@ -12,7 +12,7 @@ class Projectile(h.Sprite):
 
     This includes an image, a speed, and the damage it does.
     """
-    def __init__(self, image, center, changex, changey, damage):
+    def __init__(self, image, center, changex, changey, damage, owner):
         """
         Create the projectile with a certain image, center, and speed
         :param image: a pygame image to associate with the projectile
@@ -20,10 +20,12 @@ class Projectile(h.Sprite):
         :param changex: Int representing how quickly the projectile moves in the x direction
         :param changey: Int representing how quickly the projectile moves in the y direction
         :param damage: Int representing the amount of damage the projectile does on contact
+        :param owner: The sprite object which spawned the projectile
         """
         super().__init__()
 
         self.image = image
+        self.owner = owner
 
         self.changex = changex
         self.changey = changey

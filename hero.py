@@ -4,11 +4,14 @@ Exports the Heroes that the User can control as a list.
 All Heroes subclass Hero, which in turn subclasses pygame Sprites.
 """
 import os
+import logging
 import pygame
 import pyganim
 import entities
 import helpers as h
 from config import settings
+
+module_logger = logging.getLogger('mineEye.hero')
 
 
 class Hero(pygame.sprite.Sprite):
@@ -98,6 +101,8 @@ class Hero(pygame.sprite.Sprite):
         super().__init__()
 
         self.world = None
+
+        self.logger = logging.getLogger('mineEye.hero.Hero')
 
         # Mutable variables that items, etc. can change
         self.hp = self.base_hp
@@ -220,7 +225,9 @@ class Hero(pygame.sprite.Sprite):
         :param amount: Int representing how much damage was taken
         """
         if not settings['GOD MODE']:
+            self.logger.info('Hero took {0} damage'.format(amount))
             self.hp -= amount
+            self.logger.info('HP: {0}/{1}'.format(self.hp, self.base_hp))
 
     def drop_bomb(self):
         """
@@ -302,6 +309,8 @@ class Demo(Hero):
 
     def __init__(self):
         super().__init__()
+
+        self.logger = logging.getLogger('mineEye.hero.Demo')
         self.create_animation_dict()
         self.reset_all()
 
@@ -322,6 +331,8 @@ class Jumpy(Hero):
 
     def __init__(self):
         super().__init__()
+
+        self.logger = logging.getLogger('mineEye.hero.Jumpy')
         self.create_animation_dict()
         self.reset_all()
 
@@ -340,6 +351,8 @@ class Speedy(Hero):
 
     def __init__(self):
         super().__init__()
+
+        self.logger = logging.getLogger('mineEye.hero.Speedy')
         self.create_animation_dict()
         self.reset_all()
 

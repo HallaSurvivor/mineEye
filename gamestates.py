@@ -24,6 +24,7 @@ the GameState is changed via GameStateManager.
     go_back simply returns to the previous GameState.
 """
 from math import hypot
+import logging
 import pickle
 import random
 import pygame
@@ -33,13 +34,15 @@ import helpers as h
 import rooms
 import hero
 
-pygame.init()
+module_logger = logging.getLogger('mineEye.gamestates')
 
 try:
+    module_logger.debug('Try to load seeds')
     f = open('seeds', 'rb')
     seeds = pickle.loads(f.read())
     f.close()
 except FileNotFoundError:
+    module_logger.debug('Failed - creating seeds instead')
     seeds = [''] * 11
     f = open('seeds', 'wb')
     f.write(pickle.dumps(seeds))
@@ -93,6 +96,7 @@ class GameStateManager(object):
         self.done = False
         self.go_to(TitleScreen())
         self.previous_state = None
+        self.logger = logging.getLogger('mineEye.gamestates.GameStateManager')
 
     def go_to(self, gamestate):
         """
@@ -104,6 +108,12 @@ class GameStateManager(object):
             self.previous_state = self.state
         else:
             self.previous_state = None
+
+        if type(gamestate) is InGame:
+            self.logger.info('==Enter Game==')
+            self.logger.info('SEED: {0}'.format(gamestate.seed))
+            self.logger.info('HERO: {0}'.format(gamestate.hero))
+            gamestate.enter_world()
 
         self.state = gamestate
         self.state.manager = self
@@ -461,8 +471,17 @@ class ChooseHero(Menu):
 
     def __init__(self, timer=False, seed=None):
         super().__init__()
+
+        self.logger = logging.getLogger('mineEye.gamestates.ChooseHero')
+
         self.timer = timer
-        self.seed = seed
+        if seed is None:
+            self.seed = random.randint(0, 1000000000)
+            self.logger.info('Random Seed: {0}'.format(self.seed))
+        else:
+            self.seed = int(seed)
+            self.logger.info('PreSelected Seed: {0}'.format(self.seed))
+
         self.selections = [InGame(timer=self.timer, chosen_hero=player, seed=self.seed) for player in hero.hero_list]
 
 
@@ -592,38 +611,44 @@ class InGame(GameState):
 
     musicfile = 'Pathetique.mp3'
 
-    def __init__(self, timer=False, chosen_hero=hero.Demo, seed=None):
+    def __init__(self, seed, timer=False, chosen_hero=hero.Demo):
         """
         Instantiate the primary Game State.
 
         :param timer: A boolean. True if a timer is to be displayed in the top right, False if not.
         :param seed: The seed to use to generate the world.
+        :param chosen_hero: The hero who will enter the world.
         """
+
         super().__init__()
+
+        self.logger = logging.getLogger('mineEye.gamestates.InGame')
+
         self.manager = None
 
-        if seed is None:
-            self.seed = random.randint(0, 100000000000)
-        else:
-            self.seed = seed
-
-        random.seed(self.seed)
+        self.seed = seed
 
         self.all_sprites_list = pygame.sprite.Group()
-        try:
-            self.hero = chosen_hero()
-        except TypeError:
-            self.hero = chosen_hero
+        self.hero = chosen_hero()
 
         self.world = None
-        self.generate_world(30)
-        self.hero.world = self.world
 
         self.timer = timer
         self.elapsed_time = 0
 
         self.left_pressed = False
         self.right_pressed = False
+
+    def enter_world(self):
+        """
+        Create the world, and give the world to the Hero.
+
+        Avoids generating the world multiple times due to
+        multiple instances of GameState existing at once.
+        """
+        self.logger.info('--====NEW WORLD====--')
+        self.generate_world(30)
+        self.hero.world = self.world
 
     def draw_hud(self, screen):
         """
@@ -740,6 +765,8 @@ class InGame(GameState):
         self.hero.update()
 
         if self.hero.hp <= 0:
+            self.logger.info('Hero Died')
+            self.logger.debug('go to DeathScreen')
             self.die()
 
     def handle_events(self, events):
@@ -777,6 +804,7 @@ class InGame(GameState):
             if event.type == pygame.KEYDOWN:
                 if event.key == settings['LEFT']:
                     self.left_pressed = True
+                    self.logger.info('pressed [LEFT]')
 
                     if self.hero.moving_right:
                         self.world.changespeed(self.hero.actual_speed, 0)
@@ -788,6 +816,7 @@ class InGame(GameState):
 
                 elif event.key == settings['RIGHT']:
                     self.right_pressed = True
+                    self.logger.info('pressed [RIGHT]')
 
                     if self.hero.moving_left:
                         self.world.changespeed(-self.hero.actual_speed, 0)
@@ -798,6 +827,7 @@ class InGame(GameState):
                     self.hero.last_motion = 'right'
 
                 elif event.key == settings['UP']:
+                    self.logger.info('pressed [UP]')
                     if not self.hero.jumping:
 
                         # If the hero is on a platform:
@@ -817,12 +847,16 @@ class InGame(GameState):
                             self.hero.start_double_jump = True
 
                 elif event.key == settings['BOMB']:
+                    self.logger.info('pressed [BOMB]')
+
                     if self.hero.bombs > 0:
                         bomb = self.hero.drop_bomb()
                         self.world.bomb_list.add(bomb)
                         self.world.all_sprites.add(bomb)
 
                 elif event.key == settings['DOWN']:
+                    self.logger.info('pressed [DOWN]')
+
                     for drop in self.world.drops_list:
                         if drop.is_weapon:
                             if hypot(drop.rect.centerx - self.hero.rect.centerx,
@@ -830,31 +864,37 @@ class InGame(GameState):
 
                                 if drop.drop.style == 0: # Melee
                                     if self.hero.melee_weapon is not None:
+                                        self.logger.info('dropped old melee weapon ({0})'.format(self.hero.melee_weapon.name))
                                         self.world.all_sprites.add(self.hero.melee_weapon.sprite)
                                         self.world.drops_list.add(self.hero.melee_weapon.sprite)
+                                    self.logger.info('picked up new melee weapon ({0})'.format(drop.drop.name))
                                     self.hero.melee_weapon = drop.drop
 
                                 elif drop.drop.style == 1: # Ranged
                                     if self.hero.ranged_weapon is not None:
+                                        self.logger.info('dropped old ranged weapon ({0})'.format(self.hero.ranged_weapon.name))
                                         self.world.all_sprites.add(self.hero.ranged_weapon.sprite)
-                                        self.world.all_sprites.add(self.hero.ranged_weapon.sprite)
+                                        self.world.drops_sprites.add(self.hero.ranged_weapon.sprite)
+                                    self.logger.info('picked up new ranged weapon ({0})'.format(drop.drop.name))
                                     self.hero.ranged_weapon = drop.drop
                                 drop.kill()
 
-                # Quit to TitleScreen (eventually pause menu) if the user presses escape
+                # Enter pause menu
                 elif event.key == settings['PAUSE']:
-                    if settings['DEBUG']:
-                        if pygame.key.get_mods() & pygame.KMOD_LSHIFT:
-                            settings['GOD MODE'] = True
-                        else:
-                            self.manager.go_to(PauseScreen(chosen_hero=self.hero, timer=self.timer, seed=self.seed))
+                    self.logger.info('pressed [PAUSE]')
+
+                    if settings['DEBUG'] and (pygame.key.get_mods() & pygame.KMOD_LSHIFT):
+                        settings['GOD MODE'] = True
+                        self.logger.info('God Mode Activated')
                     else:
-                        self.manager.go_to(PauseScreen(chosen_hero=self.hero, timer=self.timer, seed=self.seed))
+                        self.logger.debug('Go to PauseScreen')
+                        self.manager.go_to(PauseScreen(chosen_hero=type(self.hero), timer=self.timer, seed=self.seed))
 
             elif event.type == pygame.KEYUP:
                 # Cancel the motion by adding the opposite of the keydown situation
                 if event.key == settings['LEFT']:
                     self.left_pressed = False
+                    self.logger.info('released [LEFT]')
 
                     if self.hero.moving_left:
                         self.world.changespeed(-self.hero.actual_speed, 0)
@@ -867,6 +907,7 @@ class InGame(GameState):
 
                 elif event.key == settings['RIGHT']:
                     self.right_pressed = False
+                    self.logger.info('released [RIGHT]')
 
                     if self.hero.moving_right:
                         self.world.changespeed(self.hero.actual_speed, 0)
@@ -878,13 +919,15 @@ class InGame(GameState):
                         self.hero.last_motion = 'left'
 
                 elif event.key == settings['UP']:
-                    pass
+                    self.logger.info('released [UP]')
 
                 elif event.key == settings['DOWN']:
-                    pass
+                    self.logger.info('released [DOWN]')
 
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:  # Left Click
+                    self.logger.info('[Left Click] at {0}'.format(event.pos))
+
                     if self.hero.melee_weapon is not None:
                         for e in self.world.enemy_list:
                             dist = hypot(e.rect.centerx - self.hero.rect.centerx,
@@ -892,7 +935,8 @@ class InGame(GameState):
                             if dist <= self.hero.melee_weapon.range:
                                 e.damage(self.hero.melee_weapon.power * self.hero.actual_damage_multiplier)
                 elif event.button == 3:  # Right Click
-                    pass
+                    self.logger.info('[Right Click] at {0}'.format(event.pos))
+
             else:
                 pass
 
@@ -944,24 +988,32 @@ class InGame(GameState):
         move_right_counter = 0
 
         total_displacement = 0
+        self.logger.info('========Generating World With Seed {seed}========'.format(seed=self.seed))
+        random.seed(self.seed)
         for i in range(n):
+            self.logger.debug('total displacement: {0}'.format(total_displacement))
             matched = False
+            self.logger.debug('======finding room {i}======'.format(i=i))
             while not matched:
                 possible_next_room = random.choice(possible_rooms)
-
+                self.logger.debug('==new room==')
+                for row in possible_next_room:
+                    self.logger.debug(row)
                 if possible_next_room[0] == rooms.MoveDown:
-                    if move_down_counter <= 3:
+                    if move_down_counter <= 2:
                         room_list.append(possible_next_room)
 
                         move_down_counter += 1
                         move_left_counter = 0
                         move_right_counter = 0
                         matched = True
+                    else:
+                        self.logger.debug('DQ: too many down in a row')
 
                 elif possible_next_room[0] == rooms.MoveLeft:
                     # Solves a bug with rendering left of the start
                     if total_displacement >= 2*len(possible_next_room[-1]):
-                        if move_left_counter <= 5:
+                        if move_left_counter <= 4:
                             room_list.append(possible_next_room)
 
                             move_down_counter = 0
@@ -970,9 +1022,15 @@ class InGame(GameState):
 
                             total_displacement -= len(possible_next_room[-1])
                             matched = True
+                        else:
+                            self.logger.debug('DQ: too many left in a row')
+                    else:
+                        self.logger.debug('DQ: too close to start to move left')
+                        self.logger.debug('total displacement: {0}, room length: {1}'.format(total_displacement,
+                                                                                             possible_next_room[-1]))
 
                 elif possible_next_room[0] == rooms.MoveRight:
-                    if move_right_counter <= 5:
+                    if move_right_counter <= 4:
                         room_list.append(possible_next_room)
 
                         move_down_counter = 0
@@ -981,8 +1039,14 @@ class InGame(GameState):
 
                         total_displacement += len(possible_next_room[-1])
                         matched = True
+                    else:
+                        self.logger.debug('DQ: too many right in a row')
+
+            self.logger.debug('move_down: {0}, move_left: {1}, move_right: {2}'.format(move_down_counter, move_left_counter, move_right_counter))
+            self.logger.debug('=======found room {i}======'.format(i=i))
 
         room_list.append(rooms.room_dict["EndingRoom"])
+        self.logger.debug('===============WorldGen Complete===============')
 
         self.world = rooms.World(room_list, self.seed)
 

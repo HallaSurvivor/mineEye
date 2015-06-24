@@ -151,7 +151,7 @@ class Turret(Enemy):
         changex = (hero.rect.centerx - self.rect.centerx)/self.projectile_speed
         changey = (hero.rect.centery - self.rect.centery)/self.projectile_speed
 
-        proj = entities.Projectile(h.load('bullet.png'), self.rect.center, changex, changey, self.projectile_damage)
+        proj = entities.Projectile(h.load('bullet.png'), self.rect.center, changex, changey, self.projectile_damage, self)
 
         self.cooldown += self.attack_period
 
