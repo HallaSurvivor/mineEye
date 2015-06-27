@@ -56,7 +56,7 @@ HEIGHT = SCREEN_RESOLUTION[1]
 
 if not os.path.exists('settings'):
     settings = {}
-    exclude = ['os', 'pickle', 'pygame', 'exclude']
+    exclude = ['os', 'pickle', 'pygame', 'exclude', 'settings', 'logging']
     for item in [item for item in dir() if not item.startswith('__') and item not in exclude]:
         settings[item] = locals()[item]
 
