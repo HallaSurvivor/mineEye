@@ -92,7 +92,8 @@ class Graph:
                 yield node
 
     def cost(self, a, b):
-        return self.weights.get(a) + self.weights.get(b)
+        # return self.weights.get(a) + self.weights.get(b) maybe add this later, maybe not
+        return 0
 
     def append(self, node):
         self.nodes.append(node)
@@ -128,8 +129,8 @@ class Graph:
         :return: A list of neighboring nodes
         """
 
-        directions = [[1, 0], [0, 1], [-1, 0], [0, -1], [1, 1], [-1, 1], [-1, -1], [1, -1]]
-        neighbors = [[node[0] + direction[0], node[1] + direction[1]] for direction in directions]
+        directions = [[64, 0], [0, 64], [-64, 0], [0, -64]]
+        neighbors = [(node[0] + direction[0], node[1] + direction[1]) for direction in directions]
         neighbors = filter(self.passable, neighbors)
 
         return neighbors

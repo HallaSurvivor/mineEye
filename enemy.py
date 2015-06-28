@@ -173,9 +173,6 @@ class Enemy(h.Sprite):
                     self.movey(-self.speed)
             else:
                 path = self.reconstruct_path(hero, self.a_star(hero))
-                if self.get_nearest_node() != path[0]:
-                    path.pop(0)
-
 
         if self.current_hp <= 0:
             self.kill()
@@ -227,7 +224,6 @@ class Ghost(Enemy):
     """
     A moving ghost that can clip though walls and attacks the hero on contact
     """
-    is_ranged = False
     contact_damage = 1
     activation_range = 1024
     clips = False
@@ -239,4 +235,10 @@ class Ghost(Enemy):
 
 
 class FireBat(Enemy):
-    pass
+    activation_range = 1024
+    speed = 5
+
+    def __init__(self, world, node):
+        super().__init__(world, node)
+
+        self.image = h.load('firebat.png')

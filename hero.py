@@ -5,6 +5,7 @@ All Heroes subclass Hero, which in turn subclasses pygame Sprites.
 """
 import os
 import logging
+from math import hypot
 import pygame
 import pyganim
 import entities
@@ -300,9 +301,9 @@ class Hero(pygame.sprite.Sprite):
         for node in self.world.nodes:
             if nearest_node is None:
                 nearest_node = node
-                current_dist = self.get_dist(node)
+                current_dist = hypot(self.rect.centerx - node[0], self.rect.centery - node[1])
             else:
-                new_dist = self.get_dist(node)
+                new_dist = hypot(self.rect.centerx - node[0], self.rect.centery - node[1])
                 if new_dist < current_dist:
                     nearest_node = node
                     current_dist = new_dist

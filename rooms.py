@@ -32,7 +32,7 @@ room_dict = {
     # StartingRoom and EndingRoom must exist somewhere
     "StartingRoom": [MoveRight,
                      "SSSSSSSS",
-                     "S      S",
+                     "S     FS",
                      "SW     S",
                      "SSSSSDDS"
     ],
@@ -630,7 +630,7 @@ class Room:
         for row in self.room_array:
             if row != MoveRight and row != MoveLeft and row != MoveDown:
                 for col in row:
-                    node = [x+32, y+32]  # +32 moves the node to the tile's center
+                    node = (x+32, y+32)  # +32 moves the node to the tile's center
 
                     if col == "S":
                         wall = Wall(x, y, h.load('stone.png'))
@@ -658,15 +658,19 @@ class Room:
 
                     elif col == "R":
                         new_enemy = enemy.Turret(self, node)
-                        new_enemy.rect.x = x + 8
-                        new_enemy.rect.y = y + 16
+                        new_enemy.rect.center = node
                         self.enemy_list.add(new_enemy)
                         self.all_sprites.add(new_enemy)
 
                     elif col == "G":
                         new_enemy = enemy.Ghost(self, node)
-                        new_enemy.rect.x = x + 3
-                        new_enemy.rect.y = y + 10
+                        new_enemy.rect.center = node
+                        self.enemy_list.add(new_enemy)
+                        self.all_sprites.add(new_enemy)
+
+                    elif col == "F":
+                        new_enemy = enemy.FireBat(self, node)
+                        new_enemy.rect.center = node
                         self.enemy_list.add(new_enemy)
                         self.all_sprites.add(new_enemy)
 
@@ -677,7 +681,8 @@ class Room:
                         self.chest_list.add(chest)
                         self.all_sprites.add(chest)
 
-                    self.nodes.append(node)
+                    if col != "&":
+                        self.nodes.append(node)
                     x += 64
                 y += 64
                 x = xstart
@@ -746,7 +751,7 @@ class World(Room):
                     if type(row) == str:
                         aligned_row = ""
                         for s in range(door_location):
-                            aligned_row += " "
+                            aligned_row += "&"
                         aligned_row += row
                         aligned_room.append(aligned_row)
 
@@ -754,4 +759,4 @@ class World(Room):
 
         self.logger.info('----====Finished World====----')
         for row in self.room_array:
-            self.logger.info(row)
+            self.logger.info(row.replace('&', ' '))
