@@ -49,7 +49,7 @@ except FileNotFoundError:
     f.close()
 
 
-class GameState(object):
+class GameState:
     """
     A superclass for all the states the game can be in.
 
@@ -87,7 +87,7 @@ class GameState(object):
         raise NotImplementedError
 
 
-class GameStateManager(object):
+class GameStateManager:
     """
     A helper class to manage game states.
     """

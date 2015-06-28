@@ -194,7 +194,7 @@ class Chest(h.Sprite):
         return contents
 
 
-class Room(object):
+class Room:
     """
     A superclass to define rooms.
 
@@ -665,7 +665,7 @@ class Room(object):
                         self.all_sprites.add(wall)
 
                     elif col == "R":
-                        new_enemy = enemy.Turret()
+                        new_enemy = enemy.Turret(self)
                         new_enemy.rect.x = x + 8
                         new_enemy.rect.y = y + 16
                         self.enemy_list.add(new_enemy)
@@ -673,7 +673,7 @@ class Room(object):
                         self.nodes.append([x+32, y+32])  # +32 moves the node to the tile's center
 
                     elif col == "G":
-                        new_enemy = enemy.Ghost()
+                        new_enemy = enemy.Ghost(self)
                         new_enemy.rect.x = x + 3
                         new_enemy.rect.y = y + 10
                         self.enemy_list.add(new_enemy)

@@ -2,6 +2,7 @@
 Exports a variety of helper functions to cut down on repetitive code.
 """
 import os
+import collections
 import pygame
 from config import settings
 import constants as c
@@ -49,6 +50,28 @@ class Sprite(pygame.sprite.Sprite):
         """
 
         self.rect.y += yspeed
+
+
+class Queue:
+    """
+    A wrapper for deque to make handling A* more legible
+
+    Thanks to redblobgames for the basis of this code
+    """
+    def __init__(self):
+        self.elements = collections.deque()
+
+    def is_empty(self):
+        """
+        Return True if and only if the Queue is empty.
+        """
+        return len(self.elements) == 0
+
+    def put(self, x):
+        self.elements.append(x)
+
+    def get(self):
+        return self.elements.popleft()
 
 
 def load(imagename, subfolder=None):

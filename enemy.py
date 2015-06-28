@@ -59,7 +59,7 @@ class Enemy(h.Sprite):
     projectile_damage = 3
     attack_period = 16
 
-    def __init__(self):
+    def __init__(self, world):
         """
         create the class.
 
@@ -73,7 +73,7 @@ class Enemy(h.Sprite):
 
         self.image = pygame.Surface((48, 48))
 
-        self.world = None
+        self.world = world
 
         self.current_hp = self.hp
         self.cooldown = 0
@@ -99,6 +99,13 @@ class Enemy(h.Sprite):
         Attack the hero when approached.
         """
         pass
+
+    def a_star(self):
+        """
+        Calculate the A* algorithm to pathfind towards the hero.
+
+
+        """
 
     def update(self, hero):
         """
@@ -143,8 +150,8 @@ class Turret(Enemy):
     is_ranged = True
     contact_damage = 0
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, world):
+        super().__init__(world)
 
         self.image = h.load('badGuy.png')
 
@@ -173,8 +180,8 @@ class Ghost(Enemy):
     activation_range = 1024
     clips = False
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, world):
+        super().__init__(world)
 
         self.image = h.load('ghost.png')
 
