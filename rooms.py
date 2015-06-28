@@ -255,7 +255,7 @@ class Room:
         self.hero_projectile_list = pygame.sprite.Group()
         self.bomb_list = pygame.sprite.Group()
 
-        self.nodes = []
+        self.nodes = h.Graph()
 
         self.background_string = ''
         self.background = pygame.Surface(settings['SCREEN_RESOLUTION'])
@@ -332,20 +332,6 @@ class Room:
                                   settings['SCREEN_RESOLUTION'][1] / 2 - 128)
 
         self.all_sprites.draw(screen)
-
-    def get_neighbors(self, node):
-        """
-        Return a list of all the neighbors for a given node
-
-        :param node: The node around which to find neighbors
-        :return: A list of neighboring nodes
-        """
-
-        directions = [[1, 0], [0, 1], [-1, 0], [0, -1], [1, 1], [-1, 1], [-1, -1], [1, -1]]
-        neighbors = [[node[0] + direction[0], node[1] + direction[1]] for direction in directions
-                     if [node[0] + direction[0], node[1] + direction[1]] in self.nodes]
-
-        return neighbors
 
     def move_world(self, hero, x, y):
         """
@@ -548,7 +534,7 @@ class Room:
                     distance = hypot(block.rect.centerx - bomb.rect.centerx, block.rect.centery - bomb.rect.centery)
                     if distance < bomb.radius and block.breakable:
                         self.logger.info('destroyed block at {0} with bomb'.format((block.rect.x, block.rect.y)))
-                        self.nodes.append([block.rect.centerx, block.rect.centery])
+                        self.nodes.make_passable([block.rect.centerx, block.rect.centery])
                         block.kill()
 
                 for e in self.enemy_list:
@@ -644,41 +630,45 @@ class Room:
         for row in self.room_array:
             if row != MoveRight and row != MoveLeft and row != MoveDown:
                 for col in row:
+                    node = [x+32, y+32]  # +32 moves the node to the tile's center
+
                     if col == "S":
                         wall = Wall(x, y, h.load('stone.png'))
                         self.block_list.add(wall)
                         self.all_sprites.add(wall)
+                        self.nodes.add_wall(node)
 
                     if col == "T":
                         wall = Wall(x, y, h.load('stone.png'), end_timer=True)
                         self.block_list.add(wall)
                         self.all_sprites.add(wall)
+                        self.nodes.add_wall(node)
 
                     elif col == "P":
                         wall = Wall(x, y, h.load('spikes.png'), damage_player=True)
                         self.block_list.add(wall)
                         self.all_sprites.add(wall)
+                        self.nodes.add_wall(node)
 
                     elif col == "B":
                         wall = Wall(x, y, h.load('broken_stone.png'), breakable=True)
                         self.block_list.add(wall)
                         self.all_sprites.add(wall)
+                        self.nodes.add_wall(node)
 
                     elif col == "R":
-                        new_enemy = enemy.Turret(self)
+                        new_enemy = enemy.Turret(self, node)
                         new_enemy.rect.x = x + 8
                         new_enemy.rect.y = y + 16
                         self.enemy_list.add(new_enemy)
                         self.all_sprites.add(new_enemy)
-                        self.nodes.append([x+32, y+32])  # +32 moves the node to the tile's center
 
                     elif col == "G":
-                        new_enemy = enemy.Ghost(self)
+                        new_enemy = enemy.Ghost(self, node)
                         new_enemy.rect.x = x + 3
                         new_enemy.rect.y = y + 10
                         self.enemy_list.add(new_enemy)
                         self.all_sprites.add(new_enemy)
-                        self.nodes.append([x+32, y+32])  # +32 moves the node to the tile's center
 
                     elif col == "W":
                         chest = Chest(x, y, weapon=True)
@@ -686,10 +676,8 @@ class Room:
                         chest.rect.y += 16
                         self.chest_list.add(chest)
                         self.all_sprites.add(chest)
-                        self.nodes.append([x+32, y+32])  # +32 moves the node to the tile's center
 
-                    else:
-                        self.nodes.append([x+32, y+32])  # +32 moves the node to the tile's center
+                    self.nodes.append(node)
                     x += 64
                 y += 64
                 x = xstart

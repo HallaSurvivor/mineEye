@@ -295,6 +295,21 @@ class Hero(pygame.sprite.Sprite):
         if self.bombs < self.max_bombs:
             self.bombs += 1
 
+    def get_nearest_node(self):
+        nearest_node = None
+        for node in self.world.nodes:
+            if nearest_node is None:
+                nearest_node = node
+                current_dist = self.get_dist(node)
+            else:
+                new_dist = self.get_dist(node)
+                if new_dist < current_dist:
+                    nearest_node = node
+                    current_dist = new_dist
+
+        return nearest_node
+
+
 
 class Demo(Hero):
     """

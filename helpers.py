@@ -2,7 +2,7 @@
 Exports a variety of helper functions to cut down on repetitive code.
 """
 import os
-import collections
+import heapq
 import pygame
 from config import settings
 import constants as c
@@ -54,12 +54,12 @@ class Sprite(pygame.sprite.Sprite):
 
 class Queue:
     """
-    A wrapper for deque to make handling A* more legible
+    A queue class to store potential paths for pathfinding
 
     Thanks to redblobgames for the basis of this code
     """
     def __init__(self):
-        self.elements = collections.deque()
+        self.elements = []
 
     def is_empty(self):
         """
@@ -67,11 +67,72 @@ class Queue:
         """
         return len(self.elements) == 0
 
-    def put(self, x):
-        self.elements.append(x)
+    def put(self, item, priority):
+        heapq.heappush(self.elements, (priority, item))
 
     def get(self):
-        return self.elements.popleft()
+        return heapq.heappop(self.elements)[1]
+
+
+class Graph:
+    """
+    A grid of nodes representing the world.
+
+    Thanks to redblobgames.com for the basis of this code.
+    """
+
+    def __init__(self):
+        self.nodes = []
+        self.walls = []
+        self.weights = {}
+
+    def __iter__(self):
+        for node in self.nodes:
+            if node not in self.walls:
+                yield node
+
+    def cost(self, a, b):
+        return self.weights.get(a) + self.weights.get(b)
+
+    def append(self, node):
+        self.nodes.append(node)
+
+    def add_wall(self, node):
+        self.walls.append(node)
+
+    def passable(self, node):
+        return node not in self.walls
+
+    def make_passable(self, node):
+        self.walls = [wall for wall in self.walls if wall != node]
+
+    def heuristic(self, a, b):
+        """
+        Get the heuristic between nodes for A*
+
+        :param a: the first node
+        :param b: the second node
+        :return: a pseudo-distance between them
+
+        Thanks to redblobgames.com for the basis of this code!
+        """
+        (x1, y1) = a
+        (x2, y2) = b
+        return abs(x1 - x2) + abs(y1 - y2)
+
+    def get_neighbors(self, node):
+        """
+        Return a list of all the neighbors for a given node
+
+        :param node: The node around which to find neighbors
+        :return: A list of neighboring nodes
+        """
+
+        directions = [[1, 0], [0, 1], [-1, 0], [0, -1], [1, 1], [-1, 1], [-1, -1], [1, -1]]
+        neighbors = [[node[0] + direction[0], node[1] + direction[1]] for direction in directions]
+        neighbors = filter(self.passable, neighbors)
+
+        return neighbors
 
 
 def load(imagename, subfolder=None):

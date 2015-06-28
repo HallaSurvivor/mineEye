@@ -59,7 +59,7 @@ class Enemy(h.Sprite):
     projectile_damage = 3
     attack_period = 16
 
-    def __init__(self, world):
+    def __init__(self, world, node):
         """
         create the class.
 
@@ -74,6 +74,8 @@ class Enemy(h.Sprite):
         self.image = pygame.Surface((48, 48))
 
         self.world = world
+
+        self.node = node
 
         self.current_hp = self.hp
         self.cooldown = 0
@@ -100,12 +102,53 @@ class Enemy(h.Sprite):
         """
         pass
 
-    def a_star(self):
+    def a_star(self, hero):
         """
         Calculate the A* algorithm to pathfind towards the hero.
 
-
+        Thanks to redblobgames.com for the basis of this code!
         """
+        frontier = h.Queue()
+        came_from = {}
+        cost_so_far = {}
+
+        graph = self.world.nodes
+        start = self.node
+        goal = hero.get_nearest_node()
+
+        frontier.put(start, 0)
+
+        came_from[start] = None
+        cost_so_far[start] = 0
+
+        while not frontier.is_empty():
+            current = frontier.get()
+
+            if current == goal:
+                break
+
+            for next_node in graph.get_neighbors(current):
+                new_cost = cost_so_far[current] + graph.cost(current, next_node)
+                if next_node not in cost_so_far or new_cost < cost_so_far[next_node]:
+                    cost_so_far[next_node] = new_cost
+                    priority = new_cost + graph.heuristic(goal, next_node)
+                    frontier.put(next_node, priority)
+                    came_from[next_node] = current
+
+        return came_from
+
+    def reconstruct_path(self, hero, came_from):
+        start = self.node
+        goal = hero.get_nearest_node()
+
+        current = goal
+        path = [current]
+        while current != start:
+            current = came_from[current]
+            path.append(current)
+        path.reverse()
+
+        return path
 
     def update(self, hero):
         """
@@ -128,16 +171,25 @@ class Enemy(h.Sprite):
                     self.movex(-self.speed)
                 if hero.rect.centery < self.rect.centery:
                     self.movey(-self.speed)
+            else:
+                path = self.reconstruct_path(hero, self.a_star(hero))
+                if self.get_nearest_node() != path[0]:
+                    path.pop(0)
+
 
         if self.current_hp <= 0:
             self.kill()
             hero.increment_bomb_counter()
 
-    def get_dist(self):
+    def get_dist(self, node=None):
         """
-        Return the distance from the enemy's center to the Hero's center.
+        Return the distance from the enemy's center to the Hero's center or a node
         """
-        dist = hypot(self.rect.centerx - settings['HEIGHT']/2, self.rect.centery - settings['WIDTH']/2)
+        if node is None:
+            dist = hypot(self.rect.centerx - settings['HEIGHT']/2, self.rect.centery - settings['WIDTH']/2)
+
+        else:
+            dist = hypot(self.rect.centerx - node[0], self.rect.centery - node[1])
 
         return dist
 
@@ -150,8 +202,8 @@ class Turret(Enemy):
     is_ranged = True
     contact_damage = 0
 
-    def __init__(self, world):
-        super().__init__(world)
+    def __init__(self, world, node):
+        super().__init__(world, node)
 
         self.image = h.load('badGuy.png')
 
@@ -180,8 +232,8 @@ class Ghost(Enemy):
     activation_range = 1024
     clips = False
 
-    def __init__(self, world):
-        super().__init__(world)
+    def __init__(self, world, node):
+        super().__init__(world, node)
 
         self.image = h.load('ghost.png')
 
