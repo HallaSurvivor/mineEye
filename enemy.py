@@ -59,7 +59,7 @@ class Enemy(h.Sprite):
     projectile_damage = 3
     attack_period = 16
 
-    def __init__(self, world, node):
+    def __init__(self, world):
         """
         create the class.
 
@@ -74,8 +74,6 @@ class Enemy(h.Sprite):
         self.image = pygame.Surface((48, 48))
 
         self.world = world
-
-        self.node = node
 
         self.current_hp = self.hp
         self.cooldown = 0
@@ -113,7 +111,7 @@ class Enemy(h.Sprite):
         cost_so_far = {}
 
         graph = self.world.nodes
-        start = self.node
+        start = self.get_nearest_node()
         goal = hero.get_nearest_node()
 
         frontier.put(start, 0)
@@ -138,7 +136,7 @@ class Enemy(h.Sprite):
         return came_from
 
     def reconstruct_path(self, hero, came_from):
-        start = self.node
+        start = self.get_nearest_node()
         goal = hero.get_nearest_node()
 
         current = goal
@@ -173,6 +171,18 @@ class Enemy(h.Sprite):
                     self.movey(-self.speed)
             else:
                 path = self.reconstruct_path(hero, self.a_star(hero))
+                if path[0] == self.get_nearest_node():
+                    path.pop(0)
+
+                if len(path) > 0:
+                    if path[0][0] > self.rect.centerx:
+                        self.movex(self.speed)
+                    if path[0][1] > self.rect.centery:
+                        self.movey(self.speed)
+                    if path[0][0] < self.rect.centerx:
+                        self.movex(-self.speed)
+                    if path[0][1] < self.rect.centery:
+                        self.movey(-self.speed)
 
         if self.current_hp <= 0:
             self.kill()
@@ -190,6 +200,20 @@ class Enemy(h.Sprite):
 
         return dist
 
+    def get_nearest_node(self):
+        nearest_node = None
+        for node in self.world.nodes.nodes:
+            if nearest_node is None:
+                nearest_node = node
+                current_dist = self.get_dist(node)
+            else:
+                new_dist = self.get_dist(node)
+                if new_dist < current_dist:
+                    nearest_node = node
+                    current_dist = new_dist
+
+        return nearest_node
+
 
 class Turret(Enemy):
     """
@@ -199,8 +223,8 @@ class Turret(Enemy):
     is_ranged = True
     contact_damage = 0
 
-    def __init__(self, world, node):
-        super().__init__(world, node)
+    def __init__(self, *args):
+        super().__init__(*args)
 
         self.image = h.load('badGuy.png')
 
@@ -228,8 +252,8 @@ class Ghost(Enemy):
     activation_range = 1024
     clips = False
 
-    def __init__(self, world, node):
-        super().__init__(world, node)
+    def __init__(self, *args):
+        super().__init__(*args)
 
         self.image = h.load('ghost.png')
 
@@ -238,7 +262,7 @@ class FireBat(Enemy):
     activation_range = 1024
     speed = 5
 
-    def __init__(self, world, node):
-        super().__init__(world, node)
+    def __init__(self, *args):
+        super().__init__(*args)
 
         self.image = h.load('firebat.png')

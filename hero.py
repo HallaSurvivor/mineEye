@@ -298,7 +298,7 @@ class Hero(pygame.sprite.Sprite):
 
     def get_nearest_node(self):
         nearest_node = None
-        for node in self.world.nodes:
+        for node in self.world.nodes.nodes:
             if nearest_node is None:
                 nearest_node = node
                 current_dist = hypot(self.rect.centerx - node[0], self.rect.centery - node[1])
@@ -309,7 +309,6 @@ class Hero(pygame.sprite.Sprite):
                     current_dist = new_dist
 
         return nearest_node
-
 
 
 class Demo(Hero):

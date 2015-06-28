@@ -657,19 +657,19 @@ class Room:
                         self.nodes.add_wall(node)
 
                     elif col == "R":
-                        new_enemy = enemy.Turret(self, node)
+                        new_enemy = enemy.Turret(self)
                         new_enemy.rect.center = node
                         self.enemy_list.add(new_enemy)
                         self.all_sprites.add(new_enemy)
 
                     elif col == "G":
-                        new_enemy = enemy.Ghost(self, node)
+                        new_enemy = enemy.Ghost(self)
                         new_enemy.rect.center = node
                         self.enemy_list.add(new_enemy)
                         self.all_sprites.add(new_enemy)
 
                     elif col == "F":
-                        new_enemy = enemy.FireBat(self, node)
+                        new_enemy = enemy.FireBat(self)
                         new_enemy.rect.center = node
                         self.enemy_list.add(new_enemy)
                         self.all_sprites.add(new_enemy)

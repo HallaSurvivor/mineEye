@@ -86,11 +86,6 @@ class Graph:
         self.walls = []
         self.weights = {}
 
-    def __iter__(self):
-        for node in self.nodes:
-            if node not in self.walls:
-                yield node
-
     def cost(self, a, b):
         # return self.weights.get(a) + self.weights.get(b) maybe add this later, maybe not
         return 0
