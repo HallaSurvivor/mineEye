@@ -102,19 +102,25 @@ class Enemy(h.Sprite):
 
     def update(self, hero):
         """
-        cause animation of the enemies.
-        They move toward the position of the hero's center
+        Cause enemy movement/death.
+
+        If the enemy moves and doesn't clip (ghosts):
+            They move toward the position of the hero's center
+
+        If the enemy moves and DOES clip:
+            Call the Hero's position a "goal" and use A* pathfinding
         :param hero: The hero to move towards
         """
         if not self.stationary and self.get_dist() <= self.activation_range:
-            if hero.rect.centerx > self.rect.centerx:
-                self.movex(self.speed)
-            if hero.rect.centery > self.rect.centery:
-                self.movey(self.speed)
-            if hero.rect.centerx < self.rect.centerx:
-                self.movex(-self.speed)
-            if hero.rect.centery < self.rect.centery:
-                self.movey(-self.speed)
+            if not self.clips:
+                if hero.rect.centerx > self.rect.centerx:
+                    self.movex(self.speed)
+                if hero.rect.centery > self.rect.centery:
+                    self.movey(self.speed)
+                if hero.rect.centerx < self.rect.centerx:
+                    self.movex(-self.speed)
+                if hero.rect.centery < self.rect.centery:
+                    self.movey(-self.speed)
 
         if self.current_hp <= 0:
             self.kill()
@@ -165,9 +171,13 @@ class Ghost(Enemy):
     is_ranged = False
     contact_damage = 1
     activation_range = 1024
-    Clips = False
+    clips = False
 
     def __init__(self):
         super().__init__()
 
         self.image = h.load('ghost.png')
+
+
+class FireBat(Enemy):
+    pass

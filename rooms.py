@@ -209,6 +209,11 @@ class Room(object):
 
         all_sprite_list comprises all the sprites that move alongside the world.
 
+    Pathfinding:
+        Enemies use A* pathfinding to navigate the world.
+        Because of this, a set of nodes corresponding to the centers of tiles
+        is added.
+
     background is a pygame Surface that is displayed behind the level
 
     region is a value representing what part of the mine the hero is in.
@@ -249,6 +254,8 @@ class Room(object):
         self.enemy_projectile_list = pygame.sprite.Group()
         self.hero_projectile_list = pygame.sprite.Group()
         self.bomb_list = pygame.sprite.Group()
+
+        self.nodes = []
 
         self.background_string = ''
         self.background = pygame.Surface(settings['SCREEN_RESOLUTION'])
@@ -325,6 +332,20 @@ class Room(object):
                                   settings['SCREEN_RESOLUTION'][1] / 2 - 128)
 
         self.all_sprites.draw(screen)
+
+    def get_neighbors(self, node):
+        """
+        Return a list of all the neighbors for a given node
+
+        :param node: The node around which to find neighbors
+        :return: A list of neighboring nodes
+        """
+
+        directions = [[1, 0], [0, 1], [-1, 0], [0, -1], [1, 1], [-1, 1], [-1, -1], [1, -1]]
+        neighbors = [[node[0] + direction[0], node[1] + direction[1]] for direction in directions
+                     if [node[0] + direction[0], node[1] + direction[1]] in self.nodes]
+
+        return neighbors
 
     def move_world(self, hero, x, y):
         """
@@ -527,6 +548,7 @@ class Room(object):
                     distance = hypot(block.rect.centerx - bomb.rect.centerx, block.rect.centery - bomb.rect.centery)
                     if distance < bomb.radius and block.breakable:
                         self.logger.info('destroyed block at {0} with bomb'.format((block.rect.x, block.rect.y)))
+                        self.nodes.append([block.rect.centerx, block.rect.centery])
                         block.kill()
 
                 for e in self.enemy_list:
@@ -648,6 +670,7 @@ class Room(object):
                         new_enemy.rect.y = y + 16
                         self.enemy_list.add(new_enemy)
                         self.all_sprites.add(new_enemy)
+                        self.nodes.append([x+32, y+32])  # +32 moves the node to the tile's center
 
                     elif col == "G":
                         new_enemy = enemy.Ghost()
@@ -655,6 +678,7 @@ class Room(object):
                         new_enemy.rect.y = y + 10
                         self.enemy_list.add(new_enemy)
                         self.all_sprites.add(new_enemy)
+                        self.nodes.append([x+32, y+32])  # +32 moves the node to the tile's center
 
                     elif col == "W":
                         chest = Chest(x, y, weapon=True)
@@ -662,7 +686,10 @@ class Room(object):
                         chest.rect.y += 16
                         self.chest_list.add(chest)
                         self.all_sprites.add(chest)
+                        self.nodes.append([x+32, y+32])  # +32 moves the node to the tile's center
 
+                    else:
+                        self.nodes.append([x+32, y+32])  # +32 moves the node to the tile's center
                     x += 64
                 y += 64
                 x = xstart
