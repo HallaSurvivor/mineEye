@@ -87,8 +87,7 @@ class Graph:
         self.weights = {}
 
     def cost(self, a, b):
-        # return self.weights.get(a) + self.weights.get(b) maybe add this later, maybe not
-        return 0
+        return 1
 
     def append(self, node):
         self.nodes.append(node)
@@ -129,6 +128,22 @@ class Graph:
         neighbors = filter(self.passable, neighbors)
 
         return neighbors
+
+    def shift_nodes_x(self, x):
+        """
+        Move all the node locations in the x direction to correspond with the moving world
+
+        :param x: The x shift
+        """
+        self.nodes = [(node[0] + x, node[1]) for node in self.nodes]
+
+    def shift_nodes_y(self, y):
+        """
+        Move all the node locations in the y direction to correspond with the moving world
+
+        :param y: The y shift
+        """
+        self.nodes = [(node[0], node[1] + y) for node in self.nodes]
 
 
 def load(imagename, subfolder=None):

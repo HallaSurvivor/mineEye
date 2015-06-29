@@ -754,6 +754,11 @@ class InGame(GameState):
         self.hero.draw(screen)
         self.draw_hud(screen)
         self.draw_cursor(screen)
+        node_sprite = h.load('bullet.png')
+        node_pos = node_sprite.get_rect()
+        for node in self.world.nodes.nodes:
+            node_pos.center = node
+            screen.blit(node_sprite, node_pos)
 
     def update(self):
         """

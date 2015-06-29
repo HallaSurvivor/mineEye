@@ -32,7 +32,7 @@ room_dict = {
     # StartingRoom and EndingRoom must exist somewhere
     "StartingRoom": [MoveRight,
                      "SSSSSSSS",
-                     "S      S",
+                     "S     FS",
                      "SW     S",
                      "SSSSSDDS"
     ],
@@ -264,6 +264,9 @@ class Room:
         self.xspeed = 0
         self.yspeed = 0
 
+        self.xshift = 0
+        self.yshift = 0
+
         self.base_y_gravity = -3
         self.gravity_acceleration = -1
 
@@ -278,7 +281,7 @@ class Room:
         :param hero: An instance of the Hero class to pass to self.move_world()
         """
         # Calculate the effect of gravity
-        self.calc_gravity()
+        # self.calc_gravity()
 
         # Move the player's bombs through the world
         self.cause_bomb_gravity()
@@ -348,7 +351,8 @@ class Room:
         :param y: the Int of how far to shift the world's y
         """
 
-        # Move the blocks in the X direction
+        # Move the blocks/nodes in the X direction
+        self.nodes.shift_nodes_x(x)
         for sprite in self.all_sprites:
             sprite.movex(x)
 
@@ -363,6 +367,7 @@ class Room:
             x_pos_change = block.rect.x - old_x_pos
 
             # Shift the rest of the room to stay in line with the block that collided
+            self.nodes.shift_nodes_x(x_pos_change)
             for sprite in self.all_sprites:
                 if sprite != block:
                     sprite.rect.x += x_pos_change
@@ -376,7 +381,8 @@ class Room:
             if block.end_timer:
                 hero.run_timer = False
 
-        # Move the blocks in the Y direction
+        # Move the blocks/nodes in the Y direction
+        # self.nodes.shift_nodes_y(y)
         for sprite in self.all_sprites:
             sprite.movey(y)
 
@@ -402,6 +408,7 @@ class Room:
             y_pos_change = block.rect.y - old_y_pos
 
             # Shift the rest of the room to stay in line with the block that collided
+            # self.nodes.shift_nodes_y(y_pos_change)
             for sprite in self.all_sprites:
                 if sprite != block:
                     sprite.rect.y += y_pos_change
@@ -711,7 +718,7 @@ class World(Room):
 
         random.seed(seed)
 
-        self.background_string = 'background.png'
+        self.background_string = 'black.png'
         self.background = h.create_background(h.load(self.background_string))
         self.logger.debug('===Begin modifying rooms to align doors===')
 

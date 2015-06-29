@@ -114,7 +114,7 @@ class Enemy(h.Sprite):
         """
         pass
 
-    def a_star(self, hero):
+    def a_star(self, hero, n=5):
         """
         Calculate the A* algorithm to pathfind towards the hero.
 
@@ -133,7 +133,7 @@ class Enemy(h.Sprite):
         came_from[start] = None
         cost_so_far[start] = 0
 
-        while not frontier.is_empty():
+        while not frontier.is_empty() and n > 0:
             current = frontier.get()
 
             if current == goal:
@@ -147,6 +147,8 @@ class Enemy(h.Sprite):
                     frontier.put(next_node, priority)
                     came_from[next_node] = current
 
+            n -= 1
+
         return came_from
 
     def reconstruct_path(self, hero, came_from):
@@ -156,8 +158,11 @@ class Enemy(h.Sprite):
         current = goal
         path = [current]
         while current != start:
-            current = came_from[current]
-            path.append(current)
+            try:
+                current = came_from[current]
+                path.append(current)
+            except KeyError:
+                pass
         path.reverse()
 
         return path
@@ -177,39 +182,60 @@ class Enemy(h.Sprite):
                 self.rect.bottom = block.rect.top
                 self.yspeed = 0
 
-    def basic_pathfinding(self, hero):
+    def check_collisions(self):
         """
-        A basic pathfinding alg to replace the buggy A* implementation for ground-only enemies
+        Prevent the enemy from moving through walls.
 
-        :param hero: The hero to compare against
+        Check for collisions, then adjust the enemy position if it collides with anything
+        :param direction: The direction of motion
         """
-        if not self.flying:
-            self.calc_gravity()
-
-        if abs(hero.rect.centerx - self.rect.centerx) < 8:
-            direction = 'none'
-
-        elif hero.rect.centerx > self.rect.centerx:
-            self.movex(self.speed)
-            direction = 'right'
-
-        elif hero.rect.centerx < self.rect.centerx:
-            self.movex(-self.speed)
-            direction = 'left'
-
         block_hit_list = pygame.sprite.spritecollide(self, self.world.block_list, False)
         for block in block_hit_list:
-            if direction == 'right':
+            if self.rect.x < block.rect.x:
                 self.rect.right = block.rect.left
                 # self.logger.debug("{enemy} hit a block from the left".format(enemy=self))
-            elif direction == 'left':
+            elif self.rect.x > block.rect.x:
                 self.rect.left = block.rect.right
                 # self.logger.debug("{enemy} hit a block from the right".format(enemy=self))
             else:
                 self.logger.error("{0} moving, but it hit something... ya done messed up".format(self))
 
-            if self.rect.bottom >= hero.rect.bottom:
-                self.yspeed = -self.speed
+    def straight_to_hero(self, hero):
+        """
+        Move directly towards the hero, regardless of walls
+
+        Used by enemies that don't clip, such as ghosts
+        :param hero: The hero to move towards
+        """
+        if hero.rect.centerx > self.rect.centerx:
+            self.movex(self.speed)
+        if hero.rect.centery > self.rect.centery:
+            self.movey(self.speed)
+        if hero.rect.centerx < self.rect.centerx:
+            self.movex(-self.speed)
+        if hero.rect.centery < self.rect.centery:
+            self.movey(-self.speed)
+
+    def pathfind(self, hero):
+        """
+        Use A* pathfinding to move efficiently towards the hero
+
+        :param hero: The hero to use as a goal
+        """
+
+        path = self.reconstruct_path(hero, self.a_star(hero))
+        if path[0] == self.get_nearest_node():
+            path.pop(0)
+
+        if len(path) > 0:
+            if path[0][0] > self.rect.centerx:
+                self.movex(self.speed)
+            if path[0][1] > self.rect.centery:
+                self.movey(self.speed)
+            if path[0][0] < self.rect.centerx:
+                self.movex(-self.speed)
+            if path[0][1] < self.rect.centery:
+                self.movey(-self.speed)
 
     def update(self, hero):
         """
@@ -219,40 +245,19 @@ class Enemy(h.Sprite):
             They move toward the position of the hero's center
 
         If the enemy moves and DOES clip:
-            (Call the Hero's position a "goal" and use A* pathfinding)
-                depreciated due to bugs. Might reimplement later
-
-            Use the basic_pathfinding method to move generally towards the hero.
+            Call the Hero's position a "goal" and use A* pathfinding
 
         :param hero: The hero to move towards
         """
         if not self.stationary and self.get_dist() <= self.activation_range:
-            if not self.clips:
-                if hero.rect.centerx > self.rect.centerx:
-                    self.movex(self.speed)
-                if hero.rect.centery > self.rect.centery:
-                    self.movey(self.speed)
-                if hero.rect.centerx < self.rect.centerx:
-                    self.movex(-self.speed)
-                if hero.rect.centery < self.rect.centery:
-                    self.movey(-self.speed)
-            else:
-                if not self.flying:
-                    self.basic_pathfinding(hero)
-                else:
-                    path = self.reconstruct_path(hero, self.a_star(hero))
-                    if path[0] == self.get_nearest_node():
-                        path.pop(0)
+            if not self.flying:
+                self.calc_gravity()
 
-                    if len(path) > 0:
-                        if path[0][0] > self.rect.centerx:
-                            self.movex(self.speed)
-                        if path[0][1] > self.rect.centery:
-                            self.movey(self.speed)
-                        if path[0][0] < self.rect.centerx:
-                            self.movex(-self.speed)
-                        if path[0][1] < self.rect.centery:
-                            self.movey(-self.speed)
+            if not self.clips:
+                self.straight_to_hero(hero)
+            else:
+                self.pathfind(hero)
+                self.check_collisions()
 
         if self.current_hp <= 0:
             self.kill()
@@ -271,6 +276,9 @@ class Enemy(h.Sprite):
         return dist
 
     def get_nearest_node(self):
+        """
+        Return the node closest to
+        """
         nearest_node = None
         for node in self.world.nodes.nodes:
             if nearest_node is None:
@@ -332,6 +340,7 @@ class Ghost(Enemy):
 class FireBat(Enemy):
     activation_range = 1024
     speed = 5
+    flying = True
 
     def __init__(self, *args):
         super().__init__(*args)
