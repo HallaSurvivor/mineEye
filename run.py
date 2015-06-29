@@ -7,7 +7,7 @@ from config import settings
 import gamestates
 
 logger = logging.getLogger('mineEye')
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 handler = logging.FileHandler('log.txt')
 
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')

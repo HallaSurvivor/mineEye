@@ -1,11 +1,14 @@
 """
 Exports the Enemy classes that the Hero has to battle.
 """
+import logging
 from math import hypot
 import pygame
 import helpers as h
 from config import settings
 import entities
+
+module_logger = logging.getLogger('mineEye.enemy')
 
 
 class Enemy(h.Sprite):
@@ -53,6 +56,7 @@ class Enemy(h.Sprite):
     clips = True
     activation_range = 0
     stationary = False
+    flying = False
 
     attack_range = 256
     projectile_speed = 16
@@ -71,14 +75,23 @@ class Enemy(h.Sprite):
         """
         super().__init__()
 
+        self.logger = logging.getLogger('mineEye.enemy.Enemy')
+
         self.image = pygame.Surface((48, 48))
 
         self.world = world
+
+        self.yspeed = 0  # separate y speed for gravity
 
         self.current_hp = self.hp
         self.cooldown = 0
 
         self.rect = self.image.get_rect()
+
+        self.previous_location = self.rect.center
+
+    def __repr__(self):
+        return '{enemy} at position: {pos}'.format(enemy=type(self).__name__, pos=self.rect.center)
 
     def damage(self, amount):
         """
@@ -86,6 +99,7 @@ class Enemy(h.Sprite):
 
         :param amount: Int representing how much damage was taken
         """
+        self.logger.info('{enemy} damaged by {amount}'.format(enemy=self, amount=amount))
         self.current_hp -= amount
 
     def ranged_attack(self, hero):
@@ -148,6 +162,55 @@ class Enemy(h.Sprite):
 
         return path
 
+    def calc_gravity(self):
+        self.yspeed -= self.world.gravity_acceleration
+        self.logger.debug('{enemy} yspeed: {value}'.format(enemy=self, value=self.yspeed))
+        self.movey(self.yspeed)
+
+        block_hit_list = pygame.sprite.spritecollide(self, self.world.block_list, False)
+        for block in block_hit_list:
+
+            if self.yspeed < 0:
+                self.rect.top = block.rect.bottom
+                self.yspeed = 0
+            elif self.yspeed > 0:
+                self.rect.bottom = block.rect.top
+                self.yspeed = 0
+
+    def basic_pathfinding(self, hero):
+        """
+        A basic pathfinding alg to replace the buggy A* implementation for ground-only enemies
+
+        :param hero: The hero to compare against
+        """
+        if not self.flying:
+            self.calc_gravity()
+
+        if abs(hero.rect.centerx - self.rect.centerx) < 8:
+            direction = 'none'
+
+        elif hero.rect.centerx > self.rect.centerx:
+            self.movex(self.speed)
+            direction = 'right'
+
+        elif hero.rect.centerx < self.rect.centerx:
+            self.movex(-self.speed)
+            direction = 'left'
+
+        block_hit_list = pygame.sprite.spritecollide(self, self.world.block_list, False)
+        for block in block_hit_list:
+            if direction == 'right':
+                self.rect.right = block.rect.left
+                # self.logger.debug("{enemy} hit a block from the left".format(enemy=self))
+            elif direction == 'left':
+                self.rect.left = block.rect.right
+                # self.logger.debug("{enemy} hit a block from the right".format(enemy=self))
+            else:
+                self.logger.error("{0} moving, but it hit something... ya done messed up".format(self))
+
+            if self.rect.bottom >= hero.rect.bottom:
+                self.yspeed = -self.speed
+
     def update(self, hero):
         """
         Cause enemy movement/death.
@@ -156,7 +219,11 @@ class Enemy(h.Sprite):
             They move toward the position of the hero's center
 
         If the enemy moves and DOES clip:
-            Call the Hero's position a "goal" and use A* pathfinding
+            (Call the Hero's position a "goal" and use A* pathfinding)
+                depreciated due to bugs. Might reimplement later
+
+            Use the basic_pathfinding method to move generally towards the hero.
+
         :param hero: The hero to move towards
         """
         if not self.stationary and self.get_dist() <= self.activation_range:
@@ -170,19 +237,22 @@ class Enemy(h.Sprite):
                 if hero.rect.centery < self.rect.centery:
                     self.movey(-self.speed)
             else:
-                path = self.reconstruct_path(hero, self.a_star(hero))
-                if path[0] == self.get_nearest_node():
-                    path.pop(0)
+                if not self.flying:
+                    self.basic_pathfinding(hero)
+                else:
+                    path = self.reconstruct_path(hero, self.a_star(hero))
+                    if path[0] == self.get_nearest_node():
+                        path.pop(0)
 
-                if len(path) > 0:
-                    if path[0][0] > self.rect.centerx:
-                        self.movex(self.speed)
-                    if path[0][1] > self.rect.centery:
-                        self.movey(self.speed)
-                    if path[0][0] < self.rect.centerx:
-                        self.movex(-self.speed)
-                    if path[0][1] < self.rect.centery:
-                        self.movey(-self.speed)
+                    if len(path) > 0:
+                        if path[0][0] > self.rect.centerx:
+                            self.movex(self.speed)
+                        if path[0][1] > self.rect.centery:
+                            self.movey(self.speed)
+                        if path[0][0] < self.rect.centerx:
+                            self.movex(-self.speed)
+                        if path[0][1] < self.rect.centery:
+                            self.movey(-self.speed)
 
         if self.current_hp <= 0:
             self.kill()
@@ -251,6 +321,7 @@ class Ghost(Enemy):
     contact_damage = 1
     activation_range = 1024
     clips = False
+    flying = True
 
     def __init__(self, *args):
         super().__init__(*args)
