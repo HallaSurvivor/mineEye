@@ -32,7 +32,7 @@ room_dict = {
     # StartingRoom and EndingRoom must exist somewhere
     "StartingRoom": [MoveRight,
                      "SSSSSSSS",
-                     "S     FS",
+                     "S      S",
                      "SW     S",
                      "SSSSSDDS"
     ],
@@ -281,7 +281,7 @@ class Room:
         :param hero: An instance of the Hero class to pass to self.move_world()
         """
         # Calculate the effect of gravity
-        # self.calc_gravity()
+        self.calc_gravity()
 
         # Move the player's bombs through the world
         self.cause_bomb_gravity()
@@ -382,7 +382,7 @@ class Room:
                 hero.run_timer = False
 
         # Move the blocks/nodes in the Y direction
-        # self.nodes.shift_nodes_y(y)
+        self.nodes.shift_nodes_y(y)
         for sprite in self.all_sprites:
             sprite.movey(y)
 
@@ -408,7 +408,7 @@ class Room:
             y_pos_change = block.rect.y - old_y_pos
 
             # Shift the rest of the room to stay in line with the block that collided
-            # self.nodes.shift_nodes_y(y_pos_change)
+            self.nodes.shift_nodes_y(y_pos_change)
             for sprite in self.all_sprites:
                 if sprite != block:
                     sprite.rect.y += y_pos_change
