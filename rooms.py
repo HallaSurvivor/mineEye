@@ -399,8 +399,10 @@ class Room:
 
             if y > 0:
                 block.rect.bottom = hero.rect.top
+                self.logger.debug('Hero clipped with the ceiling')
             elif y < 0:
                 block.rect.top = hero.rect.bottom
+                self.logger.debug('Hero clipped with the floor')
                 self.yspeed = 0
                 hero.jumping = False
                 hero.double_jumping = False
