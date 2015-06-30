@@ -374,7 +374,7 @@ class Room:
 
             # Damage the player if the block is a spike
             if block.damage_player:
-                self.logger.info('player touched spike')
+                self.logger.info('hero touched spike')
                 hero.damage(block.damage)
 
             # End the game timer if the block is the end
@@ -415,7 +415,7 @@ class Room:
 
             # Damage the player if the block is a spike
             if block.damage_player:
-                self.logger.info('player touched spike')
+                self.logger.info('hero touched spike')
                 hero.damage(block.damage)
 
             # End the game timer if the block is the end
@@ -644,42 +644,49 @@ class Room:
                         self.block_list.add(wall)
                         self.all_sprites.add(wall)
                         self.nodes.add_wall(node)
+                        self.logger.debug('added wall at {pos}'.format(pos=(x, y)))
 
                     if col == "T":
                         wall = Wall(x, y, h.load('stone.png'), end_timer=True)
                         self.block_list.add(wall)
                         self.all_sprites.add(wall)
                         self.nodes.add_wall(node)
+                        self.logger.debug('added wall/timer at {pos}'.format(pos=(x, y)))
 
                     elif col == "P":
                         wall = Wall(x, y, h.load('spikes.png'), damage_player=True)
                         self.block_list.add(wall)
                         self.all_sprites.add(wall)
                         self.nodes.add_wall(node)
+                        self.logger.debug('added spikes at {pos}'.format(pos=(x, y)))
 
                     elif col == "B":
                         wall = Wall(x, y, h.load('broken_stone.png'), breakable=True)
                         self.block_list.add(wall)
                         self.all_sprites.add(wall)
                         self.nodes.add_wall(node)
+                        self.logger.debug('added broken wall at {pos}'.format(pos=(x, y)))
 
                     elif col == "R":
                         new_enemy = enemy.Turret(self)
                         new_enemy.rect.center = node
                         self.enemy_list.add(new_enemy)
                         self.all_sprites.add(new_enemy)
+                        self.logger.debug('added turret at {pos}'.format(pos=(x, y)))
 
                     elif col == "G":
                         new_enemy = enemy.Ghost(self)
                         new_enemy.rect.center = node
                         self.enemy_list.add(new_enemy)
                         self.all_sprites.add(new_enemy)
+                        self.logger.debug('added ghost at {pos}'.format(pos=(x, y)))
 
                     elif col == "F":
                         new_enemy = enemy.FireBat(self)
                         new_enemy.rect.center = node
                         self.enemy_list.add(new_enemy)
                         self.all_sprites.add(new_enemy)
+                        self.logger.debug('added firebat at {pos}'.format(pos=(x, y)))
 
                     elif col == "W":
                         chest = Chest(x, y, weapon=True)
@@ -687,6 +694,7 @@ class Room:
                         chest.rect.y += 16
                         self.chest_list.add(chest)
                         self.all_sprites.add(chest)
+                        self.logger.debug('added weapon chest at {pos}'.format(pos=(x, y)))
 
                     if col != "&":
                         self.nodes.append(node)
