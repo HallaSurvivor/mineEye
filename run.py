@@ -7,13 +7,18 @@ from config import settings
 import gamestates
 
 logger = logging.getLogger('mineEye')
-logger.setLevel(logging.DEBUG)
-handler = logging.FileHandler('log.txt')
+logger.setLevel(logging.INFO)
+file_handler = logging.FileHandler('log.txt')
+
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.WARNING)
 
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-handler.setFormatter(formatter)
+file_handler.setFormatter(formatter)
+console_handler.setFormatter(formatter)
 
-logger.addHandler(handler)
+logger.addHandler(file_handler)
+logger.addHandler(console_handler)
 
 logger.info('Starting Program')
 pygame.init()

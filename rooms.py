@@ -32,7 +32,7 @@ room_dict = {
     # StartingRoom and EndingRoom must exist somewhere
     "StartingRoom": [MoveRight,
                      "SSSSSSSS",
-                     "S      S",
+                     "S     FS",
                      "SW     S",
                      "SSSSSDDS"
     ],

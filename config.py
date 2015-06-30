@@ -32,6 +32,7 @@ import os
 import logging
 import pickle
 import pygame
+module_logger = logging.getLogger('mineEye.config')
 
 #Defaults:
 SCREEN_RESOLUTION = (1366, 768)
@@ -54,19 +55,20 @@ WIDTH = SCREEN_RESOLUTION[0]
 HEIGHT = SCREEN_RESOLUTION[1]
 
 
-if not os.path.exists('settings'):
+try:
+    f = open('settings', 'rb')
+    settings = pickle.loads(f.read())
+    f.close()
+
+except EOFError:
+    module_logger.info('Created new settings dictionary')
     settings = {}
-    exclude = ['os', 'pickle', 'pygame', 'exclude', 'settings', 'logging']
+    exclude = ['os', 'pickle', 'pygame', 'logging', 'exclude', 'settings', 'module_logger']
     for item in [item for item in dir() if not item.startswith('__') and item not in exclude]:
         settings[item] = locals()[item]
 
     f = open('settings', 'wb')
     f.write(pickle.dumps(settings))
-    f.close()
-
-else:
-    f = open('settings', 'rb')
-    settings = pickle.loads(f.read())
     f.close()
 
 settings['GOD MODE'] = False

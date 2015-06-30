@@ -88,7 +88,8 @@ class Enemy(h.Sprite):
 
         self.rect = self.image.get_rect()
 
-        self.previous_location = self.rect.center
+        self.pathfind_timer = 0
+        self.path = None
 
     def __repr__(self):
         return '{enemy} at position: {pos}'.format(enemy=type(self).__name__, pos=self.rect.center)
@@ -114,7 +115,7 @@ class Enemy(h.Sprite):
         """
         pass
 
-    def a_star(self, hero, n=5):
+    def a_star(self, hero, n=10):
         """
         Calculate the A* algorithm to pathfind towards the hero.
 
@@ -126,7 +127,7 @@ class Enemy(h.Sprite):
 
         graph = self.world.nodes
         start = self.get_nearest_node()
-        goal = hero.get_nearest_node()
+        goal = hero.nearest_node
 
         frontier.put(start, 0)
 
@@ -149,11 +150,10 @@ class Enemy(h.Sprite):
 
             n -= 1
 
-        return came_from
+        return came_from, current
 
-    def reconstruct_path(self, hero, came_from):
+    def reconstruct_path(self, came_from, goal):
         start = self.get_nearest_node()
-        goal = hero.get_nearest_node()
 
         current = goal
         path = [current]
@@ -162,7 +162,7 @@ class Enemy(h.Sprite):
                 current = came_from[current]
                 path.append(current)
             except KeyError:
-                pass
+                self.logger.exception('Key error in reconstruct path, node {0}'.format(current))
         path.reverse()
 
         return path
@@ -182,23 +182,35 @@ class Enemy(h.Sprite):
                 self.rect.bottom = block.rect.top
                 self.yspeed = 0
 
-    def check_collisions(self):
+    def check_x_collisions(self):
         """
         Prevent the enemy from moving through walls.
 
         Check for collisions, then adjust the enemy position if it collides with anything
-        :param direction: The direction of motion
         """
         block_hit_list = pygame.sprite.spritecollide(self, self.world.block_list, False)
         for block in block_hit_list:
             if self.rect.x < block.rect.x:
                 self.rect.right = block.rect.left
-                # self.logger.debug("{enemy} hit a block from the left".format(enemy=self))
             elif self.rect.x > block.rect.x:
                 self.rect.left = block.rect.right
-                # self.logger.debug("{enemy} hit a block from the right".format(enemy=self))
             else:
-                self.logger.error("{0} moving, but it hit something... ya done messed up".format(self))
+                self.logger.error("{0} not moving in x, but it hit something... ya done messed up".format(self))
+
+    def check_y_collisions(self):
+        """
+        Prevent the enemy from moving through walls.
+
+        Check for collisions, then adjust the enemy position if it collides with anything
+        """
+        block_hit_list = pygame.sprite.spritecollide(self, self.world.block_list, False)
+        for block in block_hit_list:
+            if self.rect.y < block.rect.y:
+                self.rect.bottom = block.rect.top
+            elif self.rect.y > block.rect.y:
+                self.rect.top = block.rect.bottom
+            else:
+                self.logger.error("{0} not moving in y, but it hit something... ya done messed up".format(self))
 
     def straight_to_hero(self, hero):
         """
@@ -223,18 +235,29 @@ class Enemy(h.Sprite):
         :param hero: The hero to use as a goal
         """
 
-        path = self.reconstruct_path(hero, self.a_star(hero))
-        if path[0] == self.get_nearest_node():
-            path.pop(0)
+        if self.pathfind_timer == 0:
+            came_from, current = self.a_star(hero)
+            self.path = self.reconstruct_path(came_from, current)
+            self.pathfind_timer += 12
+        else:
+            self.pathfind_timer -= 1
 
-        if len(path) > 0:
-            if path[0][0] > self.rect.centerx:
+        try:
+            if self.path[0] == self.get_nearest_node():
+                self.path.pop(0)
+        except IndexError:
+            self.logger.debug('{enemy} ran out of nodes in path'.format(enemy=self))
+
+        if len(self.path) > 0:
+            if self.path[0][0] > self.rect.centerx:
                 self.movex(self.speed)
-            if path[0][1] > self.rect.centery:
+                self.check_x_collisions()
+            if self.path[0][1] > self.rect.centery:
                 self.movey(self.speed)
-            if path[0][0] < self.rect.centerx:
+            if self.path[0][0] < self.rect.centerx:
                 self.movex(-self.speed)
-            if path[0][1] < self.rect.centery:
+                self.check_x_collisions()
+            if self.path[0][1] < self.rect.centery:
                 self.movey(-self.speed)
 
     def update(self, hero):
@@ -257,7 +280,6 @@ class Enemy(h.Sprite):
                 self.straight_to_hero(hero)
             else:
                 self.pathfind(hero)
-                self.check_collisions()
 
         if self.current_hp <= 0:
             self.kill()
