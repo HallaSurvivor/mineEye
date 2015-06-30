@@ -718,7 +718,7 @@ class World(Room):
 
         random.seed(seed)
 
-        self.background_string = 'black.png'
+        self.background_string = 'background.png'
         self.background = h.create_background(h.load(self.background_string))
         self.logger.debug('===Begin modifying rooms to align doors===')
 

@@ -194,8 +194,6 @@ class Enemy(h.Sprite):
                 self.rect.right = block.rect.left
             elif self.rect.x > block.rect.x:
                 self.rect.left = block.rect.right
-            else:
-                self.logger.error("{0} not moving in x, but it hit something... ya done messed up".format(self))
 
     def check_y_collisions(self):
         """
@@ -209,8 +207,6 @@ class Enemy(h.Sprite):
                 self.rect.bottom = block.rect.top
             elif self.rect.y > block.rect.y:
                 self.rect.top = block.rect.bottom
-            else:
-                self.logger.error("{0} not moving in y, but it hit something... ya done messed up".format(self))
 
     def straight_to_hero(self, hero):
         """
@@ -252,13 +248,18 @@ class Enemy(h.Sprite):
             if self.path[0][0] > self.rect.centerx:
                 self.movex(self.speed)
                 self.check_x_collisions()
+
             if self.path[0][1] > self.rect.centery:
                 self.movey(self.speed)
+                self.check_y_collisions()
+
             if self.path[0][0] < self.rect.centerx:
                 self.movex(-self.speed)
                 self.check_x_collisions()
+
             if self.path[0][1] < self.rect.centery:
                 self.movey(-self.speed)
+                self.check_y_collisions()
 
     def update(self, hero):
         """

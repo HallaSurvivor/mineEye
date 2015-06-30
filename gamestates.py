@@ -755,13 +755,14 @@ class InGame(GameState):
         self.draw_hud(screen)
         self.draw_cursor(screen)
 
-        node_sprite = h.load('bullet.png')
-        node_pos = node_sprite.get_rect()
+        if settings['SHOW_NODES']:
+            node_sprite = h.load('bullet.png')
+            node_pos = node_sprite.get_rect()
 
-        for node in self.world.nodes.nodes:
-            if node != self.hero.nearest_node:
-                node_pos.center = node
-                screen.blit(node_sprite, node_pos)
+            for node in self.world.nodes.nodes:
+                if node != self.hero.nearest_node:
+                    node_pos.center = node
+                    screen.blit(node_sprite, node_pos)
 
     def update(self):
         """
