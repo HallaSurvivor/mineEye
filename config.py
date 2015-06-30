@@ -62,7 +62,7 @@ try:
     settings = pickle.loads(f.read())
     f.close()
 
-except EOFError:
+except:
     module_logger.info('Created new settings dictionary')
     settings = {}
     exclude = ['os', 'pickle', 'pygame', 'logging', 'exclude', 'settings', 'module_logger']
