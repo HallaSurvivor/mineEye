@@ -150,6 +150,8 @@ class Menu(GameState):
         super().__init__()
         self.manager = None
 
+        self.logger = logging.getLogger('mineEye.gamestates.Menu')
+
         self.selected = 0
         self.list_size = len(self.options) - 1
 
@@ -180,7 +182,6 @@ class Menu(GameState):
         )
         if self.default_background.get_size() != screen.get_size():
             self.default_background = h.create_background(h.load(self.background_tile))
-
         screen.blit(self.default_background, (0, 0))
 
         if not self.rect_list:
@@ -189,7 +190,7 @@ class Menu(GameState):
             h.create_menu(screen, self.title, self.options, self.descriptions)
         if self.selections is not None:
             for index, option in enumerate(self.selections):
-                if type(option) == str and option != 'go back':
+                if type(option) == str and option != 'go back' and option[:5] != 'seed:':
                     if settings[option]:
                         on_rect = on.get_rect()
                         on_rect.bottomright = self.rect_list[index].bottomleft
@@ -236,11 +237,28 @@ class Menu(GameState):
         """
         Activate the currently highlighted option.
         """
+        global seeds
+
         if self.selections is not None:
             if type(self.selections[self.selected]) == str:
                 # if it's a back button
                 if self.selections[self.selected] == 'go back':
                     self.manager.go_back()
+
+                # if it's an add-this-seed
+                if self.selections[self.selected][:5] == 'seed:':
+                    found = False
+                    for index, seed in enumerate(seeds):
+                        if seed == '' and not found:
+                            seeds[index] = self.selections[self.selected][5:]
+                            self.logger.info('added seed {0} from win/death menu'.format(self.selections[self.selected][5:]))
+                            f = open('seeds', 'wb')
+                            f.write(pickle.dumps(seeds))
+                            f.close()
+                            found = True
+                    else:
+                        if not found:
+                            self.logger.INFO('Tried to add seed {0}, but there were no available slots'.format(self.selections[self.selected][5:]))
 
                 # if it's a settings modifier
                 else:
@@ -469,7 +487,7 @@ class ChooseHero(Menu):
     options = [player.name for player in hero.hero_list]
     descriptions = [player.description for player in hero.hero_list]
 
-    def __init__(self, timer=False, seed=None):
+    def __init__(self, timer=True, seed=None):
         super().__init__()
 
         self.logger = logging.getLogger('mineEye.gamestates.ChooseHero')
@@ -728,8 +746,6 @@ class InGame(GameState):
                 elapsed_rect.top = 0
                 elapsed_rect.right = settings['WIDTH']
                 screen.blit(elapsed_time_display, elapsed_rect)
-        else:
-            self.manager.go_to(WinScreen(self.seed, self.elapsed_time))
 
     def draw_cursor(self, screen):
         """
@@ -777,6 +793,11 @@ class InGame(GameState):
             self.logger.info('Hero Died')
             self.logger.debug('go to DeathScreen')
             self.die()
+
+        if not self.hero.run_timer:
+            self.logger.info('Hero Won with time: {0}'.format(self.elapsed_time))
+            self.logger.debug('go to WinScreen')
+            self.win()
 
     def handle_events(self, events):
         """
@@ -950,7 +971,10 @@ class InGame(GameState):
                 pass
 
     def die(self):
-        self.manager.go_to(DeathScreen(self.seed))
+        self.manager.go_to(DeathScreen(self.timer, type(self.hero), self.seed))
+
+    def win(self):
+        self.manager.go_to(WinScreen(self.timer, type(self.hero), self.seed, self.elapsed_time))
 
     def generate_world(self, n):
         """
@@ -1060,7 +1084,7 @@ class InGame(GameState):
         self.world = rooms.World(room_list, self.seed)
 
 
-class DeathScreen(GameState):
+class DeathScreen(Menu):
     """
     A game state for showing the hero's death.
 
@@ -1071,22 +1095,26 @@ class DeathScreen(GameState):
 
     musicfile = 'Raven.mp3'
 
-    def __init__(self, seed):
+    title = "You Died!"
+    options = ["Retry", "Save Seed", "Generate New World", "Quit"]
+
+    show_back_button = False
+
+    def __init__(self, timer, chosen_hero, seed):
         super().__init__()
         self.manager = None
         self.seed = seed
+        self.timer = timer
+        self.chosen_hero = chosen_hero
 
-    def draw(self, screen):
-        screen.fill(c.BLACK)
-        death_text = h.load_font("luximb.ttf", 32).render(
-            "You Died! Press any key to try again.", 1, c.RED
-        )
-        death_text_x = death_text.get_rect().width / 2
-        death_text_y = death_text.get_rect().height / 2
-        centered_pos = (settings['WIDTH']/2 - death_text_x, settings['HEIGHT']/2 - death_text_y)
+        self.selections = [InGame(timer=self.timer, chosen_hero=self.chosen_hero, seed=self.seed),
+                           "seed: {0}".format(self.seed),
+                           ChooseHero(),
+                           TitleScreen()
+        ]
 
-        screen.blit(death_text, centered_pos)
 
+    def extra_draw(self, screen):
         seed_text = h.load_font("luximb.ttf", 16).render(
             "SEED: {0}".format(self.seed), 1, c.BLUE
         )
@@ -1095,16 +1123,8 @@ class DeathScreen(GameState):
         seed_rect.bottom = settings['HEIGHT']
         screen.blit(seed_text, seed_rect)
 
-    def update(self):
-        pass
 
-    def handle_events(self, events):
-        for event in events:
-            if event.type == pygame.KEYDOWN:
-                self.manager.go_to(TitleScreen())
-
-
-class WinScreen(GameState):
+class WinScreen(Menu):
     """
     A gamestate for showing a victory.
 
@@ -1113,22 +1133,24 @@ class WinScreen(GameState):
     that was played.
     """
 
-    def __init__(self, seed, elapsed_time):
+    title = "You Win!"
+    options = ["Retry", "Save Seed", "Generate New World", "Quit"]
+
+    def __init__(self, timer, chosen_hero, seed, elapsed_time):
         super().__init__()
         self.manager = None
         self.seed = seed
         self.elapsed_time = elapsed_time
+        self.timer = timer
+        self.chosen_hero = chosen_hero
 
-    def draw(self, screen):
-        screen.fill(c.BLACK)
-        # Print the "YOU WIN!" text
-        win_text = h.load_font("luximb.ttf", 32).render(
-            "You Win! Press any key to try again.", 1, c.GREEN
-        )
-        centered_pos = win_text.get_rect()
-        centered_pos.center = (settings['WIDTH']/2, settings['HEIGHT']/2)
-        screen.blit(win_text, centered_pos)
+        self.selections = [InGame(timer=self.timer, chosen_hero=self.chosen_hero, seed=self.seed),
+                           "seed: {0}".format(self.seed),
+                           ChooseHero(),
+                           TitleScreen()
+        ]
 
+    def extra_draw(self, screen):
         # Print the final time
         partials = self.elapsed_time % 60
         seconds = ((self.elapsed_time - partials) // 60) % 60
@@ -1159,11 +1181,6 @@ class WinScreen(GameState):
 
     def update(self):
         pass
-
-    def handle_events(self, events):
-        for event in events:
-            if event.type == pygame.KEYDOWN:
-                self.manager.go_to(TitleScreen())
 
 
 class PauseScreen(Menu):
