@@ -32,7 +32,7 @@ room_dict = {
     # StartingRoom and EndingRoom must exist somewhere
     "StartingRoom": [MoveRight,
                      "SSSSSSSS",
-                     "S     FS",
+                     "S      S",
                      "SW     S",
                      "SSSSSDDS"
     ],
@@ -42,7 +42,7 @@ room_dict = {
                    "S      S",
                    "SP    PS",
                    "P      P",
-                   "SSTTTTSS"
+                   "SRRRRRRS"
     ],
     "Room01": [MoveDown,
                "SSDDSS",
@@ -60,7 +60,7 @@ room_dict = {
     "Room02": [MoveLeft,
                "SSSSSSSSSDDS",
                "P          P",
-               "P   F  WS  P",
+               "P      WS  P",
                "SSDDSSSSSSSS",
     ],
     "Room03": [MoveRight,
@@ -72,10 +72,10 @@ room_dict = {
     "Room04": [MoveRight,
                "SSDDSSSSSSSSSSSSS",
                "S               S",
-               "SR              S",
+               "ST              S",
                "S     SSSSSSS   S",
                "S      S   S    S",
-               "S    S R S      S",
+               "S    S T S      S",
                "SSSSSSSSSSSSSDDSS"
     ],
     "Room05": [MoveLeft,
@@ -101,7 +101,7 @@ room_dict = {
                "S    S",
                "S    S",
                "S    S",
-               "SR  RS",
+               "ST  TS",
                "S    S",
                "S BBBS",
                "S    S",
@@ -112,11 +112,26 @@ room_dict = {
     ],
     "Room08": [MoveLeft,
                "SSSSSSSSSSSDDSSS",
-               "S       R      S",
+               "S       T      S",
                "S   B          S",
                "SS  BB         S",
                "SSDDSSSSSSSSSSSS"
 
+    ],
+    "Room09": [MoveRight,
+                "SSDDSSSSSSSS",
+                "ST  T      S",
+                "S          S",
+                "S         WS",
+                "SSSSDDSSSSSS"
+    ],
+    "Room10": [MoveRight,
+                "SSSSDDSSSSSSSS",
+                "S  B        TS",
+                "S  B         S",
+                "S  B      B  S",
+                "SW     G BB  S",
+                "SSPPSSSSSSSDDS"
     ]
 }
 
@@ -625,9 +640,9 @@ class Room:
         S is stone
         P is spike
         B is a breakable wall
-        R is a turret
+        T is a turret
         G is a ghost
-        T is a block that stops the timer
+        R is a block that stops the timer
         W is a weapon chest
         D is door <- IMPORTANT, you need a door at the top and bottom to make the logic work
 
@@ -648,7 +663,7 @@ class Room:
                         self.nodes.add_wall(node)
                         self.logger.debug('added wall at {pos}'.format(pos=(x, y)))
 
-                    if col == "T":
+                    if col == "R":
                         wall = Wall(x, y, h.load('stone.png'), end_timer=True)
                         self.block_list.add(wall)
                         self.all_sprites.add(wall)
@@ -669,7 +684,7 @@ class Room:
                         self.nodes.add_wall(node)
                         self.logger.debug('added broken wall at {pos}'.format(pos=(x, y)))
 
-                    elif col == "R":
+                    elif col == "T":
                         new_enemy = enemy.Turret(self)
                         new_enemy.rect.center = node
                         self.enemy_list.add(new_enemy)
