@@ -1096,7 +1096,7 @@ class DeathScreen(Menu):
     musicfile = 'Raven.mp3'
 
     title = "You Died!"
-    options = ["Retry", "Save Seed", "Generate New World", "Quit"]
+    options = ["Retry", "Save Seed[WIP]", "Generate New World", "Quit"]
 
     show_back_button = False
 
@@ -1134,7 +1134,7 @@ class WinScreen(Menu):
     """
 
     title = "You Win!"
-    options = ["Retry", "Save Seed", "Generate New World", "Quit"]
+    options = ["Retry", "Save Seed[WIP]", "Generate New World", "Quit"]
 
     def __init__(self, timer, chosen_hero, seed, elapsed_time):
         super().__init__()
