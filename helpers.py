@@ -123,7 +123,7 @@ class Graph:
         :return: A list of neighboring nodes
         """
 
-        node = node_indexs
+        node = node_index
 
         directions = [[64, 0], [0, 64], [-64, 0], [0, -64]] # [64, 64], [-64, 64], [-64, -64], [64, -64]
         neighbors = [(node[0] + direction[0], node[1] + direction[1]) for direction in directions]
