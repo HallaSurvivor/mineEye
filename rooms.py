@@ -32,7 +32,7 @@ room_dict = {
     # StartingRoom and EndingRoom must exist somewhere
     "StartingRoom": [MoveRight,
                      "SSSSSSSS",
-                     "S      S",
+                     "S     FS",
                      "SW     S",
                      "SSSSSDDS"
     ],
@@ -121,14 +121,12 @@ room_dict = {
     "Room09": [MoveRight,
                 "SSDDSSSSSSSS",
                 "ST  T      S",
-                "S          S",
                 "S         WS",
-                "SSSSDDSSSSSS"
+                "SSSSSSDDSSSS"
     ],
     "Room10": [MoveRight,
                 "SSSSDDSSSSSSSS",
                 "S  B        TS",
-                "S  B         S",
                 "S  B      B  S",
                 "SW     G BB  S",
                 "SSPPSSSSSSSDDS"
@@ -222,7 +220,7 @@ class Room:
         hero_projectile_list comprises all the shots fired by the hero
         bomb_list comprises all the bombs thrown by the hero
 
-        all_sprite_list comprises all the sprites that move alongside the world.
+        all_sprites comprises all the sprites that move alongside the world.
 
     Pathfinding:
         Enemies use A* pathfinding to navigate the world.
@@ -580,7 +578,8 @@ class Room:
                 hero_distance = hypot(hero.rect.centerx - bomb.rect.centerx, hero.rect.centery - bomb.rect.centery)
                 if hero_distance < bomb.radius:
                     if not hero.bomb_control:
-                        self.logger.info('damage self with bomb')
+                        self.logger.info('damaged self with bomb')
+                        self.logger.info('damaged self with bomb')
                         hero.damage(25)
 
                 bomb.kill()
@@ -654,7 +653,7 @@ class Room:
         for row in self.room_array:
             if row != MoveRight and row != MoveLeft and row != MoveDown:
                 for col in row:
-                    node = (x+32, y+32)  # +32 moves the node to the tile's center
+                    node = (x+32, y+32)
 
                     if col == "S":
                         wall = Wall(x, y, h.load('stone.png'))
@@ -715,6 +714,7 @@ class Room:
 
                     if col != "&":
                         self.nodes.append(node)
+
                     x += 64
                 y += 64
                 x = xstart

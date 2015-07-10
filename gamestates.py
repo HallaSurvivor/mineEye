@@ -57,7 +57,7 @@ class GameState:
     """
 
     musicfile = None
-    background_tile = 'dirt.jpg'
+    background_tile = 'menubg.png'
 
     def __init__(self):
         self.default_background = h.create_background(h.load(self.background_tile))
@@ -536,7 +536,7 @@ class ChangeBinds(Menu):
         """
         Override the default event checking in order to check for any key press.
         """
-        self.descriptions = [pygame.key.name(settings[option]) for option in self.selections]
+        self.descriptions = [pygame.key.name(settings[option]) for option in self.selections if option != 'go back']
 
         valid_options = [
             # letters
@@ -776,9 +776,8 @@ class InGame(GameState):
             node_pos = node_sprite.get_rect()
 
             for node in self.world.nodes.nodes:
-                if node != self.hero.nearest_node:
-                    node_pos.center = node
-                    screen.blit(node_sprite, node_pos)
+                node_pos.center = node
+                screen.blit(node_sprite, node_pos)
 
     def update(self):
         """

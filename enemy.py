@@ -115,7 +115,7 @@ class Enemy(h.Sprite):
         """
         pass
 
-    def a_star(self, hero, n=10):
+    def a_star(self, hero, n=20):
         """
         Calculate the A* algorithm to pathfind towards the hero.
 
@@ -126,8 +126,8 @@ class Enemy(h.Sprite):
         cost_so_far = {}
 
         graph = self.world.nodes
-        start = self.get_nearest_node()
-        goal = hero.nearest_node
+        start = (971, 348)
+        goal = (651, 412)
 
         frontier.put(start, 0)
 
@@ -153,7 +153,7 @@ class Enemy(h.Sprite):
         return came_from, current
 
     def reconstruct_path(self, came_from, goal):
-        start = self.get_nearest_node()
+        start = self.rect.center
 
         current = goal
         path = [current]
@@ -228,38 +228,46 @@ class Enemy(h.Sprite):
         """
         Use A* pathfinding to move efficiently towards the hero
 
+        Importantly, the nodes change alongside the motion of the room,
+        Because of this, the nodes manipulated here are references to the
+        nodes stored inside of World.nodes.nodes. This makes it possible to
+        move those nodes' positions, and have the pathfinding here update
+        automatically.
+
         :param hero: The hero to use as a goal
         """
-
         if self.pathfind_timer == 0:
             came_from, current = self.a_star(hero)
             self.path = self.reconstruct_path(came_from, current)
-            self.pathfind_timer += 12
+            print(self.path)
+            self.pathfind_timer += 999999999999
         else:
             self.pathfind_timer -= 1
 
         try:
-            if self.path[0] == self.get_nearest_node():
+            if self.path[0][0] == self.rect.centerx:
+                print('popped node {0}'.format(self.path[0]))
                 self.path.pop(0)
+                print(self.path)
         except IndexError:
             self.logger.debug('{enemy} ran out of nodes in path'.format(enemy=self))
 
         if len(self.path) > 0:
             if self.path[0][0] > self.rect.centerx:
                 self.movex(self.speed)
-                self.check_x_collisions()
+                # self.check_x_collisions()
 
-            if self.path[0][1] > self.rect.centery:
-                self.movey(self.speed)
-                self.check_y_collisions()
+            # if self.path[0][1] > self.rect.centery:
+            #     self.movey(self.speed)
+            #     # self.check_y_collisions()
 
             if self.path[0][0] < self.rect.centerx:
                 self.movex(-self.speed)
-                self.check_x_collisions()
+                # self.check_x_collisions()
 
-            if self.path[0][1] < self.rect.centery:
-                self.movey(-self.speed)
-                self.check_y_collisions()
+            # if self.path[0][1] < self.rect.centery:
+            #     self.movey(-self.speed)
+            #     # self.check_y_collisions()
 
     def update(self, hero):
         """
@@ -277,10 +285,10 @@ class Enemy(h.Sprite):
             if not self.flying:
                 self.calc_gravity()
 
-            if not self.clips:
-                self.straight_to_hero(hero)
-            else:
+            if self.clips:
                 self.pathfind(hero)
+            else:
+                self.straight_to_hero(hero)
 
         if self.current_hp <= 0:
             self.kill()
@@ -297,23 +305,6 @@ class Enemy(h.Sprite):
             dist = hypot(self.rect.centerx - node[0], self.rect.centery - node[1])
 
         return dist
-
-    def get_nearest_node(self):
-        """
-        Return the node closest to
-        """
-        nearest_node = None
-        for node in self.world.nodes.nodes:
-            if nearest_node is None:
-                nearest_node = node
-                current_dist = self.get_dist(node)
-            else:
-                new_dist = self.get_dist(node)
-                if new_dist < current_dist:
-                    nearest_node = node
-                    current_dist = new_dist
-
-        return nearest_node
 
 
 class Turret(Enemy):
@@ -362,7 +353,8 @@ class Ghost(Enemy):
 
 class FireBat(Enemy):
     activation_range = 1024
-    speed = 5
+    speed = 1
+    contact_damage = 0
     flying = True
 
     def __init__(self, *args):

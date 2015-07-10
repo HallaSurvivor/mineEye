@@ -6,8 +6,9 @@ import pygame
 from config import settings
 import gamestates
 
+# Create Logger
 logger = logging.getLogger('mineEye')
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 file_handler = logging.FileHandler('log.txt')
 
 console_handler = logging.StreamHandler()
@@ -21,9 +22,11 @@ logger.addHandler(file_handler)
 logger.addHandler(console_handler)
 
 logger.info('Starting Program')
+
+# Create the game
 pygame.init()
 
-screen = pygame.display.set_mode(settings['SCREEN_RESOLUTION'], pygame.FULLSCREEN)
+screen = pygame.display.set_mode(settings['SCREEN_RESOLUTION'])
 pygame.display.set_caption("mineEye")
 clock = pygame.time.Clock()
 pygame.mouse.set_visible(False)

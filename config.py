@@ -39,7 +39,7 @@ SCREEN_RESOLUTION = (1366, 768)
 
 DEBUG = True
 
-SHOW_NODES = False
+SHOW_NODES = True
 
 PLAY_MUSIC = True
 PLAY_SFX = False
@@ -74,3 +74,4 @@ except:
     f.close()
 
 settings['GOD MODE'] = False
+settings['SHOW_NODES'] = SHOW_NODES

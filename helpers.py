@@ -103,7 +103,7 @@ class Graph:
 
     def heuristic(self, a, b):
         """
-        Get the heuristic between nodes for A*
+        Get the heuristic between nodes for A* via Manhattan distance
 
         :param a: the first node
         :param b: the second node
@@ -115,15 +115,17 @@ class Graph:
         (x2, y2) = b
         return abs(x1 - x2) + abs(y1 - y2)
 
-    def get_neighbors(self, node):
+    def get_neighbors(self, node_index):
         """
         Return a list of all the neighbors for a given node
 
-        :param node: The node around which to find neighbors
+        :param node_index: The index of the node tuple in self.nodes
         :return: A list of neighboring nodes
         """
 
-        directions = [[64, 0], [0, 64], [-64, 0], [0, -64]]
+        node = node_indexs
+
+        directions = [[64, 0], [0, 64], [-64, 0], [0, -64]] # [64, 64], [-64, 64], [-64, -64], [64, -64]
         neighbors = [(node[0] + direction[0], node[1] + direction[1]) for direction in directions]
         neighbors = filter(self.passable, neighbors)
 
