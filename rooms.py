@@ -32,8 +32,8 @@ room_dict = {
     # StartingRoom and EndingRoom must exist somewhere
     "StartingRoom": [MoveRight,
                      "SSSSSSSS",
-                     "S     FS",
-                     "SW     S",
+                     "S    SFS",
+                     "SW S   S",
                      "SSSSSDDS"
     ],
     "EndingRoom": [MoveDown,
@@ -302,6 +302,9 @@ class Room:
         #Blow up the bombs that hit walls
         self.det_bombs(hero)
 
+        # Update the enemies
+        self.enemy_list.update(hero)
+
         # Control the world via user input and gravity
         self.move_world(hero, self.xspeed, self.yspeed)
 
@@ -322,9 +325,6 @@ class Room:
 
         # Deal contact damage
         self.cause_contact_damage(hero)
-
-        # Update the enemies
-        self.enemy_list.update(hero)
 
         # Destroy any projectiles that hit walls or opposing projectiles
         self.destroy_projectiles()

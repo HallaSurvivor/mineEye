@@ -115,15 +115,13 @@ class Graph:
         (x2, y2) = b
         return abs(x1 - x2) + abs(y1 - y2)
 
-    def get_neighbors(self, node_index):
+    def get_neighbors(self, node):
         """
         Return a list of all the neighbors for a given node
 
-        :param node_index: The index of the node tuple in self.nodes
+        :param node_index: The node tuple around which to find neighbors
         :return: A list of neighboring nodes
         """
-
-        node = node_index
 
         directions = [[64, 0], [0, 64], [-64, 0], [0, -64]] # [64, 64], [-64, 64], [-64, -64], [64, -64]
         neighbors = [(node[0] + direction[0], node[1] + direction[1]) for direction in directions]

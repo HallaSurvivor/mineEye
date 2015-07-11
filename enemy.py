@@ -81,6 +81,8 @@ class Enemy(h.Sprite):
 
         self.world = world
 
+        self.graph = self.world.nodes
+
         self.yspeed = 0  # separate y speed for gravity
 
         self.current_hp = self.hp
@@ -115,7 +117,7 @@ class Enemy(h.Sprite):
         """
         pass
 
-    def a_star(self, hero, n=20):
+    def a_star(self, hero, n=7):
         """
         Calculate the A* algorithm to pathfind towards the hero.
 
@@ -125,8 +127,7 @@ class Enemy(h.Sprite):
         came_from = {}
         cost_so_far = {}
 
-        graph = self.world.nodes
-        start = (971, 348)
+        start = (971, 352)
         goal = (651, 412)
 
         frontier.put(start, 0)
@@ -140,11 +141,11 @@ class Enemy(h.Sprite):
             if current == goal:
                 break
 
-            for next_node in graph.get_neighbors(current):
-                new_cost = cost_so_far[current] + graph.cost(current, next_node)
+            for next_node in self.graph.get_neighbors(current):
+                new_cost = cost_so_far[current] + self.graph.cost(current, next_node)
                 if next_node not in cost_so_far or new_cost < cost_so_far[next_node]:
                     cost_so_far[next_node] = new_cost
-                    priority = new_cost + graph.heuristic(goal, next_node)
+                    priority = new_cost + self.graph.heuristic(goal, next_node)
                     frontier.put(next_node, priority)
                     came_from[next_node] = current
 
@@ -153,7 +154,7 @@ class Enemy(h.Sprite):
         return came_from, current
 
     def reconstruct_path(self, came_from, goal):
-        start = self.rect.center
+        start = (971, 352)
 
         current = goal
         path = [current]
@@ -162,10 +163,11 @@ class Enemy(h.Sprite):
                 current = came_from[current]
                 path.append(current)
             except KeyError:
-                self.logger.exception('Key error in reconstruct path, node {0}'.format(current))
+                # self.logger.exception('Key error in reconstruct path, node {0}'.format(current))
+                pass
         path.reverse()
 
-        return path
+        return [self.graph.nodes.index(node) for node in path]
 
     def calc_gravity(self):
         self.yspeed -= self.world.gravity_acceleration
@@ -239,35 +241,37 @@ class Enemy(h.Sprite):
         if self.pathfind_timer == 0:
             came_from, current = self.a_star(hero)
             self.path = self.reconstruct_path(came_from, current)
-            print(self.path)
+            print([self.graph.nodes[node_index] for node_index in self.path])
             self.pathfind_timer += 999999999999
         else:
             self.pathfind_timer -= 1
 
         try:
-            if self.path[0][0] == self.rect.centerx:
+            if self.graph.nodes[self.path[0]] == self.rect.center:
                 print('popped node {0}'.format(self.path[0]))
                 self.path.pop(0)
-                print(self.path)
+                print([self.graph.nodes[node_index] for node_index in self.path])
         except IndexError:
             self.logger.debug('{enemy} ran out of nodes in path'.format(enemy=self))
 
         if len(self.path) > 0:
-            if self.path[0][0] > self.rect.centerx:
+            node_index = self.path[0]
+            node = self.graph.nodes[node_index]
+            if node[0] > self.rect.centerx:
                 self.movex(self.speed)
                 # self.check_x_collisions()
 
-            # if self.path[0][1] > self.rect.centery:
-            #     self.movey(self.speed)
-            #     # self.check_y_collisions()
+            if node[1] > self.rect.centery:
+                self.movey(self.speed)
+                # self.check_y_collisions()
 
-            if self.path[0][0] < self.rect.centerx:
+            if node[0] < self.rect.centerx:
                 self.movex(-self.speed)
                 # self.check_x_collisions()
 
-            # if self.path[0][1] < self.rect.centery:
-            #     self.movey(-self.speed)
-            #     # self.check_y_collisions()
+            if node[1] < self.rect.centery:
+                self.movey(-self.speed)
+                # self.check_y_collisions()
 
     def update(self, hero):
         """
