@@ -33,7 +33,7 @@ room_dict = {
     "StartingRoom": [MoveRight,
                      "SSSSSSSS",
                      "S    SFS",
-                     "SW S   S",
+                     "SW B   S",
                      "SSSSSDDS"
     ],
     "EndingRoom": [MoveDown,
@@ -556,7 +556,7 @@ class Room:
                     distance = hypot(block.rect.centerx - bomb.rect.centerx, block.rect.centery - bomb.rect.centery)
                     if distance < bomb.radius and block.breakable:
                         self.logger.info('destroyed block at {0} with bomb'.format((block.rect.x, block.rect.y)))
-                        self.nodes.make_passable([block.rect.centerx, block.rect.centery])
+                        self.nodes.make_passable((block.rect.centerx, block.rect.centery))
                         block.kill()
 
                 for e in self.enemy_list:
