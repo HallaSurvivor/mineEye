@@ -373,7 +373,7 @@ class Ghost(Enemy):
 class FireBat(Enemy):
     activation_range = 1024
     speed = 4
-    contact_damage = 0
+    contact_damage = 4
     flying = True
 
     def __init__(self, *args):
