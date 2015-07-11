@@ -127,14 +127,13 @@ class Enemy(h.Sprite):
         came_from = {}
         cost_so_far = {}
 
-        start = (971, 352)
-        goal = (651, 412)
+        start = self.get_nearest_node()
+        goal = hero.get_nearest_node()
 
         frontier.put(start, 0)
 
         came_from[start] = None
         cost_so_far[start] = 0
-
         while not frontier.is_empty() and n > 0:
             current = frontier.get()
 
@@ -154,7 +153,7 @@ class Enemy(h.Sprite):
         return came_from, current
 
     def reconstruct_path(self, came_from, goal):
-        start = (971, 352)
+        start = self.get_nearest_node()
 
         current = goal
         path = [current]
@@ -166,7 +165,6 @@ class Enemy(h.Sprite):
                 # self.logger.exception('Key error in reconstruct path, node {0}'.format(current))
                 pass
         path.reverse()
-
         return [self.graph.nodes.index(node) for node in path]
 
     def calc_gravity(self):
@@ -241,16 +239,13 @@ class Enemy(h.Sprite):
         if self.pathfind_timer == 0:
             came_from, current = self.a_star(hero)
             self.path = self.reconstruct_path(came_from, current)
-            print([self.graph.nodes[node_index] for node_index in self.path])
-            self.pathfind_timer += 999999999999
+            self.pathfind_timer += 60
         else:
             self.pathfind_timer -= 1
 
         try:
             if self.graph.nodes[self.path[0]] == self.rect.center:
-                print('popped node {0}'.format(self.path[0]))
                 self.path.pop(0)
-                print([self.graph.nodes[node_index] for node_index in self.path])
         except IndexError:
             self.logger.debug('{enemy} ran out of nodes in path'.format(enemy=self))
 
@@ -309,6 +304,26 @@ class Enemy(h.Sprite):
             dist = hypot(self.rect.centerx - node[0], self.rect.centery - node[1])
 
         return dist
+
+    def get_nearest_node(self):
+        """
+        Return the node nearest to the Enemy's center.
+        """
+
+        nearest_node = None
+        for node in self.world.nodes.nodes:
+            if hypot(node[0] - settings['WIDTH']/2, node[1] - settings['HEIGHT']) <= 1200:
+                if nearest_node is None:
+                    nearest_node = node
+                    current_dist = hypot(self.rect.centerx - node[0], self.rect.centery - node[1])
+                else:
+                    new_dist = hypot(self.rect.centerx - node[0], self.rect.centery - node[1])
+                    if new_dist < current_dist:
+                        nearest_node = node
+                        current_dist = new_dist
+
+        self.logger.debug('Nearest node to {enemy}: {node}'.format(enemy=self, node=nearest_node))
+        return nearest_node
 
 
 class Turret(Enemy):

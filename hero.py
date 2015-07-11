@@ -95,8 +95,6 @@ class Hero(pygame.sprite.Sprite):
     melee_weapon = None
     ranged_weapon = None
 
-    nearest_node = None
-
     def __init__(self):
         """
         create the class, and create local variables based on the base variables that can be modified.
@@ -221,10 +219,6 @@ class Hero(pygame.sprite.Sprite):
         if settings['GOD MODE']:
             self.jump_height = 50
 
-        if self.moving_left or self.moving_right or self.nearest_node is None:
-            self.logger.debug('recalculating hero node')
-            self.get_nearest_node()
-
     def damage(self, amount):
         """
         Reduces the Hero's health based on an event.
@@ -309,17 +303,18 @@ class Hero(pygame.sprite.Sprite):
 
         nearest_node = None
         for node in self.world.nodes.nodes:
-            if nearest_node is None:
-                nearest_node = node
-                current_dist = hypot(self.rect.centerx - node[0], self.rect.centery - node[1])
-            else:
-                new_dist = hypot(self.rect.centerx - node[0], self.rect.centery - node[1])
-                if new_dist < current_dist:
+            if hypot(node[0] - settings['WIDTH']/2, node[1] - settings['HEIGHT']) <= 1200:
+                if nearest_node is None:
                     nearest_node = node
-                    current_dist = new_dist
+                    current_dist = hypot(self.rect.centerx - node[0], self.rect.centery - node[1])
+                else:
+                    new_dist = hypot(self.rect.centerx - node[0], self.rect.centery - node[1])
+                    if new_dist < current_dist:
+                        nearest_node = node
+                        current_dist = new_dist
 
-        self.logger.debug('Nearest node: {node}'.format(node=nearest_node))
-        self.nearest_node = nearest_node
+        self.logger.debug('Nearest node to hero: {node}'.format(node=nearest_node))
+        return nearest_node
 
 
 class Demo(Hero):

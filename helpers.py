@@ -93,13 +93,13 @@ class Graph:
         self.nodes.append(node)
 
     def add_wall(self, node):
-        self.walls.append(node)
+        self.walls.append(self.nodes.index(node))
 
     def passable(self, node):
-        return node not in self.walls
+        return self.nodes.index(node) not in self.walls
 
     def make_passable(self, node):
-        self.walls = [wall for wall in self.walls if wall != node]
+        self.walls = [wall for wall in self.walls if wall != self.nodes.index(node)]
 
     def heuristic(self, a, b):
         """
@@ -296,3 +296,4 @@ def create_menu(screen, title, options, descriptions=None,
             i += 1
 
     return rect_list
+

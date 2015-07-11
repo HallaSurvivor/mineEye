@@ -655,6 +655,9 @@ class Room:
                 for col in row:
                     node = (x+32, y+32)
 
+                    if col != "&":
+                        self.nodes.append(node)
+
                     if col == "S":
                         wall = Wall(x, y, h.load('stone.png'))
                         self.block_list.add(wall)
@@ -711,9 +714,6 @@ class Room:
                         self.chest_list.add(chest)
                         self.all_sprites.add(chest)
                         self.logger.debug('added weapon chest at {pos}'.format(pos=(x, y)))
-
-                    if col != "&":
-                        self.nodes.append(node)
 
                     x += 64
                 y += 64
