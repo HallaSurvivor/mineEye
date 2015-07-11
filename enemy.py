@@ -239,7 +239,7 @@ class Enemy(h.Sprite):
         if self.pathfind_timer == 0:
             came_from, current = self.a_star(hero)
             self.path = self.reconstruct_path(came_from, current)
-            self.pathfind_timer += 60
+            self.pathfind_timer += 16
         else:
             self.pathfind_timer -= 1
 
@@ -372,7 +372,7 @@ class Ghost(Enemy):
 
 class FireBat(Enemy):
     activation_range = 1024
-    speed = 1
+    speed = 4
     contact_damage = 0
     flying = True
 

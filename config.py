@@ -39,7 +39,7 @@ SCREEN_RESOLUTION = (1366, 768)
 
 DEBUG = True
 
-SHOW_NODES = True
+SHOW_NODES = False
 
 PLAY_MUSIC = True
 PLAY_SFX = False
