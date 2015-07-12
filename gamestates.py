@@ -1005,6 +1005,7 @@ class InGame(GameState):
                 * Don't move down more than 3 times
                 * Total Displacement must be more than twice the length of a left-moving room
                     (the factor of two is for complete certainty)
+                * If the same room is selected twice, generate a test value which must be greater than 5
         * Finally, add the ending room
 
         :param n: The Int number of rooms to randomly choose
@@ -1033,12 +1034,25 @@ class InGame(GameState):
                     self.logger.debug(row)
                 if possible_next_room[0] == rooms.MoveDown:
                     if move_down_counter <= 2:
-                        room_list.append(possible_next_room)
+                        if possible_next_room == room_list[-1]:
+                            test = random.randint(0, 10)
+                            self.logger.debug('Same room repeated. (move down) Test={0}'.format(test))
+                            if test >= 5:
+                                room_list.append(possible_next_room)
 
-                        move_down_counter += 1
-                        move_left_counter = 0
-                        move_right_counter = 0
-                        matched = True
+                                move_down_counter += 1
+                                move_left_counter = 0
+                                move_right_counter = 0
+                                matched = True
+                            else:
+                                self.logger.debug('DQ: Test is not greater than threshold')
+                        else:
+                            room_list.append(possible_next_room)
+
+                            move_down_counter += 1
+                            move_left_counter = 0
+                            move_right_counter = 0
+                            matched = True
                     else:
                         self.logger.debug('DQ: too many down in a row')
 
@@ -1046,31 +1060,61 @@ class InGame(GameState):
                     # Solves a bug with rendering left of the start
                     if total_displacement >= 2*len(possible_next_room[-1]):
                         if move_left_counter <= 4:
-                            room_list.append(possible_next_room)
+                            if possible_next_room == room_list[-1]:
+                                test = random.randint(0, 10)
+                                self.logger.debug('Same room repeated. (move left) Test={0}'.format(test))
+                                if test >= 5:
+                                    room_list.append(possible_next_room)
 
-                            move_down_counter = 0
-                            move_left_counter += 1
-                            move_right_counter = 0
+                                    move_down_counter = 0
+                                    move_left_counter += 1
+                                    move_right_counter = 0
 
-                            total_displacement -= len(possible_next_room[-1])
-                            matched = True
+                                    total_displacement -= len(possible_next_room[-1])
+                                    matched = True
+                                else:
+                                    self.logger.debug('DQ: Test is not greater than threshold')
+                            else:
+                                room_list.append(possible_next_room)
+
+                                move_down_counter = 0
+                                move_left_counter += 1
+                                move_right_counter = 0
+
+                                total_displacement -= len(possible_next_room[-1])
+                                matched = True
                         else:
                             self.logger.debug('DQ: too many left in a row')
                     else:
                         self.logger.debug('DQ: too close to start to move left')
-                        self.logger.debug('total displacement: {0}, room length: {1}'.format(total_displacement,
-                                                                                             possible_next_room[-1]))
+                        self.logger.debug('total displacement: {0}, room width: {1}'.format(total_displacement,
+                                                                                             len(possible_next_room[-1])))
 
                 elif possible_next_room[0] == rooms.MoveRight:
                     if move_right_counter <= 4:
-                        room_list.append(possible_next_room)
+                        if possible_next_room == room_list[-1]:
+                            test = random.randint(0, 10)
+                            self.logger.debug('Same room repeated. (move right) Test={0}'.format(test))
+                            if test >= 5:
+                                room_list.append(possible_next_room)
 
-                        move_down_counter = 0
-                        move_left_counter = 0
-                        move_right_counter += 1
+                                move_down_counter = 0
+                                move_left_counter = 0
+                                move_right_counter += 1
 
-                        total_displacement += len(possible_next_room[-1])
-                        matched = True
+                                total_displacement += len(possible_next_room[-1])
+                                matched = True
+                            else:
+                                self.logger.debug('DQ: Test is not greater than threshold')
+                        else:
+                            room_list.append(possible_next_room)
+
+                            move_down_counter = 0
+                            move_left_counter = 0
+                            move_right_counter += 1
+
+                            total_displacement += len(possible_next_room[-1])
+                            matched = True
                     else:
                         self.logger.debug('DQ: too many right in a row')
 
