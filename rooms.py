@@ -32,8 +32,8 @@ room_dict = {
     # StartingRoom and EndingRoom must exist somewhere
     "StartingRoom": [MoveRight,
                      "SSSSSSSS",
-                     "S    SFS",
-                     "SW B   S",
+                     "S      S",
+                     "SW     S",
                      "SSSSSDDS"
     ],
     "EndingRoom": [MoveDown,
@@ -46,7 +46,7 @@ room_dict = {
     ],
     "Room01": [MoveDown,
                "SSDDSS",
-               "S    S",
+               "SF  FS",
                "S    S",
                "SS   S",
                "S    S",
@@ -130,7 +130,12 @@ room_dict = {
                 "S  B      B  S",
                 "SW     G BB  S",
                 "SSPPSSSSSSSDDS"
-    ]
+    ],
+    "Room11": [MoveRight,
+               "SSDDSSSSSSSS",
+               "SF         S",
+               "S          S",
+               "SPSSSPPSDDSS"]
 }
 
 
