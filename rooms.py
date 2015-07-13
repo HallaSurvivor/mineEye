@@ -348,9 +348,7 @@ class World:
         screen.blit(self.background, (0, 0))
 
         if not self.array_parsed:
-            # Create the room 128, 128 left and upwards of center-screen
-            self.parse_room_array(settings['SCREEN_RESOLUTION'][0] / 2 - 128,
-                                  settings['SCREEN_RESOLUTION'][1] / 2 - 128)
+            self.parse_room_array()
 
         self.all_sprites.draw(screen)
 
@@ -631,7 +629,7 @@ class World:
         self.xspeed += changex
         self.yspeed += changey
 
-    def parse_room_array(self, xstart, ystart):
+    def parse_room_array(self):
         """
         Turn a list of strings into an array of walls and enemies.
 
@@ -649,12 +647,13 @@ class World:
         R is a block that stops the timer
         W is a weapon chest
         D is door <- IMPORTANT, you need a 2 wide door at the top and bottom to make the logic work
-
-        :param xstart: Int representing the starting x location
-        :param ystart: Int representing the starting y location
         """
-        x = xstart
-        y = ystart
+        x = settings['SCREEN_RESOLUTION'][0] / 2 - 128
+        y = settings['SCREEN_RESOLUTION'][1] / 2 - 128
+        for char in self.room_array[0]:
+            if char == '&':
+                x -= 64
+        xstart = x
         for row in self.room_array:
             if row != MoveRight and row != MoveLeft and row != MoveDown:
                 for col in row:

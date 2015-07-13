@@ -977,27 +977,27 @@ class InGame(GameState):
 
     def create_world(self, n):
         """
-        Generate the world then check if it's solvable.
+        Generate the world and align the rooms.
 
         :param n: number of rooms to generate, passed to generate_world
         """
 
-        solvable = False
         self.logger.info('========Generating World With Seed {seed}========'.format(seed=self.seed))
         random.seed(self.seed)
-        trial_no = 1
-        while not solvable:
-            self.logger.debug('Trial no. {0}'.format(trial_no))
-            room_list = self.generate_world(n)
-            aligned_rooms = self.align_doors(room_list)
-            solvable = True #self.check_solvable(aligned_rooms)
-            trial_no += 1
 
-        self.logger.info('==============Solvable World Generated!==============')
+        room_list = self.generate_world(n)
+        aligned_rooms = self.align_doors(room_list)
+
+        self.logger.info('==============Complete World Generated!==============')
         self.world = rooms.World(self.seed)
         self.world.room_array = aligned_rooms
+
+        self.logger.info(' ')
         for row in aligned_rooms:
             self.logger.info(row.replace('&', ' '))
+
+        self.logger.info(' ')
+        self.logger.info('=====================================================')
 
     def generate_world(self, n):
         """
@@ -1027,8 +1027,6 @@ class InGame(GameState):
             * Criteria are as follows:
                 * Don't move in the same direction more than 5 times
                 * Don't move down more than 3 times
-                * Total Displacement must be more than twice the length of a left-moving room
-                    (the factor of two is for complete certainty)
                 * If the same room is selected twice, generate a test value which must be greater than 5
         * Finally, add the ending room
 
@@ -1044,11 +1042,9 @@ class InGame(GameState):
         move_left_counter = 0
         move_right_counter = 0
 
-        total_displacement = 0
         self.logger.debug('Generating New World')
 
         for i in range(n):
-            self.logger.debug('total displacement: {0}'.format(total_displacement))
             matched = False
             self.logger.debug('======finding room {i}======'.format(i=i))
             while not matched:
@@ -1056,6 +1052,7 @@ class InGame(GameState):
                 self.logger.debug('==new room==')
                 for row in possible_next_room:
                     self.logger.debug(row)
+
                 if possible_next_room[0] == rooms.MoveDown:
                     if move_down_counter <= 2:
                         if possible_next_room == room_list[-1]:
@@ -1067,6 +1064,7 @@ class InGame(GameState):
                                 move_down_counter += 1
                                 move_left_counter = 0
                                 move_right_counter = 0
+
                                 matched = True
                             else:
                                 self.logger.debug('DQ: Test is not greater than threshold')
@@ -1076,43 +1074,36 @@ class InGame(GameState):
                             move_down_counter += 1
                             move_left_counter = 0
                             move_right_counter = 0
+
                             matched = True
                     else:
                         self.logger.debug('DQ: too many down in a row')
 
                 elif possible_next_room[0] == rooms.MoveLeft:
-                    # Solves a bug with rendering left of the start
-                    if total_displacement >= 2*len(possible_next_room[-1]):
-                        if move_left_counter <= 4:
-                            if possible_next_room == room_list[-1]:
-                                test = random.randint(0, 10)
-                                self.logger.debug('Same room repeated. (move left) Test={0}'.format(test))
-                                if test >= 5:
-                                    room_list.append(possible_next_room)
-
-                                    move_down_counter = 0
-                                    move_left_counter += 1
-                                    move_right_counter = 0
-
-                                    total_displacement -= len(possible_next_room[-1])
-                                    matched = True
-                                else:
-                                    self.logger.debug('DQ: Test is not greater than threshold')
-                            else:
+                    if move_left_counter <= 4:
+                        if possible_next_room == room_list[-1]:
+                            test = random.randint(0, 10)
+                            self.logger.debug('Same room repeated. (move left) Test={0}'.format(test))
+                            if test >= 5:
                                 room_list.append(possible_next_room)
 
                                 move_down_counter = 0
                                 move_left_counter += 1
                                 move_right_counter = 0
 
-                                total_displacement -= len(possible_next_room[-1])
                                 matched = True
+                            else:
+                                self.logger.debug('DQ: Test is not greater than threshold')
                         else:
-                            self.logger.debug('DQ: too many left in a row')
+                            room_list.append(possible_next_room)
+
+                            move_down_counter = 0
+                            move_left_counter += 1
+                            move_right_counter = 0
+
+                            matched = True
                     else:
-                        self.logger.debug('DQ: too close to start to move left')
-                        self.logger.debug('total displacement: {0}, room width: {1}'.format(total_displacement,
-                                                                                             len(possible_next_room[-1])))
+                        self.logger.debug('DQ: too many left in a row')
 
                 elif possible_next_room[0] == rooms.MoveRight:
                     if move_right_counter <= 4:
@@ -1126,7 +1117,6 @@ class InGame(GameState):
                                 move_left_counter = 0
                                 move_right_counter += 1
 
-                                total_displacement += len(possible_next_room[-1])
                                 matched = True
                             else:
                                 self.logger.debug('DQ: Test is not greater than threshold')
@@ -1137,12 +1127,13 @@ class InGame(GameState):
                             move_left_counter = 0
                             move_right_counter += 1
 
-                            total_displacement += len(possible_next_room[-1])
                             matched = True
                     else:
                         self.logger.debug('DQ: too many right in a row')
 
-            self.logger.debug('move_down: {0}, move_left: {1}, move_right: {2}'.format(move_down_counter, move_left_counter, move_right_counter))
+            self.logger.debug('move_down: {0}, move_left: {1}, move_right: {2}'.format(
+                move_down_counter, move_left_counter, move_right_counter))
+
             self.logger.debug('=======found room {i}======'.format(i=i))
 
         room_list.append(rooms.room_dict["EndingRoom"])
@@ -1198,7 +1189,7 @@ class InGame(GameState):
                 self.logger.debug('net door location (prev - new): {0}'.format(door_location))
 
                 aligned_room = []
-                if door_location > 0:
+                if door_location >= 0:
                     self.logger.debug('---Adding spaces to the room to push it right---')
                     self.logger.debug(room_array[-1])
                     for row in room:
@@ -1210,7 +1201,7 @@ class InGame(GameState):
 
                         aligned_room.append(aligned_row)
 
-                elif door_location < 0:
+                else:
                     self.logger.debug('--Adding spaces to the rest of the world to relatively push the new one left---')
                     for index2, row in enumerate(room_array):
                         aligned_row = "&"*abs(door_location) + row
@@ -1222,39 +1213,8 @@ class InGame(GameState):
                 room_array += aligned_room
 
         self.logger.debug('----====Finished World====----')
-        for row in room_array:
-            self.logger.debug(row.replace('&', ' '))
 
         return room_array
-
-    def check_solvable(self, aligned_rooms):
-        """
-        Check if the doors line up properly on all the rooms.
-        """
-        self.logger.debug('Checking if Solvable')
-        difference = 0
-        for index, room in enumerate(aligned_rooms):
-            if index != 0:
-                self.logger.debug('checking room {0}'.format(index))
-                entrance_row = room[0]
-                exit_row = aligned_rooms[index-1][-1]
-
-                self.logger.debug('entrance row:   {0}'.format(entrance_row))
-                self.logger.debug('exit row:       {0}'.format(exit_row))
-
-                entrance = entrance_row.index('DD')
-                exit_ = exit_row.index('DD')
-
-                difference += abs(entrance - exit_)
-
-        self.logger.debug('net difference (should be 0): {0}'.format(difference))
-
-        if difference == 0:
-            self.logger.debug('Solvable!')
-            return True
-        else:
-            self.logger.debug('Not Solvable!')
-            return False
 
 
 class DeathScreen(Menu):
