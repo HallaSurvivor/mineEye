@@ -212,9 +212,9 @@ class Chest(h.Sprite):
         return contents
 
 
-class Room:
+class World:
     """
-    A superclass to define rooms.
+    Defines the World.
 
     Sprite Groups:
         block_list comprises all the walls
@@ -648,7 +648,7 @@ class Room:
         G is a ghost
         R is a block that stops the timer
         W is a weapon chest
-        D is door <- IMPORTANT, you need a door at the top and bottom to make the logic work
+        D is door <- IMPORTANT, you need a 2 wide door at the top and bottom to make the logic work
 
         :param xstart: Int representing the starting x location
         :param ystart: Int representing the starting y location
@@ -725,75 +725,3 @@ class Room:
                 x = xstart
 
         self.array_parsed = True
-
-
-class World(Room):
-    """
-    The complete world to be drawn to the screen.
-    """
-
-    def __init__(self, rooms, seed=None):
-        """
-        Initialize the world.
-
-        * Cycle through the first door block at the bottom of the last room,
-        * Then find the first door block at the top of the new room,
-        * Finally add a bunch of blank characters (spaces) to offset the new room until
-            the doors line up
-
-        :param rooms: A list of all the Room objects in the order they appear.
-        :param seed: The seed to use in random generation.
-        """
-        super().__init__(seed=seed)
-
-        random.seed(seed)
-
-        self.background_string = 'background.png'
-        self.background = h.create_background(h.load(self.background_string))
-        self.logger.debug('===Begin modifying rooms to align doors===')
-
-        self.room_array = []
-        for index, room in enumerate(rooms):
-            self.logger.debug(' ')
-            self.logger.debug('next room: {0}'.format(index))
-            for row in room:
-                if type(row) != int:
-                    self.logger.debug(row)
-
-            if len(self.room_array) == 0:
-                self.room_array += room[1:]  # get rid of the leading "move right" identifier
-
-            else:
-                previous_door_location = 0
-                for char in self.room_array[-1]:
-                    previous_door_location += 1
-                    if char == "D":
-                        self.logger.debug("previous door location: {0}".format(previous_door_location))
-                        break
-
-                new_door_location = 0
-                for char in room[1]:
-                    if char != MoveDown and char != MoveLeft and char != MoveRight:
-                        new_door_location += 1
-                    if char == "D":
-                        self.logger.debug("new door location: {0}".format(new_door_location))
-                        break
-
-                door_location = previous_door_location - new_door_location
-                self.logger.debug('net door location (prev - new): {0}'.format(door_location))
-
-                aligned_room = []
-                for row in room:
-                    # Add spaces (blank tile) to each row to line up its door with the previous room
-                    if type(row) == str:
-                        aligned_row = ""
-                        for s in range(door_location):
-                            aligned_row += "&"
-                        aligned_row += row
-                        aligned_room.append(aligned_row)
-
-                self.room_array += aligned_room
-
-        self.logger.info('----====Finished World====----')
-        for row in self.room_array:
-            self.logger.info(row.replace('&', ' '))

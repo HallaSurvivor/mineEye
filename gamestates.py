@@ -665,7 +665,7 @@ class InGame(GameState):
         multiple instances of GameState existing at once.
         """
         self.logger.info('--====NEW WORLD====--')
-        self.generate_world(30)
+        self.create_world(30)
         self.hero.world = self.world
 
     def draw_hud(self, screen):
@@ -975,6 +975,30 @@ class InGame(GameState):
     def win(self):
         self.manager.go_to(WinScreen(self.timer, type(self.hero), self.seed, self.elapsed_time))
 
+    def create_world(self, n):
+        """
+        Generate the world then check if it's solvable.
+
+        :param n: number of rooms to generate, passed to generate_world
+        """
+
+        solvable = False
+        self.logger.info('========Generating World With Seed {seed}========'.format(seed=self.seed))
+        random.seed(self.seed)
+        trial_no = 1
+        while not solvable:
+            self.logger.debug('Trial no. {0}'.format(trial_no))
+            room_list = self.generate_world(n)
+            aligned_rooms = self.align_doors(room_list)
+            solvable = True #self.check_solvable(aligned_rooms)
+            trial_no += 1
+
+        self.logger.info('==============Solvable World Generated!==============')
+        self.world = rooms.World(self.seed)
+        self.world.room_array = aligned_rooms
+        for row in aligned_rooms:
+            self.logger.info(row.replace('&', ' '))
+
     def generate_world(self, n):
         """
         Generate the world by semi-randomly selecting n rooms.
@@ -1021,8 +1045,8 @@ class InGame(GameState):
         move_right_counter = 0
 
         total_displacement = 0
-        self.logger.info('========Generating World With Seed {seed}========'.format(seed=self.seed))
-        random.seed(self.seed)
+        self.logger.debug('Generating New World')
+
         for i in range(n):
             self.logger.debug('total displacement: {0}'.format(total_displacement))
             matched = False
@@ -1124,7 +1148,113 @@ class InGame(GameState):
         room_list.append(rooms.room_dict["EndingRoom"])
         self.logger.debug('===============WorldGen Complete===============')
 
-        self.world = rooms.World(room_list, self.seed)
+        return room_list
+
+    def align_doors(self, room_list):
+        """
+        Align all the doors to create a world that is solvable
+
+        * Cycle through the first door block at the bottom of the last room,
+        * Then find the first door block at the top of the new room,
+        * Finally add a bunch of blank characters (spaces) to offset the new room until
+            the doors line up
+        """
+        self.logger.debug('===Begin modifying rooms to align doors===')
+        room_array = []
+        for index, room in enumerate(room_list):
+            self.logger.debug(' ')
+            self.logger.debug('next room: {0}'.format(index))
+
+            room = room[1:]
+
+            for row in room:
+                self.logger.debug(row)
+
+            if len(room_array) == 0:
+                room_array += room  # get rid of the leading "move right" identifier
+
+            else:
+                previous_door_location = 0
+                self.logger.debug(' ')
+                self.logger.debug('Previous room exit')
+                self.logger.debug(room_array[-1])
+                for char in room_array[-1]:
+                    previous_door_location += 1
+                    if char == "D":
+                        self.logger.debug("previous door location: {0}".format(previous_door_location))
+                        break
+
+                new_door_location = 0
+                self.logger.debug(' ')
+                self.logger.debug('Current room entrance')
+                self.logger.debug(room[0])
+                for char in room[0]:
+                    new_door_location += 1
+                    if char == "D":
+                        self.logger.debug("new door location: {0}".format(new_door_location))
+                        break
+
+                door_location = previous_door_location - new_door_location
+                self.logger.debug('net door location (prev - new): {0}'.format(door_location))
+
+                aligned_room = []
+                if door_location > 0:
+                    self.logger.debug('---Adding spaces to the room to push it right---')
+                    self.logger.debug(room_array[-1])
+                    for row in room:
+                        # Add & (blank tile) to each row to line up its door with the previous room
+                        aligned_row = ""
+                        for s in range(door_location):
+                            aligned_row += "&"
+                        aligned_row += row
+
+                        aligned_room.append(aligned_row)
+
+                elif door_location < 0:
+                    self.logger.debug('--Adding spaces to the rest of the world to relatively push the new one left---')
+                    for index2, row in enumerate(room_array):
+                        aligned_row = "&"*abs(door_location) + row
+                        room_array[index2] = aligned_row
+
+                    for row in room:
+                        aligned_room.append(row)
+
+                room_array += aligned_room
+
+        self.logger.debug('----====Finished World====----')
+        for row in room_array:
+            self.logger.debug(row.replace('&', ' '))
+
+        return room_array
+
+    def check_solvable(self, aligned_rooms):
+        """
+        Check if the doors line up properly on all the rooms.
+        """
+        self.logger.debug('Checking if Solvable')
+        difference = 0
+        for index, room in enumerate(aligned_rooms):
+            if index != 0:
+                self.logger.debug('checking room {0}'.format(index))
+                entrance_row = room[0]
+                exit_row = aligned_rooms[index-1][-1]
+
+                self.logger.debug('entrance row:   {0}'.format(entrance_row))
+                self.logger.debug('exit row:       {0}'.format(exit_row))
+
+                entrance = entrance_row.index('DD')
+                exit_ = exit_row.index('DD')
+
+                difference += abs(entrance - exit_)
+
+        self.logger.debug('net difference (should be 0): {0}'.format(difference))
+
+        if difference == 0:
+            self.logger.debug('Solvable!')
+            return True
+        else:
+            self.logger.debug('Not Solvable!')
+            return False
 
 
 class DeathScreen(Menu):
