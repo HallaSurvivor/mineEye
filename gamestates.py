@@ -246,7 +246,7 @@ class Menu(GameState):
                     self.manager.go_back()
 
                 # if it's an add-this-seed
-                if self.selections[self.selected][:5] == 'seed:':
+                elif self.selections[self.selected][:5] == 'seed:':
                     found = False
                     for index, seed in enumerate(seeds):
                         if seed == '' and not found:
