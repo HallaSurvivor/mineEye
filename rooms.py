@@ -46,7 +46,7 @@ room_dict = {
     ],
     "Room01": [MoveDown,
                "SSDDSS",
-               "SF  FS",
+               "SF   S",
                "S    S",
                "SS   S",
                "S    S",
@@ -275,8 +275,8 @@ class World:
 
         self.nodes = h.Graph()
 
-        self.background_string = ''
-        self.background = pygame.Surface(settings['SCREEN_RESOLUTION'])
+        self.background_string = 'background.png'
+        self.background = h.create_background(h.load(self.background_string))
         self.region = None
 
         self.xspeed = 0
