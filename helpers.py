@@ -99,7 +99,7 @@ class Graph:
         return self.nodes.index(node) not in self.walls
 
     def make_passable(self, node):
-        self.walls = [wall for wall in self.walls if wall != self.nodes.index(node)]
+        self.walls.remove(self.nodes.index(node))
 
     def heuristic(self, a, b):
         """
