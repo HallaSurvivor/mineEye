@@ -8,6 +8,7 @@ import pygame
 import pyganim
 import helpers as h
 from config import settings
+import constants
 import entities
 
 module_logger = logging.getLogger('mineEye.enemy')
@@ -128,7 +129,7 @@ class Enemy(h.Sprite):
 
         self.animation_obj['move_right'] = pyganim.PygAnimation(movement)
         self.animation_obj['move_right'].convert()
-        self.animation_obj['move_right'].set_colorkey((203, 41, 201))
+        self.animation_obj['move_right'].set_colorkey(constants.COLORKEY)
 
         self.animation_obj['move_left'] = self.animation_obj['move_right'].getCopy()
         self.animation_obj['move_left'].flip(True, False)

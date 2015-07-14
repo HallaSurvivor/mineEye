@@ -161,9 +161,11 @@ def load(imagename, subfolder=None):
 
     if image is None:
         if subfolder:
-            image = pygame.image.load(os.path.join("Sprites", subfolder, imagename)).convert_alpha()
+            image = pygame.image.load(os.path.join("Sprites", subfolder, imagename)).convert()
+            image.set_colorkey(c.COLORKEY)
         else:
-            image = pygame.image.load(os.path.join("Sprites", imagename)).convert_alpha()
+            image = pygame.image.load(os.path.join("Sprites", imagename)).convert()
+            image.set_colorkey(c.COLORKEY)
         _image_library[(imagename, subfolder)] = image
 
     return image
