@@ -52,7 +52,7 @@ import gamestates
 
 # Create Logger
 logger = logging.getLogger('mineEye')
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 file_handler = logging.FileHandler('log.txt')
 
 console_handler = logging.StreamHandler()

@@ -121,6 +121,8 @@ class Enemy(h.Sprite):
         Thanks to the pyganim example code for the basis of thsi code
         """
 
+        self.logger.debug('Creating animation dict for {0}'.format(self))
+
         movement = [(os.path.join('Sprites', self.name, '{num}.png'.format(num=num)), 0.1)
                     for num in range(2)]
 
@@ -265,6 +267,7 @@ class Enemy(h.Sprite):
 
         :param hero: The hero to use as a goal
         """
+        self.logger.debug('{0} started pathfinding'.format(self))
         if self.pathfind_timer == 0:
             came_from, current = self.a_star(hero)
             self.path = self.reconstruct_path(came_from, current)
@@ -274,6 +277,7 @@ class Enemy(h.Sprite):
 
         try:
             if self.graph.nodes[self.path[0]] == self.rect.center:
+                self.logger.debug('{0} reached node {1}'.format(self, self.rect.center))
                 self.path.pop(0)
         except IndexError:
             self.logger.debug('{enemy} ran out of nodes in path'.format(enemy=self))
