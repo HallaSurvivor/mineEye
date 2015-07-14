@@ -1,9 +1,11 @@
 """
 Exports the Enemy classes that the Hero has to battle.
 """
+import os
 import logging
 from math import hypot
 import pygame
+import pyganim
 import helpers as h
 from config import settings
 import entities
@@ -46,6 +48,8 @@ class Enemy(h.Sprite):
         the number of frames to wait before attacking again.
     """
 
+    name = ''
+
     hp = 100
     speed = 3
     contact_damage = 3
@@ -77,8 +81,6 @@ class Enemy(h.Sprite):
 
         self.logger = logging.getLogger('mineEye.enemy.Enemy')
 
-        self.image = pygame.Surface((48, 48))
-
         self.world = world
 
         self.graph = self.world.nodes
@@ -88,10 +90,15 @@ class Enemy(h.Sprite):
         self.current_hp = self.hp
         self.cooldown = 0
 
-        self.rect = self.image.get_rect()
+        self.rect = pygame.Rect(0, 0, 64, 64)
 
         self.pathfind_timer = 0
         self.path = None
+
+        self.animation_obj = {}
+        self.conductor = None
+
+        self.create_animation_dict()
 
     def __repr__(self):
         return '{enemy} at position: {pos}'.format(enemy=type(self).__name__, pos=self.rect.center)
@@ -104,6 +111,26 @@ class Enemy(h.Sprite):
         """
         self.logger.info('{enemy} damaged by {amount}'.format(enemy=self, amount=amount))
         self.current_hp -= amount
+
+    def create_animation_dict(self):
+        """
+        Create the animation object and the conductor to run the animations.
+
+        For more details, see the hero.create_animation_dict()
+
+        Thanks to the pyganim example code for the basis of thsi code
+        """
+
+        movement = [(os.path.join('Sprites', self.name, '{num}.png'.format(num=num)), 0.1)
+                    for num in range(1)]
+
+        self.animation_obj['move_right'] = pyganim.PygAnimation(movement)
+
+        self.animation_obj['move_left'] = self.animation_obj['move_right'].getCopy()
+        self.animation_obj['move_left'].flip(True, False)
+        self.animation_obj['move_left'].makeTransformsPermanent()
+
+        self.conductor = pyganim.PygConductor(self.animation_obj)
 
     def ranged_attack(self, hero):
         """
@@ -268,31 +295,6 @@ class Enemy(h.Sprite):
                 self.movey(-self.speed)
                 # self.check_y_collisions()
 
-    def update(self, hero):
-        """
-        Cause enemy movement/death.
-
-        If the enemy moves and doesn't clip (ghosts):
-            They move toward the position of the hero's center
-
-        If the enemy moves and DOES clip:
-            Call the Hero's position a "goal" and use A* pathfinding
-
-        :param hero: The hero to move towards
-        """
-        if not self.stationary and self.get_dist() <= self.activation_range:
-            if not self.flying:
-                self.calc_gravity()
-
-            if self.clips:
-                self.pathfind(hero)
-            else:
-                self.straight_to_hero(hero)
-
-        if self.current_hp <= 0:
-            self.kill()
-            hero.increment_bomb_counter()
-
     def get_dist(self, node=None):
         """
         Return the distance from the enemy's center to the Hero's center or a node
@@ -325,6 +327,46 @@ class Enemy(h.Sprite):
         self.logger.debug('Nearest node to {enemy}: {node}'.format(enemy=self, node=nearest_node))
         return nearest_node
 
+    def update(self, hero):
+        """
+        Cause enemy movement/death.
+
+        If the enemy moves and doesn't clip (ghosts):
+            They move toward the position of the hero's center
+
+        If the enemy moves and DOES clip:
+            Call the Hero's position a "goal" and use A* pathfinding
+
+        :param hero: The hero to move towards
+        """
+        if not self.stationary and self.get_dist() <= self.activation_range:
+            if not self.flying:
+                self.calc_gravity()
+
+            if self.clips:
+                self.pathfind(hero)
+            else:
+                self.straight_to_hero(hero)
+
+        if self.current_hp <= 0:
+            self.kill()
+            hero.increment_bomb_counter()
+
+    def draw(self, screen):
+        """
+        Draw the animated enemy to the screen
+
+        :param screen: The screen to draw to
+        """
+
+        hero_x = settings['SCREEN_RESOLUTION'][0]/2
+
+        self.conductor.play()
+        if self.rect.centerx >= hero_x:
+            self.animation_obj['move_left'].blit(screen, self.rect)
+        else:
+            self.animation_obj['move_right'].blit(screen, self.rect)
+
 
 class Turret(Enemy):
     """
@@ -333,11 +375,10 @@ class Turret(Enemy):
     stationary = True
     is_ranged = True
     contact_damage = 0
+    name = 'Turret'
 
     def __init__(self, *args):
         super().__init__(*args)
-
-        self.image = h.load('badGuy.png')
 
     def ranged_attack(self, hero):
         """
@@ -363,11 +404,10 @@ class Ghost(Enemy):
     activation_range = 1024
     clips = False
     flying = True
+    name = 'Ghost'
 
     def __init__(self, *args):
         super().__init__(*args)
-
-        self.image = h.load('ghost.png')
 
 
 class FireBat(Enemy):
@@ -375,8 +415,7 @@ class FireBat(Enemy):
     speed = 4
     contact_damage = 4
     flying = True
+    name = 'FireBat'
 
     def __init__(self, *args):
         super().__init__(*args)
-
-        self.image = h.load('firebat.png')

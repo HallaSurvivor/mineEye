@@ -350,7 +350,15 @@ class World:
         if not self.array_parsed:
             self.parse_room_array()
 
-        self.all_sprites.draw(screen)
+        for e in self.enemy_list:
+            e.draw(screen)
+
+        self.block_list.draw(screen)
+        self.chest_list.draw(screen)
+        self.drops_list.draw(screen)
+        self.enemy_projectile_list.draw(screen)
+        self.hero_projectile_list.draw(screen)
+        self.bomb_list.draw(screen)
 
     def move_world(self, hero, x, y):
         """
