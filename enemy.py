@@ -3,7 +3,7 @@ Exports the Enemy classes that the Hero has to battle.
 """
 import os
 import logging
-from math import hypot
+from math import hypot, sin, cos, tan, atan, pi
 import pygame
 import pyganim
 import helpers as h
@@ -301,17 +301,50 @@ class Enemy(h.Sprite):
                 self.movey(-self.speed)
                 # self.check_y_collisions()
 
-    def get_dist(self, node=None):
+    def get_dist_from_hero(self):
         """
-        Return the distance from the enemy's center to the Hero's center or a node
+        Return the distance from the enemy's center to the Hero's center
         """
-        if node is None:
-            dist = hypot(self.rect.centerx - settings['HEIGHT']/2, self.rect.centery - settings['WIDTH']/2)
+        return hypot(self.rect.centerx - settings['HEIGHT']/2, self.rect.centery - settings['WIDTH']/2)
 
-        else:
-            dist = hypot(self.rect.centerx - node[0], self.rect.centery - node[1])
+    def get_normalized_vec_to_hero(self):
+        """
+        Return a unit vector pointing in the direction of the Hero's Center
+        """
 
-        return dist
+        norm_factor = self.get_dist_from_hero()
+
+        changex = (settings['WIDTH']/2 - self.rect.centerx)/norm_factor
+        changey = (settings['HEIGHT']/2 - self.rect.centery)/norm_factor
+
+        return changex, changey
+
+    def get_theta(self, changex, changey):
+        """
+        Return the angle of a vector
+
+        :param changex: X component of the vector
+        :param changey: Y component of the vector
+        :return: Theta
+        """
+
+        return atan(changey/changex)
+
+    def change_angle(self, changex0, changey0, delta_theta):
+        """
+        Return a unit vector corresponding to rotating  (changex0, changey0) by delta_theta
+
+        :param delta_theta: Change in theta in radians
+        """
+
+        theta0 = self.get_theta(changex0, changey0)
+
+        theta = theta0 + delta_theta
+
+        x = cos(theta)
+        y = sin(theta)
+
+        return x, y
 
     def get_nearest_node(self):
         """
@@ -345,7 +378,7 @@ class Enemy(h.Sprite):
 
         :param hero: The hero to move towards
         """
-        if not self.stationary and self.get_dist() <= self.activation_range:
+        if not self.stationary and self.get_dist_from_hero() <= self.activation_range:
             if not self.flying:
                 self.calc_gravity()
 
@@ -381,6 +414,7 @@ class Turret(Enemy):
     stationary = True
     is_ranged = True
     contact_damage = 0
+    attack_period = 16
     name = 'Turret'
 
     def __init__(self, *args):
@@ -388,18 +422,49 @@ class Turret(Enemy):
 
     def ranged_attack(self, hero):
         """
-        Fire a projectile towards the hero.
+        Fire a list of projectiles towards the hero.
+
         :param hero: The target to track
         :returns proj: a Projectile entity with the correct speed.
         """
-        changex = (hero.rect.centerx - self.rect.centerx)/self.projectile_speed
-        changey = (hero.rect.centery - self.rect.centery)/self.projectile_speed
 
-        proj = entities.Projectile(h.load('bullet.png'), self.rect.center, changex, changey, self.projectile_damage, self)
+        changex, changey = self.get_normalized_vec_to_hero()
+        changex2, changey2 = self.change_angle(abs(changex), abs(changey), pi/6)
+        changex3, changey3 = self.change_angle(abs(changex), abs(changey), -pi/6)
+
+        changex *= self.projectile_speed
+        changey *= self.projectile_speed
+
+        changex2 *= self.projectile_speed/2
+        changey2 *= self.projectile_speed/2
+
+        changex3 *= self.projectile_speed/2
+        changey3 *= self.projectile_speed/2
+
+        if settings['WIDTH']/2 < self.rect.centerx:
+            changex2 *= -1
+            changex3 *= -1
+
+        if settings['HEIGHT']/2 < self.rect.centery:
+            changey2 *= -1
+            changey3 *= -1
+
+        proj = entities.Projectile(h.load('bullet.png'), self.rect.center, changex, changey,
+                                   self.projectile_damage, self)
+
+        proj2 = entities.Projectile(h.load('bullet.png'), self.rect.center, changex2, changey2,
+                                    self.projectile_damage, self)
+
+        proj3 = entities.Projectile(h.load('bullet.png'), self.rect.center, changex3, changey3,
+                                    self.projectile_damage, self)
 
         self.cooldown += self.attack_period
 
-        return proj
+        if self.world.region:
+            return [proj, proj2, proj3]
+
+        else:
+            return [proj]
 
 
 class Ghost(Enemy):

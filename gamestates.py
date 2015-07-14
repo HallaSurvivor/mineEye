@@ -1268,6 +1268,7 @@ class WinScreen(Menu):
 
     title = "You Win!"
     options = ["Retry", "Save Seed[WIP]", "Generate New World", "Quit"]
+    show_back_button = False
 
     def __init__(self, timer, chosen_hero, seed, elapsed_time):
         super().__init__()

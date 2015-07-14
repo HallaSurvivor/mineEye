@@ -523,9 +523,10 @@ class World:
             distance = hypot(e.rect.centerx - hero.rect.centerx, e.rect.centery - hero.rect.centery)
             if e.is_ranged and distance <= e.attack_range:
                 if e.cooldown == 0:
-                    proj = e.ranged_attack(hero)
-                    self.enemy_projectile_list.add(proj)
-                    self.all_sprites.add(proj)
+                    proj_list = e.ranged_attack(hero)
+                    for proj in proj_list:
+                        self.enemy_projectile_list.add(proj)
+                        self.all_sprites.add(proj)
                 else:
                     e.cooldown -= 1
 
