@@ -122,9 +122,11 @@ class Enemy(h.Sprite):
         """
 
         movement = [(os.path.join('Sprites', self.name, '{num}.png'.format(num=num)), 0.1)
-                    for num in range(1)]
+                    for num in range(2)]
 
         self.animation_obj['move_right'] = pyganim.PygAnimation(movement)
+        self.animation_obj['move_right'].convert()
+        self.animation_obj['move_right'].set_colorkey((203, 41, 201))
 
         self.animation_obj['move_left'] = self.animation_obj['move_right'].getCopy()
         self.animation_obj['move_left'].flip(True, False)
