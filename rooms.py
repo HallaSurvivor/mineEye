@@ -33,7 +33,7 @@ room_dict = {
     "StartingRoom": [MoveRight,
                      "SSSSSSSS",
                      "S      S",
-                     "SW     S",
+                     "SW  M  S",
                      "SSSSSDDS"
     ],
     "EndingRoom": [MoveDown,
@@ -719,6 +719,13 @@ class World:
                         self.enemy_list.add(new_enemy)
                         self.all_sprites.add(new_enemy)
                         self.logger.debug('added firebat at {pos}'.format(pos=(x, y)))
+
+                    elif col == "M":
+                        new_enemy = enemy.PoisonWorm(self)
+                        new_enemy.rect.center = node
+                        self.enemy_list.add(new_enemy)
+                        self.all_sprites.add(new_enemy)
+                        self.logger.debug('added poison worm at {pos}'.format(pos=(x, y)))
 
                     elif col == "W":
                         chest = Chest(x, y, weapon=True)

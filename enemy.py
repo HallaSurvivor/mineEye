@@ -497,3 +497,39 @@ class FireBat(Enemy):
 
     def __init__(self, *args):
         super().__init__(*args)
+
+
+class PoisonWorm(Enemy):
+    activation_range = 1024
+    attack_range = 128
+    attack_period = 16
+    projectile_speed = 16
+    flying = False
+    is_ranged = True
+    contact_damage = 0
+    name = 'PoisonWorm'
+
+    def __init__(self, *args):
+        super().__init__(*args)
+
+        self.current_shot = 1
+
+    def ranged_attack(self, hero):
+        """
+        Fire 7 projectiles in quick succession
+        """
+        if self.current_shot == 8:
+            self.current_shot = 1
+            return []
+        else:
+            theta = ((8 + self.current_shot) / 8) * pi
+            changex = cos(theta) * self.projectile_speed
+            changey = sin(theta) * self.projectile_speed
+
+            proj = entities.Projectile(h.load('bullet.png'), self.rect.center, changex, changey,
+                                       self.projectile_damage, self)
+
+            self.cooldown += self.attack_period
+            self.current_shot += 1
+
+            return [proj]
