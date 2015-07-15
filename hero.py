@@ -139,6 +139,8 @@ class Hero(pygame.sprite.Sprite):
         self.rect = pygame.Rect(0, 0, 48, 48)
         self.rect.center = (settings['WIDTH']/2, settings['HEIGHT']/2)
 
+        self.create_animation_dict()
+
     def create_animation_dict(self):
         """
         Create an animation object and conductor to run the animations for walking, jumping, standing, etc.
@@ -332,7 +334,6 @@ class Demo(Hero):
         super().__init__()
 
         self.logger = logging.getLogger('mineEye.hero.Demo')
-        self.create_animation_dict()
         self.reset_all()
 
 
@@ -354,7 +355,6 @@ class Jumpy(Hero):
         super().__init__()
 
         self.logger = logging.getLogger('mineEye.hero.Jumpy')
-        self.create_animation_dict()
         self.reset_all()
 
 
@@ -374,7 +374,6 @@ class Speedy(Hero):
         super().__init__()
 
         self.logger = logging.getLogger('mineEye.hero.Speedy')
-        self.create_animation_dict()
         self.reset_all()
 
 

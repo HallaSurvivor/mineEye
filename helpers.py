@@ -96,7 +96,10 @@ class Graph:
         self.walls.append(self.nodes.index(node))
 
     def passable(self, node):
-        return self.nodes.index(node) not in self.walls
+        try:
+            return self.nodes.index(node) not in self.walls
+        except ValueError:
+            return False # Assume you can't go through it
 
     def make_passable(self, node):
         self.walls.remove(self.nodes.index(node))
