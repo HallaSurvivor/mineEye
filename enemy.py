@@ -329,7 +329,13 @@ class Enemy(h.Sprite):
         :return: Theta
         """
 
-        return atan(changey/changex)
+        try:
+            return atan(changey/changex)
+        except ZeroDivisionError:
+            if changey >= 0:
+                return pi
+            else:
+                return -pi
 
     def change_angle(self, changex0, changey0, delta_theta):
         """
