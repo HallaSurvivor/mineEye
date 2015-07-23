@@ -286,16 +286,17 @@ class Enemy(h.Sprite):
         if len(self.path) > 0:
             node_index = self.path[0]
             node = self.graph.nodes[node_index]
+
             if node[0] > self.rect.centerx:
                 self.movex(self.speed)
+
+            elif node[0] < self.rect.centerx:
+                self.movex(-self.speed)
 
             if node[1] > self.rect.centery:
                 self.movey(self.speed)
 
-            if node[0] < self.rect.centerx:
-                self.movex(-self.speed)
-
-            if node[1] < self.rect.centery:
+            elif node[1] < self.rect.centery:
                 self.movey(-self.speed)
 
     def get_dist_from_hero(self):
