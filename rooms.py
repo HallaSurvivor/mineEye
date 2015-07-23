@@ -659,84 +659,87 @@ class World:
         """
         x = settings['SCREEN_RESOLUTION'][0] / 2 - 128
         y = settings['SCREEN_RESOLUTION'][1] / 2 - 128
-        for char in self.room_array[0]:
-            if char == '&':
-                x -= 64
+
+        #Just because there are a bunch of blank tiles doesn't mean we want to spawn
+        #our first real tile all the way to the right of the screen.
+        #To fix this, we reduce our starting X by a tile for every blank tile we have
+        blanks = [char for char in self.room_array[0] if char == '&']
+        x -= 64 * len(blanks)
+
         xstart = x
         for row in self.room_array:
-            if row != MoveRight and row != MoveLeft and row != MoveDown:
-                for col in row:
-                    node = (x+32, y+32)
+            for col in row:
+                node = (x+32, y+32)
 
-                    if col != "&":
-                        self.nodes.append(node)
+                if col != "&":
+                    self.nodes.append(node)
 
-                    if col == "S":
-                        wall = Wall(x, y, h.load('stone.png'))
-                        self.block_list.add(wall)
-                        self.all_sprites.add(wall)
-                        self.nodes.add_wall(node)
-                        self.logger.debug('added wall at {pos}'.format(pos=(x, y)))
+                if col == "S":
+                    wall = Wall(x, y, h.load('stone.png'))
+                    self.block_list.add(wall)
+                    self.all_sprites.add(wall)
+                    self.nodes.add_wall(node)
+                    self.logger.debug('added wall at {pos}'.format(pos=(x, y)))
 
-                    if col == "R":
-                        wall = Wall(x, y, h.load('stone.png'), end_timer=True)
-                        self.block_list.add(wall)
-                        self.all_sprites.add(wall)
-                        self.nodes.add_wall(node)
-                        self.logger.debug('added wall/timer at {pos}'.format(pos=(x, y)))
+                if col == "R":
+                    wall = Wall(x, y, h.load('stone.png'), end_timer=True)
+                    self.block_list.add(wall)
+                    self.all_sprites.add(wall)
+                    self.nodes.add_wall(node)
+                    self.logger.debug('added wall/timer at {pos}'.format(pos=(x, y)))
 
-                    elif col == "P":
-                        wall = Wall(x, y, h.load('spikes.png'), damage_player=True)
-                        self.block_list.add(wall)
-                        self.all_sprites.add(wall)
-                        self.nodes.add_wall(node)
-                        self.logger.debug('added spikes at {pos}'.format(pos=(x, y)))
+                elif col == "P":
+                    wall = Wall(x, y, h.load('spikes.png'), damage_player=True)
+                    self.block_list.add(wall)
+                    self.all_sprites.add(wall)
+                    self.nodes.add_wall(node)
+                    self.logger.debug('added spikes at {pos}'.format(pos=(x, y)))
 
-                    elif col == "B":
-                        wall = Wall(x, y, h.load('broken_stone.png'), breakable=True)
-                        self.block_list.add(wall)
-                        self.all_sprites.add(wall)
-                        self.nodes.add_wall(node)
-                        self.logger.debug('added broken wall at {pos}'.format(pos=(x, y)))
+                elif col == "B":
+                    wall = Wall(x, y, h.load('broken_stone.png'), breakable=True)
+                    self.block_list.add(wall)
+                    self.all_sprites.add(wall)
+                    self.nodes.add_wall(node)
+                    self.logger.debug('added broken wall at {pos}'.format(pos=(x, y)))
 
-                    elif col == "T":
-                        new_enemy = enemy.Turret(self)
-                        new_enemy.rect.center = node
-                        self.enemy_list.add(new_enemy)
-                        self.all_sprites.add(new_enemy)
-                        self.logger.debug('added turret at {pos}'.format(pos=(x, y)))
+                elif col == "T":
+                    new_enemy = enemy.Turret(self)
+                    new_enemy.rect.center = node
+                    self.enemy_list.add(new_enemy)
+                    self.all_sprites.add(new_enemy)
+                    self.logger.debug('added turret at {pos}'.format(pos=(x, y)))
 
-                    elif col == "G":
-                        new_enemy = enemy.Ghost(self)
-                        new_enemy.rect.center = node
-                        self.enemy_list.add(new_enemy)
-                        self.all_sprites.add(new_enemy)
-                        self.logger.debug('added ghost at {pos}'.format(pos=(x, y)))
+                elif col == "G":
+                    new_enemy = enemy.Ghost(self)
+                    new_enemy.rect.center = node
+                    self.enemy_list.add(new_enemy)
+                    self.all_sprites.add(new_enemy)
+                    self.logger.debug('added ghost at {pos}'.format(pos=(x, y)))
 
-                    elif col == "F":
-                        new_enemy = enemy.FireBat(self)
-                        new_enemy.rect.center = node
-                        self.enemy_list.add(new_enemy)
-                        self.all_sprites.add(new_enemy)
-                        self.logger.debug('added firebat at {pos}'.format(pos=(x, y)))
+                elif col == "F":
+                    new_enemy = enemy.FireBat(self)
+                    new_enemy.rect.center = node
+                    self.enemy_list.add(new_enemy)
+                    self.all_sprites.add(new_enemy)
+                    self.logger.debug('added firebat at {pos}'.format(pos=(x, y)))
 
-                    elif col == "M":
-                        new_enemy = enemy.PoisonWorm(self)
-                        new_enemy.rect.center = node
-                        self.enemy_list.add(new_enemy)
-                        self.all_sprites.add(new_enemy)
-                        self.logger.debug('added poison worm at {pos}'.format(pos=(x, y)))
+                elif col == "M":
+                    new_enemy = enemy.PoisonWorm(self)
+                    new_enemy.rect.center = node
+                    self.enemy_list.add(new_enemy)
+                    self.all_sprites.add(new_enemy)
+                    self.logger.debug('added poison worm at {pos}'.format(pos=(x, y)))
 
-                    elif col == "W":
-                        chest = Chest(x, y, weapon=True)
-                        chest.rect.x += 8
-                        chest.rect.y += 16
-                        self.chest_list.add(chest)
-                        self.all_sprites.add(chest)
-                        self.logger.debug('added weapon chest at {pos}'.format(pos=(x, y)))
+                elif col == "W":
+                    chest = Chest(x, y, weapon=True)
+                    chest.rect.x += 8
+                    chest.rect.y += 16
+                    self.chest_list.add(chest)
+                    self.all_sprites.add(chest)
+                    self.logger.debug('added weapon chest at {pos}'.format(pos=(x, y)))
 
-                    x += 64
-                y += 64
-                x = xstart
+                x += 64
+            y += 64
+            x = xstart
 
         self.array_parsed = True
