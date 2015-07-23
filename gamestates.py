@@ -989,6 +989,7 @@ class InGame(GameState):
         aligned_rooms = self.align_doors(room_list)
 
         self.logger.info('==============Complete World Generated!==============')
+
         self.world = rooms.World(self.seed)
         self.world.room_array = aligned_rooms
 
@@ -999,7 +1000,6 @@ class InGame(GameState):
         self.logger.info(' ')
         self.logger.info('=====================================================')
 
-    @h.time_decorator
     def generate_world(self, n):
         """
         Generate the world by semi-randomly selecting n rooms.
@@ -1142,7 +1142,6 @@ class InGame(GameState):
 
         return room_list
 
-    @h.time_decorator
     def align_doors(self, room_list):
         """
         Align all the doors to create a world that is solvable
@@ -1158,35 +1157,33 @@ class InGame(GameState):
             self.logger.debug(' ')
             self.logger.debug('next room: {0}'.format(index))
 
-            room = room[1:]
+            room = room[1:]  # get rid of the leading "move right" identifier
 
             for row in room:
                 self.logger.debug(row)
 
             if len(room_array) == 0:
-                room_array += room  # get rid of the leading "move right" identifier
+                room_array += room
 
             else:
-                previous_door_location = 0
+                #Find the position of the previous room's exit door
                 self.logger.debug(' ')
                 self.logger.debug('Previous room exit')
                 self.logger.debug(room_array[-1])
-                for char in room_array[-1]:
-                    previous_door_location += 1
-                    if char == "D":
-                        self.logger.debug("previous door location: {0}".format(previous_door_location))
-                        break
 
-                new_door_location = 0
+                previous_door_location = room_array[-1].find('DD')
+                self.logger.debug("previous door location: {0}".format(previous_door_location))
+
+                #Find the position of the new room's entrance door
                 self.logger.debug(' ')
                 self.logger.debug('Current room entrance')
                 self.logger.debug(room[0])
-                for char in room[0]:
-                    new_door_location += 1
-                    if char == "D":
-                        self.logger.debug("new door location: {0}".format(new_door_location))
-                        break
 
+                new_door_location = room[0].find('DD')
+                self.logger.debug("new door location: {0}".format(new_door_location))
+
+
+                #Get the distance between the two doors
                 door_location = previous_door_location - new_door_location
                 self.logger.debug('net door location (prev - new): {0}'.format(door_location))
 
@@ -1196,11 +1193,7 @@ class InGame(GameState):
                     self.logger.debug(room_array[-1])
                     for row in room:
                         # Add & (blank tile) to each row to line up its door with the previous room
-                        aligned_row = ""
-                        for s in range(door_location):
-                            aligned_row += "&"
-                        aligned_row += row
-
+                        aligned_row = "&"*abs(door_location) + row
                         aligned_room.append(aligned_row)
 
                 else:
