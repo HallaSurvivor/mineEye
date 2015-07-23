@@ -288,19 +288,15 @@ class Enemy(h.Sprite):
             node = self.graph.nodes[node_index]
             if node[0] > self.rect.centerx:
                 self.movex(self.speed)
-                # self.check_x_collisions()
 
             if node[1] > self.rect.centery:
                 self.movey(self.speed)
-                # self.check_y_collisions()
 
             if node[0] < self.rect.centerx:
                 self.movex(-self.speed)
-                # self.check_x_collisions()
 
             if node[1] < self.rect.centery:
                 self.movey(-self.speed)
-                # self.check_y_collisions()
 
     def get_dist_from_hero(self):
         """
