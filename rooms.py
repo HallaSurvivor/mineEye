@@ -33,7 +33,7 @@ room_dict = {
     "StartingRoom": [MoveRight,
                      "SSSSSSSS",
                      "S      S",
-                     "SW  M  S",
+                     "SW     S",
                      "SSSSSDDS"
     ],
     "EndingRoom": [MoveDown,

@@ -2,10 +2,14 @@
 Exports a variety of helper functions to cut down on repetitive code.
 """
 import os
+import time
+import logging
 import heapq
 import pygame
 from config import settings
 import constants as c
+
+module_logger = logging.getLogger('mineEye.helpers')
 
 # Caches for sprites and fonts to mitigate the slow loading process
 _image_library = {}
@@ -302,3 +306,30 @@ def create_menu(screen, title, options, descriptions=None,
 
     return rect_list
 
+
+def time_decorator(function):
+    """
+    Decorate a function to return to a logger and the console the amount of time a process takes.
+
+    :param function: The function to time
+
+    Thanks to Andreas Jung at andreas-jung.com for the basis of this code
+    """
+
+    logger = logging.getLogger('mineEye.helpers.time_decorator')
+
+    def timed(*args, **kwargs):
+        start_time = time.time()
+        result = function(*args, **kwargs)
+        end_time = time.time()
+
+        elapsed_time = str(end_time - start_time)[:7]
+        display = "{function} time: {elapsed_time} seconds".format(
+                    function=function.__name__, elapsed_time=elapsed_time)
+
+        logger.info(display)
+        print(display)
+
+        return result
+
+    return timed

@@ -999,6 +999,7 @@ class InGame(GameState):
         self.logger.info(' ')
         self.logger.info('=====================================================')
 
+    @h.time_decorator
     def generate_world(self, n):
         """
         Generate the world by semi-randomly selecting n rooms.
@@ -1141,6 +1142,7 @@ class InGame(GameState):
 
         return room_list
 
+    @h.time_decorator
     def align_doors(self, room_list):
         """
         Align all the doors to create a world that is solvable
