@@ -360,22 +360,16 @@ class World:
         self.hero_projectile_list.draw(screen)
         self.bomb_list.draw(screen)
 
-    def move_world(self, hero, x, y):
+    def _move_world_x(self, hero, x):
         """
-        Move the world based on Hero speed and user input
+        Move the blocks/nodes in the X direction
 
-        first move by x,
+        move the entire world,
         check for collisions,
         stop the world moving if the hero collides with the world,
         damage the hero if standing on a spike,
-        repeat for moving by y
-
-        :param hero: An instance of the Hero class that walls can collide with.
-        :param x: The Int of how far to shift the world's x
-        :param y: the Int of how far to shift the world's y
+        end the game if the hero is standing on a timer
         """
-
-        # Move the blocks/nodes in the X direction
         self.nodes.shift_nodes_x(x)
         for sprite in self.all_sprites:
             sprite.movex(x)
@@ -405,7 +399,16 @@ class World:
             if block.end_timer:
                 hero.run_timer = False
 
-        # Move the blocks/nodes in the Y direction
+    def _move_world_y(self, hero, y):
+        """
+        Move the blocks/nodes in the Y direction
+
+        move the entire world,
+        check for collisions,
+        stop the world moving if the hero collides with the world,
+        damage the hero if standing on a spike,
+        end the game if the hero is standing on a timer
+        """
         self.nodes.shift_nodes_y(y)
         for sprite in self.all_sprites:
             sprite.movey(y)
@@ -447,6 +450,20 @@ class World:
             # End the game timer if the block is the end
             if block.end_timer:
                 hero.run_timer = False
+
+    def move_world(self, hero, x, y):
+        """
+        Move the world based on Hero speed and user input
+
+        move by X, then Y
+
+        :param hero: An instance of the Hero class that walls can collide with.
+        :param x: The Int of how far to shift the world's x
+        :param y: the Int of how far to shift the world's y
+        """
+
+        self._move_world_x(hero, x)
+        self._move_world_y(hero, y)
 
     def cause_contact_damage(self, hero):
         """
