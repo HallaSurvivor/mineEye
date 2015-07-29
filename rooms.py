@@ -415,6 +415,9 @@ class World:
 
         # Check for block-hero collisions
         block_hit_list = pygame.sprite.spritecollide(hero, self.block_list, False)
+        if len(block_hit_list) > 0:
+            self.changespeed(0, -self.yspeed)
+
         for block in block_hit_list:
             old_y_pos = block.rect.y
 
