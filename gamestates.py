@@ -297,7 +297,10 @@ class Menu(GameState):
                     self.selected = index
 
         elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-            self.select_option()
+            pos = event.pos
+            for index, rect in enumerate(self.rect_list):
+                if rect.collidepoint(pos):
+                    self.select_option()
 
         elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
             if self.title == 'Custom Seeded Maps':
