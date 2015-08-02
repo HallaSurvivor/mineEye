@@ -23,8 +23,8 @@ the GameState is changed via GameStateManager.
 
     go_back simply returns to the previous GameState.
 """
+import os
 from math import hypot
-import time
 import logging
 import pickle
 import random
@@ -836,7 +836,7 @@ class InGame(GameState):
         """
         self.tick_count += 1
         file_name = "{hero} - {seed}.txt".format(hero=self.hero.name, seed=self.seed)
-        f = open(file_name, 'a')
+        f = open(os.path.join("replays", file_name), 'a')
         for event in events:
             if event.type == pygame.KEYDOWN:
                 if event.key == settings['LEFT']:
