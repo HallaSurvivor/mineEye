@@ -24,6 +24,7 @@ the GameState is changed via GameStateManager.
     go_back simply returns to the previous GameState.
 """
 from math import hypot
+import time
 import logging
 import pickle
 import random
@@ -649,6 +650,8 @@ class InGame(GameState):
 
         self.seed = seed
 
+        self.tick_count = 0
+
         self.all_sprites_list = pygame.sprite.Group()
         self.hero = chosen_hero()
 
@@ -831,10 +834,14 @@ class InGame(GameState):
 
         :param events: a list of pygame events, get via pygame.event.get()
         """
-
+        self.tick_count += 1
+        file_name = "{hero} - {seed}.txt".format(hero=self.hero.name, seed=self.seed)
+        f = open(file_name, 'a')
         for event in events:
             if event.type == pygame.KEYDOWN:
                 if event.key == settings['LEFT']:
+                    f.write('{tick} KeyDown Left\n'.format(tick=self.tick_count))
+
                     self.left_pressed = True
                     self.logger.info('pressed [LEFT]')
 
@@ -847,6 +854,8 @@ class InGame(GameState):
                     self.hero.last_motion = 'left'
 
                 elif event.key == settings['RIGHT']:
+                    f.write('{tick} KeyDown Right\n'.format(tick=self.tick_count))
+
                     self.right_pressed = True
                     self.logger.info('pressed [RIGHT]')
 
@@ -859,6 +868,8 @@ class InGame(GameState):
                     self.hero.last_motion = 'right'
 
                 elif event.key == settings['UP']:
+                    f.write('{tick} KeyDown Up\n'.format(tick=self.tick_count))
+
                     self.logger.info('pressed [UP]')
                     if not self.hero.jumping:
 
@@ -879,6 +890,8 @@ class InGame(GameState):
                             self.hero.start_double_jump = True
 
                 elif event.key == settings['BOMB']:
+                    f.write('{tick} KeyDown Bomb\n'.format(tick=self.tick_count))
+
                     self.logger.info('pressed [BOMB]')
 
                     if self.hero.bombs > 0:
@@ -887,6 +900,8 @@ class InGame(GameState):
                         self.world.all_sprites.add(bomb)
 
                 elif event.key == settings['DOWN']:
+                    f.write('{tick} KeyDown Down\n'.format(tick=self.tick_count))
+
                     self.logger.info('pressed [DOWN]')
 
                     for drop in self.world.drops_list:
@@ -925,6 +940,8 @@ class InGame(GameState):
             elif event.type == pygame.KEYUP:
                 # Cancel the motion by adding the opposite of the keydown situation
                 if event.key == settings['LEFT']:
+                    f.write('{tick} KeyUp Left\n'.format(tick=self.tick_count))
+
                     self.left_pressed = False
                     self.logger.info('released [LEFT]')
 
@@ -938,6 +955,8 @@ class InGame(GameState):
                         self.hero.last_motion = 'right'
 
                 elif event.key == settings['RIGHT']:
+                    f.write('{tick} KeyUp Right\n'.format(tick=self.tick_count))
+
                     self.right_pressed = False
                     self.logger.info('released [RIGHT]')
 
@@ -951,10 +970,16 @@ class InGame(GameState):
                         self.hero.last_motion = 'left'
 
                 elif event.key == settings['UP']:
+                    f.write('{tick} KeyUp Up\n'.format(tick=self.tick_count))
                     self.logger.info('released [UP]')
 
                 elif event.key == settings['DOWN']:
+                    f.write('{tick} KeyUp Down\n'.format(tick=self.tick_count))
                     self.logger.info('released [DOWN]')
+
+                elif event.key == settings['BOMB']:
+                    f.write('{tick} KeyUp Bomb\n'.format(tick=self.tick_count))
+                    self.logger.info('released [BOMB]')
 
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:  # Left Click
@@ -971,6 +996,7 @@ class InGame(GameState):
 
             else:
                 pass
+        f.close()
 
     def die(self):
         self.manager.go_to(DeathScreen(self.timer, type(self.hero), self.seed))
