@@ -24,6 +24,7 @@ the GameState is changed via GameStateManager.
     go_back simply returns to the previous GameState.
 """
 import os
+import time
 from math import hypot
 import logging
 import pickle
@@ -651,14 +652,15 @@ class InGame(GameState):
 
         self.manager = None
 
-        with open(os.path.join('replays', 'test.txt'), 'r') as somefile:
-            self.replay_list = [line for line in somefile]
+        # with open(os.path.join('replays', 'Mon 10 Aug 2015 - 01 26 37 - 810835247.txt'), 'r') as somefile:
+        #     self.replay_list = [line for line in somefile]
 
         self.event_list = []
 
         self.seed = seed
 
         self.tick_count = 0
+        self.start_time = time.strftime('%a %d %b %Y - time %H %M %S')
 
         self.all_sprites_list = pygame.sprite.Group()
         self.hero = chosen_hero()
@@ -814,7 +816,7 @@ class InGame(GameState):
                     self.event_list.append(pygame.event.Event(type_, dict_))
 
         else:
-            self.manager.replay = True
+            self.manager.replay = False
 
         self.hero.update()
         self.world.update(self.hero)
@@ -860,7 +862,7 @@ class InGame(GameState):
         :param events: a list of pygame events, get via pygame.event.get()
         """
         self.tick_count += 1
-        file_name = "{hero} - {seed}.txt".format(hero=self.hero.name, seed=self.seed)
+        file_name = "{time} - seed {seed}.txt".format(time=self.start_time, seed=self.seed)
         f = open(os.path.join("replays", file_name), 'a')
         for event in events:
             if event.type == pygame.KEYDOWN:
