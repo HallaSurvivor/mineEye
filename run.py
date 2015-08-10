@@ -90,7 +90,10 @@ while not manager.done:
             settings['WIDTH'] = event.dict['w']
             settings['HEIGHT'] = event.dict['h']
 
-    manager.state.handle_events(pygame.event.get())
+    if not manager.replay:
+        manager.state.handle_events(pygame.event.get())
+    else:
+        manager.state.handle_events(manager.state.event_list)
     manager.state.update()
     manager.state.draw(screen)
 

@@ -93,11 +93,14 @@ class GameStateManager:
     A helper class to manage game states.
     """
     def __init__(self):
-        self.state = None
+        self.logger = logging.getLogger('mineEye.gamestates.GameStateManager')
+
         self.done = False
+        self.replay = False
+
+        self.state = None
         self.go_to(TitleScreen())
         self.previous_state = None
-        self.logger = logging.getLogger('mineEye.gamestates.GameStateManager')
 
     def go_to(self, gamestate):
         """
@@ -647,6 +650,8 @@ class InGame(GameState):
         self.logger = logging.getLogger('mineEye.gamestates.InGame')
 
         self.manager = None
+
+        self.event_list = []
 
         self.seed = seed
 
