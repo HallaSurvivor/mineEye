@@ -15,6 +15,7 @@ Requires:
 * Python 3.4
 * PyGame
 * Pyganim (included)
+* PathGetter (included)
 
 Much thanks to StackExchange. Seriously. We could not have made
 it this far without you and your wonderful community.

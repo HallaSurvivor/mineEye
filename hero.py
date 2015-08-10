@@ -7,7 +7,7 @@ import os
 import logging
 from math import hypot
 import pygame
-import pyganim
+from dependencies import pyganim
 import entities
 import helpers as h
 from config import settings

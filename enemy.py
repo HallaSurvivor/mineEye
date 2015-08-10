@@ -5,7 +5,7 @@ import os
 import logging
 from math import hypot, sin, cos, tan, atan, pi
 import pygame
-import pyganim
+from dependencies import pyganim
 import helpers as h
 from config import settings
 import constants

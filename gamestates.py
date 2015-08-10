@@ -655,7 +655,8 @@ class InGame(GameState):
         self.replay = replay
 
         if self.replay:
-            with open(os.path.join('replays', 'Mon 10 Aug 2015 - 01 26 37 - 810835247.txt'), 'r') as somefile:
+            replay_location = 'Mon 10 Aug 2015 - 01 26 37 - 810835247.txt'
+            with open(os.path.join('replays', replay_location), 'r') as somefile:
                 self.replay_list = [line for line in somefile]
 
         self.event_list = []
