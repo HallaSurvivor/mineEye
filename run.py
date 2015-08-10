@@ -11,13 +11,22 @@ change logger.setLevel below to logging.DEBUG.
 (Fair warning - your game will run SLIGHTLY slower if you do this, as it will
 be writing to the file a LOT)
 
+If you want the normal-person I SEE STUFF THAT MATTERS version,
+change logger.setLevel below to logging.INFO (default)
+
 Requires:
 * Python 3.4
 * PyGame
 * Pyganim (included)
 * PathGetter (included)
 
-Much thanks to StackExchange. Seriously. We could not have made
+Lots of thanks to joel-murielle at http://joel-murielle.perso.sfr.fr/
+for the use of PathGetter as a file browser.
+
+Lots of thanks to Al Sweigart at http://inventwithpython.com/pyganim/
+for the use of PygAnim to animate sprites more easily
+
+An ENORMOUS thanks to StackExchange. Seriously. We could not have made
 it this far without you and your wonderful community.
 
 Much thanks to the Speed Demos Archive forum. We asked stupid
@@ -30,7 +39,7 @@ legible/commented/etc. ...I hope.
 
 General outline:
 run.py - set up logger, run game loop.
-config.py - set up default config file, overridden by user settings file.
+config.py - set up default config file. (overridden by user settings file)
 constants.py - if you want to mess with things easily, here's where to start.
 hero.py - The hero class and subclasses.
 enemy.py - The enemy class and subclasses.
@@ -39,6 +48,12 @@ helpers.py - The start of where the magic happens. Load images, redefine sprites
 gamestates.py - The brunt of what you see that you don't realize you see.
 rooms.py - Rooms, walls, enemy calls, movement, updates, etc. If it happens during the actual GAME,
     it probably happens here.
+
+room_options.txt - the definition of all the available rooms' shapes.
+                    parsed via JSON
+replays/*.txt - a txt file storing the Tick, the Event, and the Event Info to allow
+                    functioning replays
+
 
 Don't post this or modifications anywhere without emailing me first, please. (pssst. if you email me, i'll say yes <3 )
 My Email: HallaSurvivor@gmail.com
