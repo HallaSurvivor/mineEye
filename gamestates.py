@@ -637,7 +637,7 @@ class InGame(GameState):
 
     musicfile = 'Pathetique.mp3'
 
-    def __init__(self, seed, timer=False, chosen_hero=hero.Speedy):
+    def __init__(self, seed, timer=False, chosen_hero=hero.Speedy, replay=False):
         """
         Instantiate the primary Game State.
 
@@ -652,15 +652,18 @@ class InGame(GameState):
 
         self.manager = None
 
-        # with open(os.path.join('replays', 'Mon 10 Aug 2015 - 01 26 37 - 810835247.txt'), 'r') as somefile:
-        #     self.replay_list = [line for line in somefile]
+        self.replay = replay
+
+        if self.replay:
+            with open(os.path.join('replays', 'Mon 10 Aug 2015 - 01 26 37 - 810835247.txt'), 'r') as somefile:
+                self.replay_list = [line for line in somefile]
 
         self.event_list = []
 
         self.seed = seed
 
         self.tick_count = 0
-        self.start_time = time.strftime('%a %d %b %Y - time %H %M %S')
+        self.start_time = time.strftime('%a %d %b %Y - %H %M %S')
 
         self.all_sprites_list = pygame.sprite.Group()
         self.hero = chosen_hero()
@@ -816,7 +819,7 @@ class InGame(GameState):
                     self.event_list.append(pygame.event.Event(type_, dict_))
 
         else:
-            self.manager.replay = False
+            self.manager.replay = self.replay
 
         self.hero.update()
         self.world.update(self.hero)
