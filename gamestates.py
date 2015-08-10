@@ -30,6 +30,7 @@ import logging
 import pickle
 import random
 import pygame
+from dependencies.PathGetter import PathGetter
 from config import settings
 import constants as c
 import helpers as h
@@ -353,7 +354,7 @@ class TitleScreen(Menu):
 
     def __init__(self):
         super().__init__()
-        self.selections = [ChooseHero(timer=True), PlayerMaps(), ChangeSettings(), Quit()]
+        self.selections = [InGame(seed=random.randint(0, 1000000000)), PlayerMaps(), ChangeSettings(), Quit()]
 
 
 class PlayerMaps(Menu):
@@ -384,7 +385,7 @@ class PlayerMaps(Menu):
             elif option == 'NEXT PAGE':
                 self.selections.append(PlayerMaps2())
             else:
-                self.selections.append(ChooseHero(timer=True, seed=option))
+                self.selections.append(InGame(seed=option))
 
 
 class PlayerMaps2(Menu):
@@ -637,7 +638,7 @@ class InGame(GameState):
 
     musicfile = 'Pathetique.mp3'
 
-    def __init__(self, seed, timer=False, chosen_hero=hero.Speedy, replay=False):
+    def __init__(self, seed, timer=True, chosen_hero=hero.Speedy, replay=False):
         """
         Instantiate the primary Game State.
 
