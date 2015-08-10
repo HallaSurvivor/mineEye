@@ -636,7 +636,7 @@ class InGame(GameState):
 
     musicfile = 'Pathetique.mp3'
 
-    def __init__(self, seed, timer=False, chosen_hero=hero.Demo):
+    def __init__(self, seed, timer=False, chosen_hero=hero.Speedy):
         """
         Instantiate the primary Game State.
 
@@ -650,6 +650,9 @@ class InGame(GameState):
         self.logger = logging.getLogger('mineEye.gamestates.InGame')
 
         self.manager = None
+
+        with open(os.path.join('replays', 'Speedy - 810835247.txt'), 'r') as somefile:
+            self.replay_list = [line for line in somefile]
 
         self.event_list = []
 
@@ -796,6 +799,23 @@ class InGame(GameState):
 
         Additionally, check the Hero's health
         """
+        if self.manager.replay:
+            for line in self.replay_list:
+                if line.startswith(str(self.tick_count)):
+                    type_ = None
+                    dict_ = {}
+                    if 'KeyUp' in line:
+                        type_ = pygame.KEYUP
+                        dict_['key'] = settings[line.upper()[line.find('KeyUp') + 6:len(line) - 1]]
+                    elif 'KeyDown' in line:
+                        type_ = pygame.KEYDOWN
+                        dict_['key'] = settings[line.upper()[line.find('KeyDown') + 8:len(line) - 1]]
+
+                    self.event_list.append(pygame.event.Event(type_, dict_))
+
+        else:
+            self.manager.replay = True
+
         self.hero.update()
         self.world.update(self.hero)
 
@@ -1001,6 +1021,10 @@ class InGame(GameState):
 
             else:
                 pass
+
+        if self.manager.replay:
+            self.event_list.clear()
+
         f.close()
 
     def die(self):
