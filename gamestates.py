@@ -651,7 +651,7 @@ class InGame(GameState):
 
         self.manager = None
 
-        with open(os.path.join('replays', 'Speedy - 810835247.txt'), 'r') as somefile:
+        with open(os.path.join('replays', 'test.txt'), 'r') as somefile:
             self.replay_list = [line for line in somefile]
 
         self.event_list = []
@@ -801,15 +801,15 @@ class InGame(GameState):
         """
         if self.manager.replay:
             for line in self.replay_list:
-                if line.startswith(str(self.tick_count)):
+                if line.startswith(str(self.tick_count) + " "):
                     type_ = None
                     dict_ = {}
                     if 'KeyUp' in line:
                         type_ = pygame.KEYUP
-                        dict_['key'] = settings[line.upper()[line.find('KeyUp') + 6:len(line) - 1]]
+                        dict_['key'] = settings[line.upper().replace("\n", "")[line.find('KeyUp') + 6:]]
                     elif 'KeyDown' in line:
                         type_ = pygame.KEYDOWN
-                        dict_['key'] = settings[line.upper()[line.find('KeyDown') + 8:len(line) - 1]]
+                        dict_['key'] = settings[line.upper().replace("\n", "")[line.find('KeyDown') + 8:]]
 
                     self.event_list.append(pygame.event.Event(type_, dict_))
 
@@ -1028,9 +1028,11 @@ class InGame(GameState):
         f.close()
 
     def die(self):
+        self.manager.replay = False
         self.manager.go_to(DeathScreen(self.timer, type(self.hero), self.seed))
 
     def win(self):
+        self.manager.replay = False
         self.manager.go_to(WinScreen(self.timer, type(self.hero), self.seed, self.elapsed_time))
 
     def create_world(self, n):

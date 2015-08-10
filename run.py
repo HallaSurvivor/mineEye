@@ -93,6 +93,7 @@ while not manager.done:
     if not manager.replay:
         manager.state.handle_events(pygame.event.get())
     else:
+        logger.debug('replay event', manager.state.tick_count, manager.state.event_list)
         manager.state.handle_events(manager.state.event_list)
     manager.state.update()
     manager.state.draw(screen)
