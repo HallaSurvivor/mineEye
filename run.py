@@ -86,7 +86,7 @@ logger.info('Starting Program')
 # Create the game
 pygame.init()
 
-screen = pygame.display.set_mode(settings['SCREEN_RESOLUTION'], pygame.FULLSCREEN)
+screen = pygame.display.set_mode(settings['SCREEN_RESOLUTION'])
 pygame.display.set_caption("mineEye")
 clock = pygame.time.Clock()
 pygame.mouse.set_visible(False)

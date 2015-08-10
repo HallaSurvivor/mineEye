@@ -348,13 +348,13 @@ class TitleScreen(Menu):
     musicfile = 'O_Fortuna.mp3'
 
     title = 'Press Space to begin!'
-    options = ['Start!', 'My Maps', 'Settings!', 'Quit!']
+    options = ['Start!', 'My Maps', 'Replays', 'Settings!', 'Quit!']
 
     show_back_button = False
 
     def __init__(self):
         super().__init__()
-        self.selections = [InGame(seed=random.randint(0, 1000000000)), PlayerMaps(), ChangeSettings(), Quit()]
+        self.selections = [InGame(seed=random.randint(0, 1000000000)), PlayerMaps(), ChooseReplay(), ChangeSettings(), Quit()]
 
 
 class PlayerMaps(Menu):
@@ -385,7 +385,7 @@ class PlayerMaps(Menu):
             elif option == 'NEXT PAGE':
                 self.selections.append(PlayerMaps2())
             else:
-                self.selections.append(InGame(seed=option))
+                self.selections.append(InGame(seed=int(option)))
 
 
 class PlayerMaps2(Menu):
@@ -413,7 +413,7 @@ class PlayerMaps2(Menu):
             if option == 'EMPTY':
                 self.selections.append(AddSeed(index + 5))
             else:
-                self.selections.append(ChooseHero(timer=True, seed=option))
+                self.selections.append(InGame(seed=int(option)))
 
 
 class AddSeed(Menu):
@@ -485,6 +485,22 @@ class AddSeed(Menu):
                         self.seed += pygame.key.name(event.key)
         else:
             pass
+
+
+class ChooseReplay(Menu):
+    title = 'Choose Replay'
+    options = ['Enter']
+
+    def __init__(self):
+        super().__init__()
+        self.replay_location = ""
+        self.selections = [None]
+
+    def select_option(self):
+        p = PathGetter.get()
+        seed = str(p)[str(p).find('seed ') + 5:-5]  # 5 ahead of 'seed ' to compensate for letters,
+                                                    # -5 to compensate for .txt
+        self.manager.go_to(InGame(seed=int(seed), replay_location=p))
 
 
 class ChooseHero(Menu):
@@ -638,7 +654,7 @@ class InGame(GameState):
 
     musicfile = 'Pathetique.mp3'
 
-    def __init__(self, seed, timer=True, chosen_hero=hero.Speedy, replay=False):
+    def __init__(self, seed, timer=True, chosen_hero=hero.Speedy, replay_location=None):
         """
         Instantiate the primary Game State.
 
@@ -653,11 +669,13 @@ class InGame(GameState):
 
         self.manager = None
 
-        self.replay = replay
+        if replay_location:
+            self.replay = True
+        else:
+            self.replay = False
 
         if self.replay:
-            replay_location = 'Mon 10 Aug 2015 - 01 26 37 - 810835247.txt'
-            with open(os.path.join('replays', replay_location), 'r') as somefile:
+            with open(os.path.join(replay_location), 'r') as somefile:
                 self.replay_list = [line for line in somefile]
 
         self.event_list = []
@@ -867,12 +885,14 @@ class InGame(GameState):
         :param events: a list of pygame events, get via pygame.event.get()
         """
         self.tick_count += 1
-        file_name = "{time} - seed {seed}.txt".format(time=self.start_time, seed=self.seed)
-        f = open(os.path.join("replays", file_name), 'a')
+        if not self.replay:
+            file_name = "{time} - seed {seed}.txt".format(time=self.start_time, seed=self.seed)
+            f = open(os.path.join("replays", file_name), 'a')
         for event in events:
             if event.type == pygame.KEYDOWN:
                 if event.key == settings['LEFT']:
-                    f.write('{tick} KeyDown Left\n'.format(tick=self.tick_count))
+                    if not self.replay:
+                        f.write('{tick} KeyDown Left\n'.format(tick=self.tick_count))
 
                     self.left_pressed = True
                     self.logger.debug('pressed [LEFT]')
@@ -886,7 +906,8 @@ class InGame(GameState):
                     self.hero.last_motion = 'left'
 
                 elif event.key == settings['RIGHT']:
-                    f.write('{tick} KeyDown Right\n'.format(tick=self.tick_count))
+                    if not self.replay:
+                        f.write('{tick} KeyDown Right\n'.format(tick=self.tick_count))
 
                     self.right_pressed = True
                     self.logger.debug('pressed [RIGHT]')
@@ -900,7 +921,8 @@ class InGame(GameState):
                     self.hero.last_motion = 'right'
 
                 elif event.key == settings['UP']:
-                    f.write('{tick} KeyDown Up\n'.format(tick=self.tick_count))
+                    if not self.replay:
+                        f.write('{tick} KeyDown Up\n'.format(tick=self.tick_count))
 
                     self.logger.debug('pressed [UP]')
                     if not self.hero.jumping:
@@ -922,7 +944,8 @@ class InGame(GameState):
                             self.hero.start_double_jump = True
 
                 elif event.key == settings['BOMB']:
-                    f.write('{tick} KeyDown Bomb\n'.format(tick=self.tick_count))
+                    if not self.replay:
+                        f.write('{tick} KeyDown Bomb\n'.format(tick=self.tick_count))
 
                     self.logger.debug('pressed [BOMB]')
 
@@ -932,7 +955,8 @@ class InGame(GameState):
                         self.world.all_sprites.add(bomb)
 
                 elif event.key == settings['DOWN']:
-                    f.write('{tick} KeyDown Down\n'.format(tick=self.tick_count))
+                    if not self.replay:
+                        f.write('{tick} KeyDown Down\n'.format(tick=self.tick_count))
 
                     self.logger.debug('pressed [DOWN]')
 
@@ -972,7 +996,8 @@ class InGame(GameState):
             elif event.type == pygame.KEYUP:
                 # Cancel the motion by adding the opposite of the keydown situation
                 if event.key == settings['LEFT']:
-                    f.write('{tick} KeyUp Left\n'.format(tick=self.tick_count))
+                    if not self.replay:
+                        f.write('{tick} KeyUp Left\n'.format(tick=self.tick_count))
 
                     self.left_pressed = False
                     self.logger.debug('released [LEFT]')
@@ -987,7 +1012,8 @@ class InGame(GameState):
                         self.hero.last_motion = 'right'
 
                 elif event.key == settings['RIGHT']:
-                    f.write('{tick} KeyUp Right\n'.format(tick=self.tick_count))
+                    if not self.replay:
+                        f.write('{tick} KeyUp Right\n'.format(tick=self.tick_count))
 
                     self.right_pressed = False
                     self.logger.debug('released [RIGHT]')
@@ -1002,15 +1028,18 @@ class InGame(GameState):
                         self.hero.last_motion = 'left'
 
                 elif event.key == settings['UP']:
-                    f.write('{tick} KeyUp Up\n'.format(tick=self.tick_count))
+                    if not self.replay:
+                        f.write('{tick} KeyUp Up\n'.format(tick=self.tick_count))
                     self.logger.debug('released [UP]')
 
                 elif event.key == settings['DOWN']:
-                    f.write('{tick} KeyUp Down\n'.format(tick=self.tick_count))
+                    if not self.replay:
+                        f.write('{tick} KeyUp Down\n'.format(tick=self.tick_count))
                     self.logger.debug('released [DOWN]')
 
                 elif event.key == settings['BOMB']:
-                    f.write('{tick} KeyUp Bomb\n'.format(tick=self.tick_count))
+                    if not self.replay:
+                        f.write('{tick} KeyUp Bomb\n'.format(tick=self.tick_count))
                     self.logger.debug('released [BOMB]')
 
             elif event.type == pygame.MOUSEBUTTONDOWN:
@@ -1031,8 +1060,8 @@ class InGame(GameState):
 
         if self.manager.replay:
             self.event_list.clear()
-
-        f.close()
+        if not self.replay:
+            f.close()
 
     def die(self):
         self.manager.replay = False

@@ -9,6 +9,8 @@ try:
     from .lib.PygameReadWrite import reader,form
 except ValueError:
     from lib.PygameReadWrite import reader,form
+except SystemError:
+    from lib.PygameReadWrite import reader,form
 from pygame import *
 import subprocess
 from platform import system
