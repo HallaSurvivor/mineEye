@@ -835,6 +835,14 @@ class InGame(GameState):
                     elif 'KeyDown' in line:
                         type_ = pygame.KEYDOWN
                         dict_['key'] = settings[line.upper().replace("\n", "")[line.find('KeyDown') + 8:]]
+                    elif 'Mouse1Down' in line:
+                        type_ = pygame.MOUSEBUTTONDOWN
+                        dict_['button'] = 1
+                        dict_['pos'] = line[line.find('('):]
+                    elif 'Mouse1Up' in line:
+                        type_ = pygame.MOUSEBUTTONUP
+                        dict_['button'] = 1
+                        dict_['pos'] = line[line.find('('):]
 
                     self.event_list.append(pygame.event.Event(type_, dict_))
 
@@ -1044,7 +1052,10 @@ class InGame(GameState):
 
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:  # Left Click
-                    self.logger.debug('[Left Click] at {0}'.format(event.pos))
+                    if not self.replay:
+                        f.write('{tick} Mouse1Down {pos}\n'.format(tick=self.tick_count, pos=event.pos))
+
+                    self.logger.debug('[Left Click Down] at {0}'.format(event.pos))
 
                     if self.hero.melee_weapon is not None:
                         for e in self.world.enemy_list:
@@ -1054,6 +1065,12 @@ class InGame(GameState):
                                 e.damage(self.hero.melee_weapon.power * self.hero.actual_damage_multiplier)
                 elif event.button == 3:  # Right Click
                     self.logger.debug('[Right Click] at {0}'.format(event.pos))
+
+            elif event.type == pygame.MOUSEBUTTONUP:
+                if event.button == 1:
+                    if not self.replay:
+                        f.write('{tick} Mouse1Up {pos}\n'.format(tick=self.tick_count, pos=event.pos))
+                    self.logger.debug('[Left Click Up] at {0}'.format(event.pos))
 
             else:
                 pass
