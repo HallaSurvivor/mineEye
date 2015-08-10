@@ -843,7 +843,7 @@ class InGame(GameState):
                     f.write('{tick} KeyDown Left\n'.format(tick=self.tick_count))
 
                     self.left_pressed = True
-                    self.logger.info('pressed [LEFT]')
+                    self.logger.debug('pressed [LEFT]')
 
                     if self.hero.moving_right:
                         self.world.changespeed(self.hero.actual_speed, 0)
@@ -857,7 +857,7 @@ class InGame(GameState):
                     f.write('{tick} KeyDown Right\n'.format(tick=self.tick_count))
 
                     self.right_pressed = True
-                    self.logger.info('pressed [RIGHT]')
+                    self.logger.debug('pressed [RIGHT]')
 
                     if self.hero.moving_left:
                         self.world.changespeed(-self.hero.actual_speed, 0)
@@ -870,7 +870,7 @@ class InGame(GameState):
                 elif event.key == settings['UP']:
                     f.write('{tick} KeyDown Up\n'.format(tick=self.tick_count))
 
-                    self.logger.info('pressed [UP]')
+                    self.logger.debug('pressed [UP]')
                     if not self.hero.jumping:
 
                         # If the hero is on a platform:
@@ -892,7 +892,7 @@ class InGame(GameState):
                 elif event.key == settings['BOMB']:
                     f.write('{tick} KeyDown Bomb\n'.format(tick=self.tick_count))
 
-                    self.logger.info('pressed [BOMB]')
+                    self.logger.debug('pressed [BOMB]')
 
                     if self.hero.bombs > 0:
                         bomb = self.hero.drop_bomb()
@@ -902,7 +902,7 @@ class InGame(GameState):
                 elif event.key == settings['DOWN']:
                     f.write('{tick} KeyDown Down\n'.format(tick=self.tick_count))
 
-                    self.logger.info('pressed [DOWN]')
+                    self.logger.debug('pressed [DOWN]')
 
                     for drop in self.world.drops_list:
                         if drop.is_weapon:
@@ -928,7 +928,7 @@ class InGame(GameState):
 
                 # Enter pause menu
                 elif event.key == settings['PAUSE']:
-                    self.logger.info('pressed [PAUSE]')
+                    self.logger.debug('pressed [PAUSE]')
 
                     if settings['DEBUG'] and (pygame.key.get_mods() & pygame.KMOD_LSHIFT):
                         settings['GOD MODE'] = True
@@ -943,7 +943,7 @@ class InGame(GameState):
                     f.write('{tick} KeyUp Left\n'.format(tick=self.tick_count))
 
                     self.left_pressed = False
-                    self.logger.info('released [LEFT]')
+                    self.logger.debug('released [LEFT]')
 
                     if self.hero.moving_left:
                         self.world.changespeed(-self.hero.actual_speed, 0)
@@ -958,7 +958,7 @@ class InGame(GameState):
                     f.write('{tick} KeyUp Right\n'.format(tick=self.tick_count))
 
                     self.right_pressed = False
-                    self.logger.info('released [RIGHT]')
+                    self.logger.debug('released [RIGHT]')
 
                     if self.hero.moving_right:
                         self.world.changespeed(self.hero.actual_speed, 0)
@@ -971,19 +971,19 @@ class InGame(GameState):
 
                 elif event.key == settings['UP']:
                     f.write('{tick} KeyUp Up\n'.format(tick=self.tick_count))
-                    self.logger.info('released [UP]')
+                    self.logger.debug('released [UP]')
 
                 elif event.key == settings['DOWN']:
                     f.write('{tick} KeyUp Down\n'.format(tick=self.tick_count))
-                    self.logger.info('released [DOWN]')
+                    self.logger.debug('released [DOWN]')
 
                 elif event.key == settings['BOMB']:
                     f.write('{tick} KeyUp Bomb\n'.format(tick=self.tick_count))
-                    self.logger.info('released [BOMB]')
+                    self.logger.debug('released [BOMB]')
 
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:  # Left Click
-                    self.logger.info('[Left Click] at {0}'.format(event.pos))
+                    self.logger.debug('[Left Click] at {0}'.format(event.pos))
 
                     if self.hero.melee_weapon is not None:
                         for e in self.world.enemy_list:
@@ -992,7 +992,7 @@ class InGame(GameState):
                             if dist <= self.hero.melee_weapon.range:
                                 e.damage(self.hero.melee_weapon.power * self.hero.actual_damage_multiplier)
                 elif event.button == 3:  # Right Click
-                    self.logger.info('[Right Click] at {0}'.format(event.pos))
+                    self.logger.debug('[Right Click] at {0}'.format(event.pos))
 
             else:
                 pass
