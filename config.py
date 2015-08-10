@@ -75,3 +75,4 @@ except:
 
 settings['GOD MODE'] = False
 settings['SHOW_NODES'] = SHOW_NODES
+settings['DEBUG'] = DEBUG

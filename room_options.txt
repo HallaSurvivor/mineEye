@@ -1,0 +1,155 @@
+# A dictionary of all the rooms to randomly select from.
+# Each entry takes the form:
+# ROOM_NAME: [PrimaryPlayerMotion, *room_layout]
+#
+#
+#PrimaryPlayerMotion is a variable that tells the game what direction
+#the player is moving in through the room.
+#    0 is moving to the right
+#    1 is moving to the left
+#    2 is moving down
+#
+#
+# StartingRoom and EndingRoom must exist somewhere
+#    KEY for room_array:
+#        S is stone
+#        P is spike
+#        B is a breakable wall
+#        R is a turret
+#        T is a block that stops the timer
+#        W is a weapon chest
+#        D is door <- IMPORTANT, you need a door at the top and bottom to make the logic work
+
+{
+    "StartingRoom":
+        [0,
+        "SSSSSSSS",
+        "S      S",
+        "SW     S",
+        "SSSSSDDS"
+        ],
+
+    "EndingRoom":
+        [2,
+        "SSSDDSSS",
+        "S      S",
+        "S      S",
+        "SP    PS",
+        "P      P",
+        "SRRRRRRS"
+        ],
+
+    "Room01":
+        [2,
+        "SSDDSS",
+        "SF   S",
+        "S    S",
+        "SS   S",
+        "S    S",
+        "S   SS",
+        "S    S",
+        "S S SS",
+        "S    S",
+        "S    S",
+        "SSDDSS"
+        ],
+
+    "Room02":
+        [1,
+        "SSSSSSSSSDDS",
+        "P          P",
+        "P      WS  P",
+        "SSDDSSSSSSSS"
+        ],
+
+    "Room03":
+        [0,
+        "SSDDSSSSSSSS",
+        "S          P",
+        "S     B    P",
+        "SSSSSSSSSDDS"
+        ],
+
+    "Room04":
+        [0,
+        "SSDDSSSSSSSSSSSSS",
+        "S               S",
+        "ST              S",
+        "S     SSSSSSS   S",
+        "S      S   S    S",
+        "S    S T S      S",
+        "SSSSSSSSSSSSSDDSS"
+        ],
+
+    "Room05":
+        [1,
+        "SSSSSSSSSSSSSSSDDS",
+        "S                S",
+        "S                S",
+        "S                S",
+        "S   SSSSSSSSP  SSS",
+        "S    S   S   S   S",
+        "S  B   B   B     S",
+        "SDDSSSSSSSSSSSSSSS"
+        ],
+
+    "Room06":
+        [0,
+        "SSDDSSSSSSSS",
+        "S          S",
+        "S      B   S",
+        "S  G  BB   S",
+        "SSSSSSSSDDSS"
+        ],
+
+    "Room07":
+        [2,
+        "SSDDSS",
+        "S    S",
+        "S    S",
+        "S    S",
+        "S    S",
+        "ST  TS",
+        "S    S",
+        "S BBBS",
+        "S    S",
+        "SBBB S",
+        "S    S",
+        "S    S",
+        "SSDDSS"
+        ],
+
+    "Room08":
+        [1,
+        "SSSSSSSSSSSDDSSS",
+        "S       T      S",
+        "S   B          S",
+        "SS  BB         S",
+        "SSDDSSSSSSSSSSSS"
+        ],
+
+    "Room09":
+        [0,
+        "SSDDSSSSSSSS",
+        "ST  T      S",
+        "S         WS",
+        "SSSSSSDDSSSS"
+        ],
+
+    "Room10":
+        [0,
+        "SSSSDDSSSSSSSS",
+        "S  B        TS",
+        "S  B      B  S",
+        "SW     G BB  S",
+        "SSPPSSSSSSSDDS"
+        ],
+
+    "Room11":
+        [0,
+        "SSDDSSSSSSSS",
+        "SF         S",
+        "S          S",
+        "SPSSSPPSDDSS"
+        ]
+}

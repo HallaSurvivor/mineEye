@@ -11,6 +11,7 @@ This larger room, comprised of a semi-random selection of the rooms inside room_
 is what makes up the Hero's world. The semi-random generation takes place inside gamestates.py
 """
 import random
+import json
 import logging
 from math import hypot
 import pygame
@@ -25,118 +26,10 @@ MoveRight = 0
 MoveLeft = 1
 MoveDown = 2
 
-room_dict = {
-    # A dictionary of all the rooms to randomly select from.
-    # Each entry takes the form:
-    # ROOM_NAME: [PrimaryPlayerMotion, *room_layout]
-    # StartingRoom and EndingRoom must exist somewhere
-    "StartingRoom": [MoveRight,
-                     "SSSSSSSS",
-                     "S      S",
-                     "SW     S",
-                     "SSSSSDDS"
-    ],
-    "EndingRoom": [MoveDown,
-                   "SSSDDSSS",
-                   "S      S",
-                   "S      S",
-                   "SP    PS",
-                   "P      P",
-                   "SRRRRRRS"
-    ],
-    "Room01": [MoveDown,
-               "SSDDSS",
-               "SF   S",
-               "S    S",
-               "SS   S",
-               "S    S",
-               "S   SS",
-               "S    S",
-               "S S SS",
-               "S    S",
-               "S    S",
-               "SSDDSS"
-    ],
-    "Room02": [MoveLeft,
-               "SSSSSSSSSDDS",
-               "P          P",
-               "P      WS  P",
-               "SSDDSSSSSSSS",
-    ],
-    "Room03": [MoveRight,
-               "SSDDSSSSSSSS",
-               "S          P",
-               "S     B    P",
-               "SSSSSSSSSDDS",
-    ],
-    "Room04": [MoveRight,
-               "SSDDSSSSSSSSSSSSS",
-               "S               S",
-               "ST              S",
-               "S     SSSSSSS   S",
-               "S      S   S    S",
-               "S    S T S      S",
-               "SSSSSSSSSSSSSDDSS"
-    ],
-    "Room05": [MoveLeft,
-                "SSSSSSSSSSSSSSSDDS",
-                "S                S",
-                "S                S",
-                "S                S",
-                "S   SSSSSSSSP  SSS",
-                "S    S   S   S   S",
-                "S  B   B   B     S",
-                "SDDSSSSSSSSSSSSSSS"
-    ],
-    "Room06": [MoveRight,
-               "SSDDSSSSSSSS",
-               "S          S",
-               "S      B   S",
-               "S  G  BB   S",
-               "SSSSSSSSDDSS"
-    ],
-    "Room07": [MoveDown,
-               "SSDDSS",
-               "S    S",
-               "S    S",
-               "S    S",
-               "S    S",
-               "ST  TS",
-               "S    S",
-               "S BBBS",
-               "S    S",
-               "SBBB S",
-               "S    S",
-               "S    S",
-               "SSDDSS"
-    ],
-    "Room08": [MoveLeft,
-               "SSSSSSSSSSSDDSSS",
-               "S       T      S",
-               "S   B          S",
-               "SS  BB         S",
-               "SSDDSSSSSSSSSSSS"
-
-    ],
-    "Room09": [MoveRight,
-                "SSDDSSSSSSSS",
-                "ST  T      S",
-                "S         WS",
-                "SSSSSSDDSSSS"
-    ],
-    "Room10": [MoveRight,
-                "SSSSDDSSSSSSSS",
-                "S  B        TS",
-                "S  B      B  S",
-                "SW     G BB  S",
-                "SSPPSSSSSSSDDS"
-    ],
-    "Room11": [MoveRight,
-               "SSDDSSSSSSSS",
-               "SF         S",
-               "S          S",
-               "SPSSSPPSDDSS"]
-}
+with open('room_options.txt', 'r') as raw_room_string:
+    room_string = "".join([line.replace("\n", " ") for line in raw_room_string if not line.startswith("#")])
+    module_logger.debug(room_string)
+    room_dict = json.loads(room_string)
 
 
 class Wall(h.Sprite):
