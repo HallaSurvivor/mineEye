@@ -491,6 +491,8 @@ class ChooseReplay(Menu):
     title = 'Choose Replay'
     options = ['Enter']
 
+    show_back_button = False
+
     def __init__(self):
         super().__init__()
         self.replay_location = ""
@@ -500,7 +502,8 @@ class ChooseReplay(Menu):
         p = PathGetter.get()
         seed = str(p)[str(p).find('seed ') + 5:-5]  # 5 ahead of 'seed ' to compensate for letters,
                                                     # -5 to compensate for .txt
-        self.manager.go_to(InGame(seed=int(seed), replay_location=p))
+        if p:
+            self.manager.go_to(InGame(seed=int(seed), replay_location=p))
 
 
 class ChooseHero(Menu):
