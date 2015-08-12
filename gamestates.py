@@ -654,7 +654,7 @@ class InGame(GameState):
 
     musicfile = 'Pathetique.mp3'
 
-    def __init__(self, seed, chosen_hero=hero.Hero(), replay_location=None):
+    def __init__(self, seed, chosen_hero=None, replay_location=None):
         """
         Instantiate the primary Game State.
 
@@ -668,7 +668,10 @@ class InGame(GameState):
         self.manager = None
 
         self.seed = seed
-        self.hero = chosen_hero
+        if chosen_hero:
+            self.hero = chosen_hero
+        else:
+            self.hero = hero.Hero()
 
         self.tick_count = 0
         self.start_time = time.strftime('%a %d %b %Y - %H %M %S')
@@ -1029,7 +1032,7 @@ class InGame(GameState):
                         self.logger.info('God Mode Activated')
                     else:
                         self.logger.debug('Go to PauseScreen')
-                        self.manager.go_to(PauseScreen(chosen_hero=type(self.hero), timer=self.timer, seed=self.seed))
+                        self.manager.go_to(PauseScreen(self.seed))
 
             elif event.type == pygame.KEYUP:
                 # Cancel the motion by adding the opposite of the keydown situation
@@ -1445,12 +1448,10 @@ class PauseScreen(Menu):
 
     show_back_button = False
 
-    def __init__(self, timer, chosen_hero, seed):
+    def __init__(self, seed):
         super().__init__()
-        self.timer = timer
-        self.chosen_hero = chosen_hero
         self.seed = seed
-        self.selections = ['go back', InGame(timer=self.timer, chosen_hero=self.chosen_hero, seed=self.seed), TitleScreen()]
+        self.selections = ['go back', InGame(self.seed), TitleScreen()]
 
     def extra_draw(self, screen):
         """
