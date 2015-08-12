@@ -17,80 +17,35 @@ module_logger = logging.getLogger('mineEye.hero')
 
 class Hero(pygame.sprite.Sprite):
     """
-    A superclass to be inherited by all the possible Heroes that the user can control.
+    A class representing the Hero that the user controls.
 
     all of the base stats can be modified by items, and so are recreated as actual
     values inside of __init__()
 
-    name:
-        the name of the hero to be displayed on screen during hero selection
-
-    description:
-        a description of the hero to be displayed during hero selection
-
-    base_hp:
-        the base health of the hero
-
-    base_damage_multiplier:
-        the amount by which to multiply a weapon's power when used
-
-    base_speed:
-        the base left/right speed of the hero
-
-    base_jump_height:
-        the base upward speed of the hero
-
-    base_double_jump_height:
-        the base upward speed for the second jump for those heroes who can
-
-    base_bomb_refill_requirement:
-        the base value for how many enemies need to be killed before
-        the hero recovers a bomb
-
-    self.image:
-        the pygame Sprite associated with the Hero, should be 48x48
-
-    self.world:
-        the world in which the hero is placed
-
-    self.hp:
-        the current health of the hero
-
-    self.can_doublejump:
-        True if the hero can doublejump.
-        False by default
-
-    self.can_take_falldamage:
-        False if the hero never takes fall damage.
-        True by default
-
-    self.rect:
-        the Hero's bounding box
-        .rect.y is the box's top left corner's y position
-        .rect.x is the box's top left corner's x position
-
     Thanks to those at programarcadegames.com for the basis of this code.
     """
 
-    name = ""
-    description = ""
+    name = 'Hero'
 
-    base_hp = 500
-    base_damage_multiplier = 1
-    base_speed = 7
-    base_jump_height = 12
+    base_hp = 250
+    base_speed = 10
+    base_jump_height = 15
     base_double_jump_height = 0
-    base_bomb_refill_requirement = 4
+
+    max_bombs = 3  # number of bombs in clip
+
+    melee_damage_multiplier = 1
+    ranged_damage_multiplier = 1
+
+    melee_range_multiplier = 1
+
+    base_bomb_refill_requirement = 4  # number of kills before being given another bomb
 
     can_doublejump = False
-
-    can_take_falldamage = True
-
-    bomb_control = False
-    base_bomb_count = 3
+    take_falldamage = True
 
     multiple_weapon_drops = False
-    weapon_pickup_range = 192
+    weapon_pickup_range = 48
 
     melee_weapon = None
     ranged_weapon = None
@@ -105,16 +60,13 @@ class Hero(pygame.sprite.Sprite):
 
         self.logger = logging.getLogger('mineEye.hero.Hero')
 
-        # Mutable variables that items, etc. can change
+        # Mutable variables that can change but may need to be reset
         self.hp = self.base_hp
-        self.actual_damage_multiplier = self.base_damage_multiplier
         self.actual_speed = self.base_speed
         self.jump_height = self.base_jump_height
         self.double_jump_height = self.base_double_jump_height
-        self.take_falldamage = self.can_take_falldamage
 
-        self.max_bombs = self.base_bomb_count
-        self.bombs = self.base_bomb_count
+        self.bombs = self.max_bombs
         self.bomb_refill_counter = 0
         self.bomb_refill_requirement = self.base_bomb_refill_requirement
 
@@ -317,64 +269,3 @@ class Hero(pygame.sprite.Sprite):
 
         self.logger.debug('Nearest node to hero: {node}'.format(node=nearest_node))
         return nearest_node
-
-
-class Demo(Hero):
-    """
-    A demolition expert with control over bombs.
-    """
-
-    name = "Demo"
-    description = "A demolition expert with control over bombs."
-
-    bomb_control = True
-    base_bomb_count = 5
-
-    def __init__(self):
-        super().__init__()
-
-        self.logger = logging.getLogger('mineEye.hero.Demo')
-        self.reset_all()
-
-
-class Jumpy(Hero):
-    """
-    A hero with double jump abilities. Doesn't take fall damage
-    """
-
-    name = "Jumpy"
-    description = "A hero with double jump abilities. Doesn't take fall damage"
-
-    base_jump_height = 15
-    base_double_jump_height = 15
-
-    can_doublejump = True
-    can_take_falldamage = False
-
-    def __init__(self):
-        super().__init__()
-
-        self.logger = logging.getLogger('mineEye.hero.Jumpy')
-        self.reset_all()
-
-
-class Speedy(Hero):
-    """
-    A fast hero with low health.
-    """
-
-    name = "Speedy"
-    description = "A fast hero with low health"
-
-    base_hp = 250
-    base_speed = 10
-    base_jump_height = 15
-
-    def __init__(self):
-        super().__init__()
-
-        self.logger = logging.getLogger('mineEye.hero.Speedy')
-        self.reset_all()
-
-
-hero_list = [Demo, Jumpy, Speedy]

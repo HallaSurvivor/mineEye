@@ -356,7 +356,7 @@ class TitleScreen(Menu):
 
     def __init__(self):
         super().__init__()
-        self.selections = [InGame(seed=random.randint(0, 1000000000)), PlayerMaps(), ChooseReplay(), ChangeSettings(), Quit()]
+        self.selections = [InGame(seed=h.generate_seed()), PlayerMaps(), ChooseReplay(), ChangeSettings(), Quit()]
 
 
 class PlayerMaps(Menu):
@@ -508,31 +508,6 @@ class ChooseReplay(Menu):
             self.manager.go_to(InGame(seed=int(seed), replay_location=p))
 
 
-class ChooseHero(Menu):
-    """
-    A game state for choosing a hero to play as.
-    """
-
-    title = 'Choose a Hero!'
-    options = [player.name for player in hero.hero_list]
-    descriptions = [player.description for player in hero.hero_list]
-
-    def __init__(self, timer=True, seed=None):
-        super().__init__()
-
-        self.logger = logging.getLogger('mineEye.gamestates.ChooseHero')
-
-        self.timer = timer
-        if seed is None:
-            self.seed = random.randint(0, 1000000000)
-            self.logger.info('Random Seed: {0}'.format(self.seed))
-        else:
-            self.seed = int(seed)
-            self.logger.info('PreSelected Seed: {0}'.format(self.seed))
-
-        self.selections = [InGame(timer=self.timer, chosen_hero=player, seed=self.seed) for player in hero.hero_list]
-
-
 class ChangeSettings(Menu):
     """
     A game state for changing local variables like PLAY_MUSIC.
@@ -679,7 +654,7 @@ class InGame(GameState):
 
     musicfile = 'Pathetique.mp3'
 
-    def __init__(self, seed, timer=True, chosen_hero=hero.Speedy, replay_location=None):
+    def __init__(self, seed, chosen_hero=hero.Hero(), replay_location=None):
         """
         Instantiate the primary Game State.
 
@@ -689,10 +664,22 @@ class InGame(GameState):
         """
 
         super().__init__()
-
         self.logger = logging.getLogger('mineEye.gamestates.InGame')
-
         self.manager = None
+
+        self.seed = seed
+        self.hero = chosen_hero
+
+        self.tick_count = 0
+        self.start_time = time.strftime('%a %d %b %Y - %H %M %S')
+
+        self.world = None
+
+        self.timer = True
+        self.elapsed_time = 0
+
+        self.left_pressed = False
+        self.right_pressed = False
 
         if replay_location:
             self.replay = True
@@ -704,22 +691,6 @@ class InGame(GameState):
                 self.replay_list = [line for line in somefile]
 
         self.event_list = []
-
-        self.seed = seed
-
-        self.tick_count = 0
-        self.start_time = time.strftime('%a %d %b %Y - %H %M %S')
-
-        self.all_sprites_list = pygame.sprite.Group()
-        self.hero = chosen_hero()
-
-        self.world = None
-
-        self.timer = timer
-        self.elapsed_time = 0
-
-        self.left_pressed = False
-        self.right_pressed = False
 
     def enter_world(self):
         """
@@ -1132,11 +1103,11 @@ class InGame(GameState):
 
     def die(self):
         self.manager.replay = False
-        self.manager.go_to(DeathScreen(self.timer, type(self.hero), self.seed))
+        self.manager.go_to(DeathScreen(self.seed))
 
     def win(self):
         self.manager.replay = False
-        self.manager.go_to(WinScreen(self.timer, type(self.hero), self.seed, self.elapsed_time))
+        self.manager.go_to(WinScreen(self.seed, self.elapsed_time))
 
     def create_world(self, n):
         """
@@ -1391,19 +1362,16 @@ class DeathScreen(Menu):
 
     show_back_button = False
 
-    def __init__(self, timer, chosen_hero, seed):
+    def __init__(self, seed):
         super().__init__()
         self.manager = None
         self.seed = seed
-        self.timer = timer
-        self.chosen_hero = chosen_hero
 
-        self.selections = [InGame(timer=self.timer, chosen_hero=self.chosen_hero, seed=self.seed),
+        self.selections = [InGame(seed=self.seed),
                            "seed: {0}".format(self.seed),
-                           ChooseHero(),
+                           InGame(seed=h.generate_seed()),
                            TitleScreen()
         ]
-
 
     def extra_draw(self, screen):
         seed_text = h.load_font("luximb.ttf", 16).render(
@@ -1428,17 +1396,15 @@ class WinScreen(Menu):
     options = ["Retry", "Save Seed[WIP]", "Generate New World", "Quit"]
     show_back_button = False
 
-    def __init__(self, timer, chosen_hero, seed, elapsed_time):
+    def __init__(self, seed, elapsed_time):
         super().__init__()
         self.manager = None
         self.seed = seed
         self.elapsed_time = elapsed_time
-        self.timer = timer
-        self.chosen_hero = chosen_hero
 
-        self.selections = [InGame(timer=self.timer, chosen_hero=self.chosen_hero, seed=self.seed),
+        self.selections = [InGame(seed=self.seed),
                            "seed: {0}".format(self.seed),
-                           ChooseHero(),
+                           InGame(seed=h.generate_seed()),
                            TitleScreen()
         ]
 

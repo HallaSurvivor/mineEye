@@ -3,6 +3,7 @@ Exports a variety of helper functions to cut down on repetitive code.
 """
 import os
 import time
+import random
 import logging
 import heapq
 import pygame
@@ -333,3 +334,12 @@ def time_decorator(function):
         return result
 
     return timed
+
+
+def generate_seed():
+    """
+    Generate a random seed to be used in worldgen
+
+    :return: random integer
+    """
+    return random.randint(0, 100000000000)
