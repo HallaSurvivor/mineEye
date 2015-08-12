@@ -470,9 +470,6 @@ class World:
 
         Destroy breakable walls
         Damage enemies
-        If the hero doesn't have bomb_control:
-            Destroy chests
-            Damage the Hero
         """
         for bomb in self.bomb_list:
             hit_list = pygame.sprite.spritecollide(bomb, self.block_list, False)
@@ -488,24 +485,13 @@ class World:
                     distance = hypot(e.rect.centerx - bomb.rect.centerx, e.rect.centery - bomb.rect.centery)
                     if distance < bomb.radius:
                         self.logger.info('damaged {0} with bomb'.format(e))
-                        if not hero.bomb_control:
-                            e.damage(100)
-                        else:
-                            e.damage(150)
+                        e.damage(100)
 
                 for chest in self.chest_list:
                     distance = hypot(chest.rect.centerx - bomb.rect.centerx, chest.rect.centery - bomb.rect.centery)
                     if distance < bomb.radius:
-                        if not hero.bomb_control:
-                            self.logger.info('destroyed chest at {0} with bomb'.format((chest.rect.x, chest.rect.y)))
-                            chest.kill()
-
-                hero_distance = hypot(hero.rect.centerx - bomb.rect.centerx, hero.rect.centery - bomb.rect.centery)
-                if hero_distance < bomb.radius:
-                    if not hero.bomb_control:
-                        self.logger.info('damaged self with bomb')
-                        self.logger.info('damaged self with bomb')
-                        hero.damage(25)
+                        self.logger.info('destroyed chest at {0} with bomb'.format((chest.rect.x, chest.rect.y)))
+                        chest.kill()
 
                 bomb.kill()
 
