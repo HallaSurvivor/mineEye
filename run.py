@@ -111,6 +111,7 @@ while not manager.done:
     else:
         logger.debug('replay event', manager.state.tick_count, manager.state.event_list)
         manager.state.handle_events(manager.state.event_list)
+
     manager.state.update()
     manager.state.draw(screen)
 

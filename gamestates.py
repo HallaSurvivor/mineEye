@@ -247,6 +247,7 @@ class Menu(GameState):
 
         if self.selections is not None:
             if type(self.selections[self.selected]) == str:
+
                 # if it's a back button
                 if self.selections[self.selected] == 'go back':
                     self.manager.go_back()
@@ -277,6 +278,7 @@ class Menu(GameState):
                     f = open('settings', 'wb')
                     f.write(pickle.dumps(settings))
                     f.close()
+
             elif type(self.selections[self.selected]) == tuple:
                 # if it's a screen resolution
                 settings['SCREEN_RESOLUTION'] = self.selections[self.selected]
@@ -584,7 +586,6 @@ class ChangeBinds(Menu):
             # numbers
             pygame.K_0, pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4, pygame.K_5, pygame.K_6,
             pygame.K_7, pygame.K_8, pygame.K_9
-
         ]
 
         for e in events:
@@ -600,8 +601,14 @@ class ChangeBinds(Menu):
                         self.manager.go_back()
                     elif e.key == pygame.K_SPACE or e.key == settings['RIGHT'] or \
                             e.key == pygame.K_RIGHT or e.key == pygame.K_RETURN:
-                        self.options[self.selected] = ">" + self.options[self.selected] + "<"
-                        self.modifying = True
+                        if self.selected == len(self.options) + 1:
+                            self.manager.go_back()
+                        else:
+                            try:
+                                self.options[self.selected] = ">" + self.options[self.selected] + "<"
+                                self.modifying = True
+                            except IndexError:
+                                self.manager.go_back()
 
                 else:  # If we are modifying a bind
                     if e.key == pygame.K_ESCAPE or e.key == pygame.K_RETURN or e.key == pygame.K_LEFT:
@@ -611,18 +618,21 @@ class ChangeBinds(Menu):
                     else:
                         if e.key in valid_options:
                             # If the key is not already bound
-                            if e.key not in [settings[selection] for selection in self.selections]:
+                            if e.key not in [settings[selection] for selection in self.selections if selection != 'go back']:
                                 settings[self.selections[self.selected]] = e.key
 
                             else:  # If the key is already bound, pick a random key and bind it to the old option
                                 for selection in self.selections:
-                                    if settings[selection] == e.key:
-                                        # Get a list of all the unbound, legal, keys
-                                        unbound = [key for key in valid_options if key not in
-                                                   [settings[selection] for selection in self.selections]]
+                                    try:
+                                        if settings[selection] == e.key:
+                                            # Get a list of all the unbound, legal, keys
+                                            unbound = [key for key in valid_options if key not in
+                                                       [settings[selection] for selection in self.selections if selection != 'go back']]
 
-                                        new_key = random.choice(unbound)
-                                        settings[selection] = new_key
+                                            new_key = random.choice(unbound)
+                                            settings[selection] = new_key
+                                    except KeyError: # 'go back'
+                                        pass
 
                                 settings[self.selections[self.selected]] = e.key
 
@@ -632,8 +642,23 @@ class ChangeBinds(Menu):
                             f = open('settings', 'wb')
                             f.write(pickle.dumps(settings))
                             f.close()
-            else:
-                pass
+
+            if not self.modifying:
+                if e.type == pygame.MOUSEMOTION:
+                    pos = e.pos
+                    for index, rect in enumerate(self.rect_list):
+                        if rect.collidepoint(pos):
+                            self.selected = index
+
+                elif e.type == pygame.MOUSEBUTTONDOWN and e.button == 1:
+                    pos = e.pos
+                    for index, rect in enumerate(self.rect_list):
+                        if rect.collidepoint(pos):
+                            try:
+                                self.options[self.selected] = ">" + self.options[self.selected] + "<"
+                                self.modifying = True
+                            except IndexError:
+                                self.manager.go_back()
 
 
 class InGame(GameState):
