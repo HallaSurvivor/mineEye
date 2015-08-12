@@ -739,6 +739,7 @@ class InGame(GameState):
         If the timer ends, go to WinScreen.
         :param screen: The screen on which to draw
         """
+
         # Draw the HP Bar
         hp_background = pygame.Surface((int(c.HP_BAR_WIDTH*settings['WIDTH']), int(c.HP_BAR_HEIGHT*settings['HEIGHT'])))
         hp_background.fill(c.BLACK)
