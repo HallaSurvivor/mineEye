@@ -918,18 +918,64 @@ class InGame(GameState):
 
         :param events: a list of pygame events, get via pygame.event.get()
         """
+
         self.tick_count += 1
+
+    ########Logging Aliases########
         if not self.replay:
             file_name = "{time} - seed {seed}.txt".format(time=self.start_time, seed=self.seed)
             f = open(os.path.join("replays", file_name), 'a')
+
+            def log_down(key):
+                self.logger.debug('pressed [{key}]'.format(key=key.upper()))
+                f.write('{tick} KeyDown {key}\n'.format(tick=self.tick_count, key=key))
+
+            def log_up(key):
+                self.logger.debug('released [{key}]'.format(key=key.upper()))
+                f.write('{tick} KeyUp {key}\n'.format(tick=self.tick_count, key=key))
+
+            def log_m1down(pos):
+                self.logger.debug('[Left Click Down] at {0}'.format(pos))
+                f.write('{tick} Mouse1Down {pos}\n'.format(tick=self.tick_count, pos=pos))
+
+            def log_m1up(pos):
+                self.logger.debug('[Left Click Up] at {0}'.format(pos))
+                f.write('{tick} Mouse1Up {pos}\n'.format(tick=self.tick_count, pos=pos))
+
+            def log_m2down(pos):
+                self.logger.debug('[Right Click Down] at {0}'.format(pos))
+                f.write('{tick} Mouse2Down {pos}\n'.format(tick=self.tick_count, pos=pos))
+
+            def log_m2up(pos):
+                self.logger.debug('[Right Click Up] at {0}'.format(pos))
+                f.write('{tick} Mouse2Up {pos}\n'.format(tick=self.tick_count, pos=pos))
+
+        else:
+            def log_down(key):
+                self.logger.debug('replay pressed [{key}]'.format(key=key.upper()))
+
+            def log_up(key):
+                self.logger.debug('replay released [{key}]'.format(key=key.upper()))
+
+            def log_m1down(pos):
+                self.logger.debug('replay pressed Left Click at {0}'.format(pos))
+
+            def log_m1up(pos):
+                self.logger.debug('replay released Left Click at {0}'.format(pos))
+
+            def log_m2down(pos):
+                self.logger.debug('replay pressed Right Click at {0}'.format(pos))
+
+            def log_m2up(pos):
+                self.logger.debug('replay released Right Click at {0}'.format(pos))
+    #######END LOGGING ALIASES########
+
         for event in events:
             if event.type == pygame.KEYDOWN:
                 if event.key == settings['LEFT']:
-                    if not self.replay:
-                        f.write('{tick} KeyDown Left\n'.format(tick=self.tick_count))
+                    log_down('Left')
 
                     self.left_pressed = True
-                    self.logger.debug('pressed [LEFT]')
 
                     if self.hero.moving_right:
                         self.world.changespeed(self.hero.actual_speed, 0)
@@ -940,11 +986,9 @@ class InGame(GameState):
                     self.hero.last_motion = 'left'
 
                 elif event.key == settings['RIGHT']:
-                    if not self.replay:
-                        f.write('{tick} KeyDown Right\n'.format(tick=self.tick_count))
+                    log_down('Right')
 
                     self.right_pressed = True
-                    self.logger.debug('pressed [RIGHT]')
 
                     if self.hero.moving_left:
                         self.world.changespeed(-self.hero.actual_speed, 0)
@@ -955,13 +999,10 @@ class InGame(GameState):
                     self.hero.last_motion = 'right'
 
                 elif event.key == settings['UP']:
-                    if not self.replay:
-                        f.write('{tick} KeyDown Up\n'.format(tick=self.tick_count))
+                    log_down('Up')
 
-                    self.logger.debug('pressed [UP]')
                     if not self.hero.jumping:
-
-                        # If the hero is on a platform:
+                        # Check if the hero is on a platform:
                         self.hero.rect.y += 2
                         hit_list = pygame.sprite.spritecollide(self.hero, self.world.block_list, False)
                         self.hero.rect.y -= 2
@@ -978,10 +1019,7 @@ class InGame(GameState):
                             self.hero.start_double_jump = True
 
                 elif event.key == settings['BOMB']:
-                    if not self.replay:
-                        f.write('{tick} KeyDown Bomb\n'.format(tick=self.tick_count))
-
-                    self.logger.debug('pressed [BOMB]')
+                    log_down('Bomb')
 
                     if self.hero.bombs > 0:
                         bomb = self.hero.drop_bomb()
@@ -989,10 +1027,7 @@ class InGame(GameState):
                         self.world.all_sprites.add(bomb)
 
                 elif event.key == settings['DOWN']:
-                    if not self.replay:
-                        f.write('{tick} KeyDown Down\n'.format(tick=self.tick_count))
-
-                    self.logger.debug('pressed [DOWN]')
+                    log_down('Down')
 
                     for drop in self.world.drops_list:
                         if drop.is_weapon:
@@ -1030,11 +1065,9 @@ class InGame(GameState):
             elif event.type == pygame.KEYUP:
                 # Cancel the motion by adding the opposite of the keydown situation
                 if event.key == settings['LEFT']:
-                    if not self.replay:
-                        f.write('{tick} KeyUp Left\n'.format(tick=self.tick_count))
+                    log_up('Left')
 
                     self.left_pressed = False
-                    self.logger.debug('released [LEFT]')
 
                     if self.hero.moving_left:
                         self.world.changespeed(-self.hero.actual_speed, 0)
@@ -1046,11 +1079,9 @@ class InGame(GameState):
                         self.hero.last_motion = 'right'
 
                 elif event.key == settings['RIGHT']:
-                    if not self.replay:
-                        f.write('{tick} KeyUp Right\n'.format(tick=self.tick_count))
+                    log_up('Right')
 
                     self.right_pressed = False
-                    self.logger.debug('released [RIGHT]')
 
                     if self.hero.moving_right:
                         self.world.changespeed(self.hero.actual_speed, 0)
@@ -1062,47 +1093,40 @@ class InGame(GameState):
                         self.hero.last_motion = 'left'
 
                 elif event.key == settings['UP']:
-                    if not self.replay:
-                        f.write('{tick} KeyUp Up\n'.format(tick=self.tick_count))
-                    self.logger.debug('released [UP]')
+                    log_up('Up')
 
                 elif event.key == settings['DOWN']:
-                    if not self.replay:
-                        f.write('{tick} KeyUp Down\n'.format(tick=self.tick_count))
-                    self.logger.debug('released [DOWN]')
+                    log_up('Down')
 
                 elif event.key == settings['BOMB']:
-                    if not self.replay:
-                        f.write('{tick} KeyUp Bomb\n'.format(tick=self.tick_count))
-                    self.logger.debug('released [BOMB]')
+                    log_up('Bomb')
 
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:  # Left Click
-                    if not self.replay:
-                        f.write('{tick} Mouse1Down {pos}\n'.format(tick=self.tick_count, pos=event.pos))
-
-                    self.logger.debug('[Left Click Down] at {0}'.format(event.pos))
-
+                    log_m1down(event.pos)
                     if self.hero.melee_weapon is not None:
                         for e in self.world.enemy_list:
                             dist = hypot(e.rect.centerx - self.hero.rect.centerx,
                                          e.rect.centery - self.hero.rect.centery)
                             if dist <= self.hero.melee_weapon.range:
                                 e.damage(self.hero.melee_weapon.power * self.hero.actual_damage_multiplier)
+
                 elif event.button == 3:  # Right Click
-                    self.logger.debug('[Right Click] at {0}'.format(event.pos))
+                    log_m2down(event.pos)
 
             elif event.type == pygame.MOUSEBUTTONUP:
                 if event.button == 1:
-                    if not self.replay:
-                        f.write('{tick} Mouse1Up {pos}\n'.format(tick=self.tick_count, pos=event.pos))
-                    self.logger.debug('[Left Click Up] at {0}'.format(event.pos))
+                    log_m1up(event.pos)
+
+                elif event.button == 3:
+                    log_m2up(event.pos)
 
             else:
                 pass
 
         if self.manager.replay:
             self.event_list.clear()
+
         if not self.replay:
             f.close()
 
