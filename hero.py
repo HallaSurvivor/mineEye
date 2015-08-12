@@ -54,6 +54,7 @@ class Hero(pygame.sprite.Sprite):
         """
         create the class, and create local variables based on the base variables that can be modified.
         """
+
         super().__init__()
 
         self.world = None
@@ -81,9 +82,6 @@ class Hero(pygame.sprite.Sprite):
         self.moving_left = False
         self.moving_right = False
         self.last_motion = 'right'
-
-        # A timer variable to control when it's running
-        self.run_timer = True
 
         # Sprite and PygAnim stuff
         self.animation_obj = {}

@@ -675,7 +675,6 @@ class InGame(GameState):
 
         self.world = None
 
-        self.timer = True
         self.elapsed_time = 0
 
         self.left_pressed = False
@@ -760,28 +759,27 @@ class InGame(GameState):
                         (c.RANGED_POS_X*settings['WIDTH'], c.RANGED_POS_Y*settings['HEIGHT']))
 
         # Draw the timer
-        if self.hero.run_timer:
-            if self.timer:
-                self.elapsed_time += 1
-                partials = self.elapsed_time % 60
-                seconds = ((self.elapsed_time - partials) // 60) % 60
-                minutes = (((self.elapsed_time - partials) // 60) - seconds) // 60
-                if len(str(partials)) != 2:
-                    partials = "0" + str(partials)
-                if len(str(seconds)) != 2:
-                    seconds = "0" + str(seconds)
-                if len(str(minutes)) != 2:
-                    minutes = "0" + str(minutes)
-                formatted_elapsed_time = "{minutes}:{seconds}:{partials}".format(minutes=minutes, seconds=seconds, partials=partials)
+        if self.world.run_timer:
+            self.elapsed_time += 1
+            partials = self.elapsed_time % 60
+            seconds = ((self.elapsed_time - partials) // 60) % 60
+            minutes = (((self.elapsed_time - partials) // 60) - seconds) // 60
+            if len(str(partials)) != 2:
+                partials = "0" + str(partials)
+            if len(str(seconds)) != 2:
+                seconds = "0" + str(seconds)
+            if len(str(minutes)) != 2:
+                minutes = "0" + str(minutes)
+            formatted_elapsed_time = "{minutes}:{seconds}:{partials}".format(minutes=minutes, seconds=seconds, partials=partials)
 
-                elapsed_time_display = h.load_font('luximb.ttf', 32).render(
-                    "{ElapsedTime}".format(ElapsedTime=formatted_elapsed_time), 1, c.WHITE
-                )
+            elapsed_time_display = h.load_font('luximb.ttf', 32).render(
+                "{ElapsedTime}".format(ElapsedTime=formatted_elapsed_time), 1, c.WHITE
+            )
 
-                elapsed_rect = elapsed_time_display.get_rect()
-                elapsed_rect.top = 0
-                elapsed_rect.right = settings['WIDTH']
-                screen.blit(elapsed_time_display, elapsed_rect)
+            elapsed_rect = elapsed_time_display.get_rect()
+            elapsed_rect.top = 0
+            elapsed_rect.right = settings['WIDTH']
+            screen.blit(elapsed_time_display, elapsed_rect)
 
     def draw_cursor(self, screen):
         """
@@ -854,7 +852,7 @@ class InGame(GameState):
             self.logger.debug('go to DeathScreen')
             self.die()
 
-        if not self.hero.run_timer:
+        if not self.world.run_timer:
             self.logger.info('Hero Won with time: {0}'.format(self.elapsed_time))
             self.logger.debug('go to WinScreen')
             self.win()

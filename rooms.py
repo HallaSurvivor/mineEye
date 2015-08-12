@@ -157,6 +157,8 @@ class World:
         self.seed = seed
         random.seed(self.seed)
 
+        self.run_timer = True
+
         self.all_sprites = pygame.sprite.Group()
         self.block_list = pygame.sprite.Group()
         self.chest_list = pygame.sprite.Group()
@@ -290,7 +292,7 @@ class World:
 
             # End the game timer if the block is the end
             if block.end_timer:
-                hero.run_timer = False
+                self.run_timer = False
 
     def _move_world_y(self, hero, y):
         """
@@ -345,7 +347,7 @@ class World:
 
             # End the game timer if the block is the end
             if block.end_timer:
-                hero.run_timer = False
+                self.run_timer = False
 
     def move_world(self, hero, x, y):
         """
