@@ -601,18 +601,15 @@ class ChangeBinds(Menu):
                         self.manager.go_back()
                     elif e.key == pygame.K_SPACE or e.key == settings['RIGHT'] or \
                             e.key == pygame.K_RIGHT or e.key == pygame.K_RETURN:
-                        if self.selected == len(self.options) + 1:
+                        try:
+                            self.options[self.selected] = ">" + self.options[self.selected] + "<"
+                            self.modifying = True
+                        except IndexError:  # 'go back' is not listed, and will throw an IndexError
                             self.manager.go_back()
-                        else:
-                            try:
-                                self.options[self.selected] = ">" + self.options[self.selected] + "<"
-                                self.modifying = True
-                            except IndexError:
-                                self.manager.go_back()
 
                 else:  # If we are modifying a bind
                     if e.key == pygame.K_ESCAPE or e.key == pygame.K_RETURN or e.key == pygame.K_LEFT:
-                        self.options[self.selected] = self.options[self.selected][1:-1]
+                        self.options[self.selected] = self.options[self.selected][1:-1]  # cut the > and <
                         self.modifying = False
 
                     else:
@@ -631,7 +628,7 @@ class ChangeBinds(Menu):
 
                                             new_key = random.choice(unbound)
                                             settings[selection] = new_key
-                                    except KeyError: # 'go back'
+                                    except KeyError:  # 'go back'
                                         pass
 
                                 settings[self.selections[self.selected]] = e.key
