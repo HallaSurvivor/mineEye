@@ -535,7 +535,10 @@ class ChangeBinds(Menu):
         super().__init__()
 
         self.modifying = False
-        self.descriptions = [pygame.key.name(settings[option]) for option in self.selections]
+        try:
+            self.descriptions = [pygame.key.name(settings[option]) for option in self.selections]
+        except KeyError: # go back
+            pass
 
     def handle_events(self, events):
         """
@@ -673,7 +676,7 @@ class InGame(GameState):
         else:
             self.hero = hero.Hero()
 
-        self.room_number = 3  # number of rooms to generate
+        self.room_number = 30  # number of rooms to generate
         self.loop_number = 5  # number of times you can loop
 
         self.loop_count = 0
