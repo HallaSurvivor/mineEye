@@ -99,13 +99,6 @@ while not manager.done:
         logger.info('pygame.QUIT - exiting program')
         manager.done = True
 
-    # if screen.get_flags() & pygame.FULLSCREEN != pygame.FULLSCREEN:
-    #     for event in pygame.event.get(pygame.VIDEORESIZE):
-    #         screen = pygame.display.set_mode(event.dict['size'], pygame.RESIZABLE)
-    #         settings['SCREEN_RESOLUTION'] = event.dict['size']
-    #         settings['WIDTH'] = event.dict['w']
-    #         settings['HEIGHT'] = event.dict['h']
-
     if not manager.replay:
         manager.state.handle_events(pygame.event.get())
     else:
