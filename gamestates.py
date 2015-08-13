@@ -999,7 +999,7 @@ class InGame(GameState):
                             dist = hypot(e.rect.centerx - self.hero.rect.centerx,
                                          e.rect.centery - self.hero.rect.centery)
                             if dist <= self.hero.melee_weapon.range:
-                                e.damage(self.hero.melee_weapon.power * self.hero.actual_damage_multiplier)
+                                e.damage(self.hero.melee_weapon.power * self.hero.melee_damage_multiplier)
 
                 elif event.button == 3:  # Right Click
                     log_m2down(event.pos)
