@@ -193,6 +193,7 @@ class World:
 
         :param hero: An instance of the Hero class to pass to self.move_world()
         """
+
         # Calculate the effect of gravity
         self.calc_gravity()
 
@@ -311,16 +312,17 @@ class World:
         # Check for block-hero collisions
         block_hit_list = pygame.sprite.spritecollide(hero, self.block_list, False)
         if len(block_hit_list) > 0:
+
+            if hero.take_falldamage:
+                damage = -self.yspeed - 25
+                if damage > 0:
+                    self.logger.info('hero took fall damage')
+                    hero.damage(damage)
+
             self.changespeed(0, -self.yspeed)
 
         for block in block_hit_list:
             old_y_pos = block.rect.y
-
-            if hero.take_falldamage:
-                damage = -self.yspeed - 50
-                if damage > 0:
-                    self.logger.info('hero took fall damage')
-                    hero.damage(damage)
 
             if y > 0:
                 block.rect.bottom = hero.rect.top
