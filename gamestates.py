@@ -868,6 +868,9 @@ class InGame(GameState):
         overwritten by the user inside of the Change Keybinds menu
         defined above as ChangeBinds()
 
+        The first bit of code is defining logging actions based on if
+        the user is playing, or if it's a replay.
+
         Pushing Keys:
             Left:
                 Move to the left
@@ -892,8 +895,6 @@ class InGame(GameState):
         """
 
         self.tick_count += 1
-
-    ########Logging Aliases########
         if not self.replay:
             file_name = "{time} - seed {seed}.txt".format(time=self.start_time, seed=self.seed)
             f = open(os.path.join("replays", file_name), 'a')
@@ -940,129 +941,42 @@ class InGame(GameState):
 
             def log_m2up(pos):
                 self.logger.debug('replay released Right Click at {0}'.format(pos))
-    #######END LOGGING ALIASES########
 
         for event in events:
             if event.type == pygame.KEYDOWN:
                 if event.key == settings['LEFT']:
                     log_down('Left')
-
-                    self.left_pressed = True
-
-                    if self.hero.moving_right:
-                        self.world.changespeed(self.hero.actual_speed, 0)
-                        self.hero.moving_right = False
-
-                    self.world.changespeed(self.hero.actual_speed, 0)
-                    self.hero.moving_left = True
-                    self.hero.last_motion = 'left'
+                    self.left_button_pressed()  # move left
 
                 elif event.key == settings['RIGHT']:
                     log_down('Right')
-
-                    self.right_pressed = True
-
-                    if self.hero.moving_left:
-                        self.world.changespeed(-self.hero.actual_speed, 0)
-                        self.hero.moving_left = False
-
-                    self.world.changespeed(-self.hero.actual_speed, 0)
-                    self.hero.moving_right = True
-                    self.hero.last_motion = 'right'
+                    self.right_button_pressed()  # move right
 
                 elif event.key == settings['UP']:
                     log_down('Up')
-
-                    if not self.hero.jumping:
-                        # Check if the hero is on a platform:
-                        self.hero.rect.y += 2
-                        hit_list = pygame.sprite.spritecollide(self.hero, self.world.block_list, False)
-                        self.hero.rect.y -= 2
-                        if len(hit_list) > 0:
-                            self.world.changespeed(0, self.hero.jump_height)
-                            self.hero.jumping = True
-                            self.hero.start_jump = True
-
-                    else:
-                        if self.hero.can_doublejump and not self.hero.double_jumping:
-                            self.world.setspeed(None, 0)
-                            self.world.changespeed(0, self.hero.double_jump_height)
-                            self.hero.double_jumping = True
-                            self.hero.start_double_jump = True
+                    self.up_button_pressed()  # jump/double jump
 
                 elif event.key == settings['BOMB']:
                     log_down('Bomb')
-
-                    if self.hero.bombs > 0:
-                        bomb = self.hero.drop_bomb()
-                        self.world.bomb_list.add(bomb)
-                        self.world.all_sprites.add(bomb)
+                    self.bomb_button_pressed()  # throw bomb
 
                 elif event.key == settings['DOWN']:
                     log_down('Down')
-
-                    for drop in self.world.drops_list:
-                        if drop.is_weapon:
-                            if hypot(drop.rect.centerx - self.hero.rect.centerx,
-                                     drop.rect.centery - self.hero.rect.centery) <= self.hero.weapon_pickup_range:
-
-                                if drop.drop.style == 0: # Melee
-                                    if self.hero.melee_weapon is not None:
-                                        self.logger.info('dropped old melee weapon ({0})'.format(self.hero.melee_weapon.name))
-                                        self.world.all_sprites.add(self.hero.melee_weapon.sprite)
-                                        self.world.drops_list.add(self.hero.melee_weapon.sprite)
-                                    self.logger.info('picked up new melee weapon ({0})'.format(drop.drop.name))
-                                    self.hero.melee_weapon = drop.drop
-
-                                elif drop.drop.style == 1: # Ranged
-                                    if self.hero.ranged_weapon is not None:
-                                        self.logger.info('dropped old ranged weapon ({0})'.format(self.hero.ranged_weapon.name))
-                                        self.world.all_sprites.add(self.hero.ranged_weapon.sprite)
-                                        self.world.drops_sprites.add(self.hero.ranged_weapon.sprite)
-                                    self.logger.info('picked up new ranged weapon ({0})'.format(drop.drop.name))
-                                    self.hero.ranged_weapon = drop.drop
-                                drop.kill()
+                    self.down_button_pressed()  # pick up weapons
 
                 # Enter pause menu
                 elif event.key == settings['PAUSE']:
                     self.logger.debug('pressed [PAUSE]')
-
-                    if settings['DEBUG'] and (pygame.key.get_mods() & pygame.KMOD_LSHIFT):
-                        settings['GOD MODE'] = True
-                        self.logger.info('God Mode Activated')
-                    else:
-                        self.logger.debug('Go to PauseScreen')
-                        self.manager.go_to(PauseScreen(self.seed))
+                    self.pause_button_pressed()  # Pause menu or GOD MODE
 
             elif event.type == pygame.KEYUP:
-                # Cancel the motion by adding the opposite of the keydown situation
                 if event.key == settings['LEFT']:
                     log_up('Left')
-
-                    self.left_pressed = False
-
-                    if self.hero.moving_left:
-                        self.world.changespeed(-self.hero.actual_speed, 0)
-                        self.hero.moving_left = False
-
-                    if self.right_pressed and not self.hero.moving_right:
-                        self.world.changespeed(-self.hero.actual_speed, 0)
-                        self.hero.moving_right = True
-                        self.hero.last_motion = 'right'
+                    self.left_button_released()  # stop moving left
 
                 elif event.key == settings['RIGHT']:
                     log_up('Right')
-
-                    self.right_pressed = False
-
-                    if self.hero.moving_right:
-                        self.world.changespeed(self.hero.actual_speed, 0)
-                        self.hero.moving_right = False
-
-                    if self.left_pressed and not self.hero.moving_left:
-                        self.world.changespeed(self.hero.actual_speed, 0)
-                        self.hero.moving_left = True
-                        self.hero.last_motion = 'left'
+                    self.right_button_released()  # stop moving right
 
                 elif event.key == settings['UP']:
                     log_up('Up')
@@ -1101,6 +1015,183 @@ class InGame(GameState):
 
         if not self.replay:
             f.close()
+
+    def up_button_pressed(self):
+        """
+        Called upon pressing the UP button
+
+        * Move down and back to see if the Hero is on a platform
+        * Jump
+        * Double Jump if possible
+        """
+        if not self.hero.jumping:
+            # Check if the hero is on a platform:
+            self.hero.rect.y += 2
+            hit_list = pygame.sprite.spritecollide(self.hero, self.world.block_list, False)
+            self.hero.rect.y -= 2
+
+            if len(hit_list) > 0:
+                self.world.changespeed(0, self.hero.jump_height)
+                self.hero.jumping = True
+                self.hero.start_jump = True
+
+        else:
+            if self.hero.can_doublejump and not self.hero.double_jumping:
+                self.world.setspeed(None, 0)
+                self.world.changespeed(0, self.hero.double_jump_height)
+                self.hero.double_jumping = True
+                self.hero.start_double_jump = True
+
+    def left_button_pressed(self):
+        """
+        Called upon pressing the LEFT button
+
+        The works for non-canceled movement.
+        i.e. pushing left while holding the right button,
+        if you release left, you'll instantly move right.
+
+        * Cancels motion right
+        * Stores motion left
+        * Causes motion left
+        """
+        self.left_pressed = True
+
+        if self.hero.moving_right:
+            self.world.changespeed(self.hero.actual_speed, 0)
+            self.hero.moving_right = False
+
+        self.world.changespeed(self.hero.actual_speed, 0)
+        self.hero.moving_left = True
+        self.hero.last_motion = 'left'
+
+    def left_button_released(self):
+        """
+        Called upon releasing the LEFT button
+
+        This is the brunt of the non-canceled
+        movement logic.
+
+        * Stop moving left
+        * If RIGHT is pressed, start moving right
+        """
+        self.left_pressed = False
+
+        if self.hero.moving_left:
+            self.world.changespeed(-self.hero.actual_speed, 0)
+            self.hero.moving_left = False
+
+        if self.right_pressed and not self.hero.moving_right:
+            self.world.changespeed(-self.hero.actual_speed, 0)
+            self.hero.moving_right = True
+            self.hero.last_motion = 'right'
+
+    def right_button_pressed(self):
+        """
+        Called upon pressing the RIGHT button
+
+        The works for non-canceled movement.
+        i.e. pushing left while holding the right button,
+        if you release left, you'll instantly move right.
+
+        * Cancels motion left
+        * Stores motion right
+        * Causes motion right
+        """
+
+        self.right_pressed = True
+
+        if self.hero.moving_left:
+            self.world.changespeed(-self.hero.actual_speed, 0)
+            self.hero.moving_left = False
+
+        self.world.changespeed(-self.hero.actual_speed, 0)
+        self.hero.moving_right = True
+        self.hero.last_motion = 'right'
+
+    def right_button_released(self):
+        """
+        Called upon releasing the RIGHT button
+
+        This is the brunt of the non-canceled
+        movement logic.
+
+        * Stop moving right
+        * If LEFT is pressed, start moving left
+        """
+        self.right_pressed = False
+
+        if self.hero.moving_right:
+            self.world.changespeed(self.hero.actual_speed, 0)
+            self.hero.moving_right = False
+
+        if self.left_pressed and not self.hero.moving_left:
+            self.world.changespeed(self.hero.actual_speed, 0)
+            self.hero.moving_left = True
+            self.hero.last_motion = 'left'
+
+    def down_button_pressed(self):
+        """
+        Called upon pressing the DOWN button
+
+        Pick up any weapon within the Hero's reach,
+        and drop any currently held weapon
+
+        """
+
+        for drop in self.world.drops_list:
+            if drop.is_weapon:
+                if hypot(drop.rect.centerx - self.hero.rect.centerx,
+                         drop.rect.centery - self.hero.rect.centery) <= self.hero.weapon_pickup_range:
+
+                    if drop.drop.style == 0: # Melee
+                        if self.hero.melee_weapon is not None:
+                            self.logger.info('dropped old melee weapon ({0})'.format(self.hero.melee_weapon.name))
+                            self.world.all_sprites.add(self.hero.melee_weapon.sprite)
+                            self.world.drops_list.add(self.hero.melee_weapon.sprite)
+                        self.logger.info('picked up new melee weapon ({0})'.format(drop.drop.name))
+                        self.hero.melee_weapon = drop.drop
+
+                    elif drop.drop.style == 1: # Ranged
+                        if self.hero.ranged_weapon is not None:
+                            self.logger.info('dropped old ranged weapon ({0})'.format(self.hero.ranged_weapon.name))
+                            self.world.all_sprites.add(self.hero.ranged_weapon.sprite)
+                            self.world.drops_sprites.add(self.hero.ranged_weapon.sprite)
+                        self.logger.info('picked up new ranged weapon ({0})'.format(drop.drop.name))
+                        self.hero.ranged_weapon = drop.drop
+                    drop.kill()
+
+    def bomb_button_pressed(self):
+        """
+        Called upon pressing the BOMB button
+
+        spawn a bomb
+        """
+
+        if self.hero.bombs > 0:
+            bomb = self.hero.drop_bomb()
+            self.world.bomb_list.add(bomb)
+            self.world.all_sprites.add(bomb)
+
+    def pause_button_pressed(self):
+        """
+        Called upon pressing the PAUSE button
+
+        Pauses the game, unless:
+        * debug mode is on (config.py)
+        * Left Shift is held
+
+        In which case GOD MODE is activated.
+            * Hero stops taking damage
+            * Hero can jump super high
+
+        This is for use in debugging things in game
+        """
+        if settings['DEBUG'] and (pygame.key.get_mods() & pygame.KMOD_LSHIFT):
+            settings['GOD MODE'] = True
+            self.logger.info('God Mode Activated')
+        else:
+            self.logger.debug('Go to PauseScreen')
+            self.manager.go_to(PauseScreen(self.seed))
 
     def die(self):
         self.manager.replay = False
