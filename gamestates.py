@@ -673,12 +673,16 @@ class InGame(GameState):
         else:
             self.hero = hero.Hero()
 
+        self.room_number = 30  # number of rooms to generate
+        self.loop_number = 5  # number of times you can loop
+
+        self.loop_count = 0
+        self.splits = []
+
         self.tick_count = 0
         self.start_time = time.strftime('%a %d %b %Y - %H %M %S')
 
         self.world = None
-
-        self.elapsed_time = 0
 
         self.left_pressed = False
         self.right_pressed = False
@@ -702,7 +706,7 @@ class InGame(GameState):
         multiple instances of GameState existing at once.
         """
         self.logger.info('--====NEW WORLD====--')
-        self.create_world(30)
+        self.create_world(self.room_number)
         self.hero.world = self.world
 
     def draw_hud(self, screen):
@@ -763,10 +767,10 @@ class InGame(GameState):
 
         # Draw the timer
         if self.world.run_timer:
-            self.elapsed_time += 1
-            partials = self.elapsed_time % 60
-            seconds = ((self.elapsed_time - partials) // 60) % 60
-            minutes = (((self.elapsed_time - partials) // 60) - seconds) // 60
+            partials = self.tick_count % 60
+            seconds = ((self.tick_count - partials) // 60) % 60
+            minutes = (((self.tick_count - partials) // 60) - seconds) // 60
+
             if len(str(partials)) != 2:
                 partials = "0" + str(partials)
             if len(str(seconds)) != 2:
@@ -856,7 +860,7 @@ class InGame(GameState):
             self.die()
 
         if not self.world.run_timer:
-            self.logger.info('Hero Won with time: {0}'.format(self.elapsed_time))
+            self.logger.info('Hero Won with time: {0}'.format(self.tick_count))
             self.logger.debug('go to WinScreen')
             self.win()
 
@@ -1024,6 +1028,7 @@ class InGame(GameState):
         * Jump
         * Double Jump if possible
         """
+
         if not self.hero.jumping:
             # Check if the hero is on a platform:
             self.hero.rect.y += 2
@@ -1195,11 +1200,15 @@ class InGame(GameState):
 
     def die(self):
         self.manager.replay = False
-        self.manager.go_to(DeathScreen(self.seed))
+        self.manager.go_to(DeathScreen(self))
 
     def win(self):
-        self.manager.replay = False
-        self.manager.go_to(WinScreen(self.seed, self.elapsed_time))
+        if self.loop_count < self.loop_number:
+            self.loop_count += 1
+            self.manager.go_to(UpgradeScreen(self))
+        else:
+            self.manager.replay = False
+            self.manager.go_to(WinScreen(self))
 
     def create_world(self, n):
         """
@@ -1454,10 +1463,10 @@ class DeathScreen(Menu):
 
     show_back_button = False
 
-    def __init__(self, seed):
+    def __init__(self, game):
         super().__init__()
         self.manager = None
-        self.seed = seed
+        self.seed = game.seed
 
         self.selections = [InGame(seed=self.seed),
                            "seed: {0}".format(self.seed),
@@ -1475,6 +1484,35 @@ class DeathScreen(Menu):
         screen.blit(seed_text, seed_rect)
 
 
+class UpgradeScreen(Menu):
+    """
+    A screen for displaying a random list of upgrades to the player between loops.
+    """
+
+    title = "Upgrade"
+    options = ["Double Jump", "Extra Damage", "Extra Bombs"]
+
+    show_back_button = False
+
+    def __init__(self, game):
+        super().__init__()
+
+        jump_hero = game.hero
+        jump_hero.can_doublejump = True
+        jump_hero.full_heal()
+
+        damage_hero = game.hero
+        damage_hero.melee_damage_multiplier = 2
+        damage_hero.full_heal()
+
+        bomb_hero = game.hero
+        bomb_hero.max_bombs = 5
+        bomb_hero.bomb_refill_requirement = 1
+        bomb_hero.full_heal()
+
+        self.selections = [InGame(game.seed, jump_hero), InGame(game.seed, damage_hero), InGame(game.seed, bomb_hero)]
+
+
 class WinScreen(Menu):
     """
     A gamestate for showing a victory.
@@ -1488,11 +1526,11 @@ class WinScreen(Menu):
     options = ["Retry", "Save Seed[WIP]", "Generate New World", "Quit"]
     show_back_button = False
 
-    def __init__(self, seed, elapsed_time):
+    def __init__(self, game):
         super().__init__()
         self.manager = None
-        self.seed = seed
-        self.elapsed_time = elapsed_time
+        self.seed = game.seed
+        self.elapsed_time = game.tick_count
 
         self.selections = [InGame(seed=self.seed),
                            "seed: {0}".format(self.seed),

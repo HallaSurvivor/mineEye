@@ -30,7 +30,7 @@ class Hero(pygame.sprite.Sprite):
     base_hp = 250
     base_speed = 10
     base_jump_height = 15
-    base_double_jump_height = 0
+    base_double_jump_height = 15
 
     max_bombs = 3  # number of bombs in clip
 
@@ -39,7 +39,7 @@ class Hero(pygame.sprite.Sprite):
 
     melee_range_multiplier = 1
 
-    base_bomb_refill_requirement = 4  # number of kills before being given another bomb
+    bomb_refill_requirement = 4  # number of kills before being given another bomb
 
     can_doublejump = False
     take_falldamage = True
@@ -63,13 +63,13 @@ class Hero(pygame.sprite.Sprite):
 
         # Mutable variables that can change but may need to be reset
         self.hp = self.base_hp
+        self.full_hp = self.base_hp
         self.actual_speed = self.base_speed
         self.jump_height = self.base_jump_height
         self.double_jump_height = self.base_double_jump_height
 
         self.bombs = self.max_bombs
         self.bomb_refill_counter = 0
-        self.bomb_refill_requirement = self.base_bomb_refill_requirement
 
         # Flags to help control motion
         self.start_jump = False
@@ -199,39 +199,6 @@ class Hero(pygame.sprite.Sprite):
         bomb = entities.Bomb(h.load('bomb.png'), self.rect.center, x, -20)
         return bomb
 
-    def reset_all(self):
-        """
-        Resets all mutable variables to the hero's baseline.
-        """
-        self.hp = self.base_hp
-        self.actual_damage_multiplier = self.base_damage_multiplier
-        self.actual_speed = self.base_speed
-        self.jump_height = self.base_jump_height
-        self.double_jump_height = self.base_double_jump_height
-        self.take_falldamage = self.can_take_falldamage
-        self.bombs = self.base_bomb_count
-
-    def change_speed(self, amount):
-        """
-        Change self.actual_speed
-        :param amount: A multiplier to change the speed.
-        """
-        self.actual_speed = amount*self.base_speed
-
-    def change_jump_height(self, amount):
-        """
-        Change actual self.jump_height
-        :param amount: A multiplier to change jump height
-        """
-        self.jump_height = amount*self.base_jump_height
-
-    def change_double_jump_height(self, amount):
-        """
-        Change the double jump height
-        :param amount: A multiplier to change doublejump height
-        """
-        self.double_jump_height = amount*self.base_double_jump_height
-
     def increment_bomb_counter(self):
         """
         Add 1 to the bomb counter, recover a bomb if the counter fills
@@ -247,6 +214,9 @@ class Hero(pygame.sprite.Sprite):
         """
         if self.bombs < self.max_bombs:
             self.bombs += 1
+
+    def full_heal(self):
+        self.hp = self.full_hp
 
     def get_nearest_node(self):
         """
