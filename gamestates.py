@@ -673,7 +673,7 @@ class InGame(GameState):
         else:
             self.hero = hero.Hero()
 
-        self.room_number = 30  # number of rooms to generate
+        self.room_number = 3  # number of rooms to generate
         self.loop_number = 5  # number of times you can loop
 
         self.loop_count = 0
@@ -973,6 +973,9 @@ class InGame(GameState):
                     self.logger.debug('pressed [PAUSE]')
                     self.pause_button_pressed()  # Pause menu or GOD MODE
 
+                elif event.key == pygame.K_j:
+                    self.left_click_pressed()
+
             elif event.type == pygame.KEYUP:
                 if event.key == settings['LEFT']:
                     log_up('Left')
@@ -994,12 +997,7 @@ class InGame(GameState):
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:  # Left Click
                     log_m1down(event.pos)
-                    if self.hero.melee_weapon is not None:
-                        for e in self.world.enemy_list:
-                            dist = hypot(e.rect.centerx - self.hero.rect.centerx,
-                                         e.rect.centery - self.hero.rect.centery)
-                            if dist <= self.hero.melee_weapon.range:
-                                e.damage(self.hero.melee_weapon.power * self.hero.melee_damage_multiplier)
+                    self.left_click_pressed()
 
                 elif event.button == 3:  # Right Click
                     log_m2down(event.pos)
@@ -1197,6 +1195,17 @@ class InGame(GameState):
         else:
             self.logger.debug('Go to PauseScreen')
             self.manager.go_to(PauseScreen(self.seed))
+
+    def left_click_pressed(self):
+        """
+        Called when left clicking. Uses the Melee weapon
+        """
+        if self.hero.melee_weapon is not None:
+            for e in self.world.enemy_list:
+                dist = hypot(e.rect.centerx - self.hero.rect.centerx,
+                             e.rect.centery - self.hero.rect.centery)
+                if dist <= self.hero.melee_weapon.range:
+                    e.damage(self.hero.melee_weapon.power * self.hero.melee_damage_multiplier)
 
     def die(self):
         self.manager.replay = False
@@ -1497,18 +1506,23 @@ class UpgradeScreen(Menu):
     def __init__(self, game):
         super().__init__()
 
-        jump_hero = game.hero
+        game.hero.full_heal()
+
+        jump_hero = hero.Hero()
+        damage_hero = hero.Hero()
+        bomb_hero = hero.Hero()
+
+        for key, value in game.hero.get_changes().items():
+            jump_hero.__dict__[key] = value
+            damage_hero.__dict__[key] = value
+            bomb_hero.__dict__[key] = value
+
         jump_hero.can_doublejump = True
-        jump_hero.full_heal()
 
-        damage_hero = game.hero
         damage_hero.melee_damage_multiplier = 2
-        damage_hero.full_heal()
 
-        bomb_hero = game.hero
         bomb_hero.max_bombs = 5
         bomb_hero.bomb_refill_requirement = 1
-        bomb_hero.full_heal()
 
         self.selections = [InGame(game.seed, jump_hero), InGame(game.seed, damage_hero), InGame(game.seed, bomb_hero)]
 

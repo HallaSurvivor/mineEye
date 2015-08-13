@@ -25,31 +25,6 @@ class Hero(pygame.sprite.Sprite):
     Thanks to those at programarcadegames.com for the basis of this code.
     """
 
-    name = 'Hero'
-
-    base_hp = 250
-    base_speed = 10
-    base_jump_height = 15
-    base_double_jump_height = 15
-
-    max_bombs = 3  # number of bombs in clip
-
-    melee_damage_multiplier = 1
-    ranged_damage_multiplier = 1
-
-    melee_range_multiplier = 1
-
-    bomb_refill_requirement = 4  # number of kills before being given another bomb
-
-    can_doublejump = False
-    take_falldamage = True
-
-    multiple_weapon_drops = False
-    weapon_pickup_range = 48
-
-    melee_weapon = None
-    ranged_weapon = None
-
     def __init__(self):
         """
         create the class, and create local variables based on the base variables that can be modified.
@@ -57,16 +32,40 @@ class Hero(pygame.sprite.Sprite):
 
         super().__init__()
 
+
+        self.name = 'Hero'
+
+        self.base_hp = 250
+        self.base_speed = 10
+        self.jump_height = 15
+        self.double_jump_height = 15
+
+        self.max_bombs = 3  # number of bombs in clip
+
+        self.melee_damage_multiplier = 1
+        self.ranged_damage_multiplier = 1
+
+        self.melee_range_multiplier = 1
+
+        self.bomb_refill_requirement = 4  # number of kills before being given another bomb
+
+        self.can_doublejump = False
+        self.take_falldamage = True
+
+        self.multiple_weapon_drops = False
+        self.weapon_pickup_range = 48
+
+        self.melee_weapon = None
+        self.ranged_weapon = None
+
+
         self.world = None
 
         self.logger = logging.getLogger('mineEye.hero.Hero')
 
         # Mutable variables that can change but may need to be reset
         self.hp = self.base_hp
-        self.full_hp = self.base_hp
         self.actual_speed = self.base_speed
-        self.jump_height = self.base_jump_height
-        self.double_jump_height = self.base_double_jump_height
 
         self.bombs = self.max_bombs
         self.bomb_refill_counter = 0
@@ -74,6 +73,8 @@ class Hero(pygame.sprite.Sprite):
         # Flags to help control motion
         self.start_jump = False
         self.start_double_jump = False
+
+        self.changes = {}
 
         self.jumping = False
         self.double_jumping = False
@@ -216,7 +217,7 @@ class Hero(pygame.sprite.Sprite):
             self.bombs += 1
 
     def full_heal(self):
-        self.hp = self.full_hp
+        self.hp = self.base_hp
 
     def get_nearest_node(self):
         """
@@ -237,3 +238,21 @@ class Hero(pygame.sprite.Sprite):
 
         self.logger.debug('Nearest node to hero: {node}'.format(node=nearest_node))
         return nearest_node
+
+    def get_changes(self):
+        """
+        Get all the changes and upgrades that apply to the Hero as a dictionary
+        """
+
+        return_dict = {}
+
+        include = ['base_hp', 'base_speed', 'jump_height', 'double_jump_height', 'max_bombs',
+                   'melee_damage_multiplier', 'ranged_damage_multiplier', 'melee_range_multiplier',
+                   'bomb_refill_requirement', 'can_doublejump', 'take_falldamage', 'multiple_weapon_drops',
+                   'weapon_pickup_range', 'melee_weapon', 'ranged_weapon',
+                   ]
+
+        for key in include:
+            return_dict[key] = self.__dict__[key]
+
+        return return_dict
