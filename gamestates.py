@@ -526,7 +526,7 @@ class ChangeBinds(Menu):
     A place to change keybinds.
     """
     title = "KeyBinds"
-    options = ["Up", "Left", "Right", "Down", "Bomb"]
+    options = ["Up", "Left", "Right", "Down", "Bomb", "Pause"]
     selections = [string.upper() for string in options]
 
     allow_on_off = False
