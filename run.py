@@ -97,6 +97,7 @@ logger.addHandler(console_handler)
 logger.info('Starting Program')
 
 # Create the game
+pygame.mixer.pre_init(44100, -16, 1, 512)
 pygame.init()
 
 screen = pygame.display.set_mode(settings['SCREEN_RESOLUTION'])
