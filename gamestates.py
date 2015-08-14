@@ -36,6 +36,7 @@ import constants as c
 import helpers as h
 import rooms
 import hero
+import upgrades
 
 module_logger = logging.getLogger('mineEye.gamestates')
 
@@ -657,7 +658,7 @@ class InGame(GameState):
 
     musicfile = 'Pathetique.mp3'
 
-    def __init__(self, seed, chosen_hero=None, replay_location=None):
+    def __init__(self, seed, chosen_hero=None, replay_location=None, loop_count=0):
         """
         Instantiate the primary Game State.
 
@@ -676,10 +677,10 @@ class InGame(GameState):
         else:
             self.hero = hero.Hero()
 
-        self.room_number = 30  # number of rooms to generate
+        self.room_number = 3  # number of rooms to generate
         self.loop_number = 5  # number of times you can loop
 
-        self.loop_count = 0
+        self.loop_count = loop_count
         self.splits = []
 
         self.tick_count = 0
@@ -1508,26 +1509,19 @@ class UpgradeScreen(Menu):
 
     def __init__(self, game):
         super().__init__()
+        self.game = game
 
-        game.hero.full_heal()
+    def select_option(self):
+        if self.selected == 0:
+            upgrades.double_jump(self.game.hero)
+        elif self.selected == 1:
+            upgrades.melee_increase(self.game.hero)
+        elif self.selected == 2:
+            upgrades.bomb_increase(self.game.hero)
+        else:
+            print('ya done fucked up')
 
-        jump_hero = hero.Hero()
-        damage_hero = hero.Hero()
-        bomb_hero = hero.Hero()
-
-        for key, value in game.hero.get_changes().items():
-            jump_hero.__dict__[key] = value
-            damage_hero.__dict__[key] = value
-            bomb_hero.__dict__[key] = value
-
-        jump_hero.can_doublejump = True
-
-        damage_hero.melee_damage_multiplier = 2
-
-        bomb_hero.max_bombs = 5
-        bomb_hero.bomb_refill_requirement = 1
-
-        self.selections = [InGame(game.seed, jump_hero), InGame(game.seed, damage_hero), InGame(game.seed, bomb_hero)]
+        self.manager.go_to(InGame(seed=self.game.seed, chosen_hero=self.game.hero, loop_count=self.game.loop_count))
 
 
 class WinScreen(Menu):

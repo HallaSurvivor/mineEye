@@ -31,7 +31,8 @@ class Hero(pygame.sprite.Sprite):
         """
 
         super().__init__()
-
+        self.logger = logging.getLogger('mineEye.hero.Hero')
+        self.world = None
 
         self.name = 'Hero'
 
@@ -58,11 +59,6 @@ class Hero(pygame.sprite.Sprite):
         self.melee_weapon = None
         self.ranged_weapon = None
 
-
-        self.world = None
-
-        self.logger = logging.getLogger('mineEye.hero.Hero')
-
         # Mutable variables that can change but may need to be reset
         self.hp = self.base_hp
         self.actual_speed = self.base_speed
@@ -70,11 +66,11 @@ class Hero(pygame.sprite.Sprite):
         self.bombs = self.max_bombs
         self.bomb_refill_counter = 0
 
+        self.upgrades = []
+
         # Flags to help control motion
         self.start_jump = False
         self.start_double_jump = False
-
-        self.changes = {}
 
         self.jumping = False
         self.double_jumping = False
@@ -219,6 +215,21 @@ class Hero(pygame.sprite.Sprite):
     def full_heal(self):
         self.hp = self.base_hp
 
+    def reset_motion(self):
+        """
+        Set the motion variables back to default.
+        """
+        self.start_jump = False
+        self.start_double_jump = False
+
+        self.jumping = False
+        self.double_jumping = False
+        self.jump_count = 0
+
+        self.moving_left = False
+        self.moving_right = False
+        self.last_motion = 'right'
+
     def get_nearest_node(self):
         """
         Change hero.nearest_node to be the node closest to the hero's center.
@@ -238,21 +249,3 @@ class Hero(pygame.sprite.Sprite):
 
         self.logger.debug('Nearest node to hero: {node}'.format(node=nearest_node))
         return nearest_node
-
-    def get_changes(self):
-        """
-        Get all the changes and upgrades that apply to the Hero as a dictionary
-        """
-
-        return_dict = {}
-
-        include = ['base_hp', 'base_speed', 'jump_height', 'double_jump_height', 'max_bombs',
-                   'melee_damage_multiplier', 'ranged_damage_multiplier', 'melee_range_multiplier',
-                   'bomb_refill_requirement', 'can_doublejump', 'take_falldamage', 'multiple_weapon_drops',
-                   'weapon_pickup_range', 'melee_weapon', 'ranged_weapon',
-                   ]
-
-        for key in include:
-            return_dict[key] = self.__dict__[key]
-
-        return return_dict
