@@ -66,6 +66,9 @@ class Weapon(object):
     power = 0
     range = 0
     arcs = False
+
+    kills_ghosts = False
+
     sprite_to_load = ''
     top_sprite_to_load = ''
 
@@ -166,6 +169,8 @@ class GhostSlayer(Weapon):
     style = c.MELEE
     power = 85
     range = 64
+
+    kills_ghosts = True
 
     sprite_to_load = 'ghostslayer.png'
     top_sprite_to_load = 'ghostslayer_top.png'

@@ -261,3 +261,25 @@ class Hero(pygame.sprite.Sprite):
 
         self.logger.debug('Nearest node to hero: {node}'.format(node=nearest_node))
         return nearest_node
+
+    def melee_attack(self):
+        """
+        Use the equipped melee weapon to damage enemies
+        """
+        try:
+            damage = self.melee_weapon.power * self.melee_damage_multiplier
+
+            for e in self.world.enemy_list:
+                dist = hypot(e.rect.centerx - self.rect.centerx,
+                             e.rect.centery - self.rect.centery)
+                if dist <= self.melee_weapon.range:
+                    if not e.clips:  # ghosts
+                        if self.melee_weapon.kills_ghosts:
+                            e.damage(damage)
+                    else:
+                        e.damage(damage)
+            sound = h.load_sound('melee-attack.wav')
+            sound.play()
+
+        except AttributeError:
+            pass

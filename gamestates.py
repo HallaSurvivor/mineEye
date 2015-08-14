@@ -1203,14 +1203,7 @@ class InGame(GameState):
         """
         Called when left clicking. Uses the Melee weapon
         """
-        if self.hero.melee_weapon is not None:
-            sound = h.load_sound('melee-attack.wav')
-            sound.play()
-            for e in self.world.enemy_list:
-                dist = hypot(e.rect.centerx - self.hero.rect.centerx,
-                             e.rect.centery - self.hero.rect.centery)
-                if dist <= self.hero.melee_weapon.range:
-                    e.damage(self.hero.melee_weapon.power * self.hero.melee_damage_multiplier)
+        self.hero.melee_attack()
 
     def die(self):
         self.manager.replay = False
