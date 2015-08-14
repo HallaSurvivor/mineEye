@@ -157,4 +157,20 @@ class Weapon2(Weapon):
     def __init__(self, center):
         super().__init__(center)
 
-all_weapons = [Weapon1, Weapon2]
+
+class GhostSlayer(Weapon):
+    """
+    A weapon that kills ghosts
+    """
+    name = 'ghost slayer'
+    style = c.MELEE
+    power = 85
+    range = 64
+
+    sprite_to_load = 'ghostslayer.png'
+    top_sprite_to_load = 'ghostslayer_top.png'
+
+    def __init__(self, center):
+        super().__init__(center)
+
+all_weapons = [Weapon1, Weapon2, GhostSlayer]
