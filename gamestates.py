@@ -1503,24 +1503,20 @@ class UpgradeScreen(Menu):
     """
 
     title = "Upgrade"
-    options = ["Double Jump", "Extra Damage", "Extra Bombs"]
-
     show_back_button = False
+
+    options = [' '] * 3
 
     def __init__(self, game):
         super().__init__()
+        all_options = [k for k, v in upgrades.upgrades.items() if k not in game.hero.upgrades]
+
+        self.options = random.sample(all_options, 3)
+        self.values = [upgrades.upgrades[key] for key in self.options]
         self.game = game
 
     def select_option(self):
-        if self.selected == 0:
-            upgrades.double_jump(self.game.hero)
-        elif self.selected == 1:
-            upgrades.melee_increase(self.game.hero)
-        elif self.selected == 2:
-            upgrades.bomb_increase(self.game.hero)
-        else:
-            print('ya done fucked up')
-
+        self.values[self.selected](self.game.hero)
         self.manager.go_to(InGame(seed=self.game.seed, chosen_hero=self.game.hero, loop_count=self.game.loop_count))
 
 
