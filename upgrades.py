@@ -55,7 +55,3 @@ def long_arms(hero):
 @upgrade
 def speed_boost_on_kill(hero):
     hero.speed_boost_on_kill = True
-
-@upgrade
-def no_fall_damage(hero):
-    hero.take_falldamage = False
