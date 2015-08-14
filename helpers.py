@@ -15,6 +15,7 @@ module_logger = logging.getLogger('mineEye.helpers')
 # Caches for sprites and fonts to mitigate the slow loading process
 _image_library = {}
 _font_library = {}
+_sound_library = {}
 
 
 class Sprite(pygame.sprite.Sprite):
@@ -222,10 +223,26 @@ def play_music(musicname):
     """
     try:
         pygame.mixer.music.stop()  # Stop any previously playing music
-        pygame.mixer.music.load(os.path.join('Music', musicname))
-        pygame.mixer.music.play()
+        pygame.mixer.music.load(os.path.join('Sounds', 'music', musicname))
+        pygame.mixer.music.play(-1)
     except:
         raise FileNotFoundError
+
+
+def load_sound(sound_file):
+    """
+    Load a sound file from Sounds/Sfx for playing.
+    :param sound_file: str representing the file to load
+    :return: pygame sound object
+    """
+    global _sound_library
+    sound = _sound_library.get(sound_file)
+
+    if sound is None:
+        sound = pygame.mixer.Sound(os.path.join('Sounds', 'Sfx', sound_file))
+        _sound_library[sound_file] = sound
+
+    return sound
 
 
 def blit_text(text, screen, position):

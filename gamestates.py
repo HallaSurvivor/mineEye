@@ -247,6 +247,8 @@ class Menu(GameState):
         global seeds
 
         if self.selections is not None:
+            beep = h.load_sound('select.wav')
+            beep.play()
             if type(self.selections[self.selected]) == str:
 
                 # if it's a back button
@@ -348,10 +350,10 @@ class TitleScreen(Menu):
     The title screen game state.
     """
 
-    musicfile = 'O_Fortuna.mp3'
-
     title = 'Press Space to begin!'
     options = ['Start!', 'My Maps', 'Replays', 'Settings!', 'Quit!']
+
+    musicfile = 'Pathetique.mp3'
 
     show_back_button = False
 
@@ -655,8 +657,6 @@ class InGame(GameState):
         and keeps the game interesting, i.e. no more than
         3 right moving rooms in a row.
     """
-
-    musicfile = 'Pathetique.mp3'
 
     def __init__(self, seed, chosen_hero=None, replay_location=None, loop_count=0, tick=0):
         """
@@ -1204,6 +1204,8 @@ class InGame(GameState):
         Called when left clicking. Uses the Melee weapon
         """
         if self.hero.melee_weapon is not None:
+            sound = h.load_sound('melee-attack.wav')
+            sound.play()
             for e in self.world.enemy_list:
                 dist = hypot(e.rect.centerx - self.hero.rect.centerx,
                              e.rect.centery - self.hero.rect.centery)
@@ -1467,8 +1469,6 @@ class DeathScreen(Menu):
     Show "you lose" text alongside the seed of the world
     that was played.
     """
-
-    musicfile = 'Raven.mp3'
 
     title = "You Died!"
     options = ["Retry", "Save Seed[WIP]", "Generate New World", "Quit"]

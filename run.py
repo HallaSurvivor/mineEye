@@ -59,6 +59,19 @@ Don't post this or modifications anywhere without emailing me first, please. (ps
 My Email: HallaSurvivor@gmail.com
 
 
+Sounds I used (mainly from freesound.org):
+Melee Swing:
+Sword Slash Attack Copyright 2013 Iwan Gabovitch, CC-BY3 license.
+Blood and gore FX performance 1 Copyright 2012 Slave2theLight, CC-BY3 license.
+
+Menu Selection:
+Game Sound Selection Copyright 2011 Bertrof, CC-BY3 license
+
+FireBat Death:
+Goblin Death Copyright 2014 spookymodem, CC-BY3 license
+
+
+
 Source: https://github.com/HallaSurvivor/mineEye
 """
 import logging
