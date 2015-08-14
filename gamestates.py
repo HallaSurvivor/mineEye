@@ -331,7 +331,7 @@ class Menu(GameState):
                     self.selected -= 1
 
             # Going back a screen
-            elif event.key == settings['LEFT'] or event.key == pygame.K_LEFT:
+            elif event.key == settings['LEFT'] or event.key == pygame.K_LEFT or event.key == pygame.K_ESCAPE:
                 self.manager.go_back()
 
             # Selecting an option
@@ -561,7 +561,7 @@ class ChangeBinds(Menu):
             # misc
             pygame.K_SEMICOLON, pygame.K_COMMA, pygame.K_PERIOD, pygame.K_SLASH, pygame.K_SPACE,
             pygame.K_MINUS, pygame.K_EQUALS, pygame.K_LEFTBRACKET, pygame.K_RIGHTBRACKET,
-            pygame.K_BACKSLASH, pygame.K_QUOTE,
+            pygame.K_BACKSLASH, pygame.K_QUOTE, pygame.K_TAB,
             # numbers
             pygame.K_0, pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4, pygame.K_5, pygame.K_6,
             pygame.K_7, pygame.K_8, pygame.K_9
@@ -576,7 +576,7 @@ class ChangeBinds(Menu):
                     elif e.key == settings['UP'] or e.key == pygame.K_UP:
                         if self.selected > 0:
                             self.selected -= 1
-                    elif e.key == settings['LEFT'] or e.key == pygame.K_LEFT:
+                    elif e.key == settings['LEFT'] or e.key == pygame.K_LEFT or e.key == pygame.K_ESCAPE:
                         self.manager.go_back()
                     elif e.key == pygame.K_SPACE or e.key == settings['RIGHT'] or \
                             e.key == pygame.K_RIGHT or e.key == pygame.K_RETURN:
