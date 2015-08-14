@@ -12,7 +12,7 @@ executables = [cx_Freeze.Executable(script="run.py", base=base)]
 
 packages = []
 
-include_files = ['Fonts/', 'Music/', 'Sprites/', 'dependencies/', 'replays/', 'room_options.txt']
+include_files = ['Fonts/', 'Sounds/', 'Sprites/', 'dependencies/', 'replays/', 'room_options.txt']
 
 excludes = []
 
