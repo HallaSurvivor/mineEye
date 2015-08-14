@@ -334,7 +334,8 @@ class Menu(GameState):
 
             # Going back a screen
             elif event.key == settings['LEFT'] or event.key == pygame.K_LEFT or event.key == pygame.K_ESCAPE:
-                self.manager.go_back()
+                if self.show_back_button:
+                    self.manager.go_back()
 
             # Selecting an option
             elif event.key == pygame.K_SPACE or event.key == settings['RIGHT'] or \

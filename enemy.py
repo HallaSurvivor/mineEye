@@ -496,7 +496,7 @@ class Ghost(Enemy):
 
 
 class FireBat(Enemy):
-    activation_range = 1024
+    activation_range = 600
     speed = 4
     contact_damage = 4
     flying = True
