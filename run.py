@@ -108,7 +108,7 @@ pygame.mouse.set_visible(False)
 manager = gamestates.GameStateManager()
 
 while not manager.done:
-    clock.tick(60)
+    clock.tick(120)
     if pygame.event.get(pygame.QUIT):
         logger.info('pygame.QUIT - exiting program')
         manager.done = True
