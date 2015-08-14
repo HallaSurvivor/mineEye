@@ -658,7 +658,7 @@ class InGame(GameState):
 
     musicfile = 'Pathetique.mp3'
 
-    def __init__(self, seed, chosen_hero=None, replay_location=None, loop_count=0):
+    def __init__(self, seed, chosen_hero=None, replay_location=None, loop_count=0, tick=0):
         """
         Instantiate the primary Game State.
 
@@ -677,13 +677,13 @@ class InGame(GameState):
         else:
             self.hero = hero.Hero()
 
-        self.room_number = 3  # number of rooms to generate
+        self.room_number = 30  # number of rooms to generate
         self.loop_number = 5  # number of times you can loop
 
         self.loop_count = loop_count
         self.splits = []
 
-        self.tick_count = 0
+        self.tick_count = tick
         self.start_time = time.strftime('%a %d %b %Y - %H %M %S')
 
         self.world = None
@@ -1063,10 +1063,10 @@ class InGame(GameState):
         self.left_pressed = True
 
         if self.hero.moving_right:
-            self.world.setspeed(self.hero.actual_speed, 0)
+            self.world.setspeed(self.hero.actual_speed, None)
             self.hero.moving_right = False
 
-        self.world.setspeed(self.hero.actual_speed, 0)
+        self.world.setspeed(self.hero.actual_speed, None)
         self.hero.moving_left = True
         self.hero.last_motion = 'left'
 
@@ -1083,11 +1083,11 @@ class InGame(GameState):
         self.left_pressed = False
 
         if self.hero.moving_left:
-            self.world.setspeed(0, 0)
+            self.world.setspeed(0, None)
             self.hero.moving_left = False
 
         if self.right_pressed and not self.hero.moving_right:
-            self.world.setspeed(-self.hero.actual_speed, 0)
+            self.world.setspeed(-self.hero.actual_speed, None)
             self.hero.moving_right = True
             self.hero.last_motion = 'right'
 
@@ -1107,10 +1107,10 @@ class InGame(GameState):
         self.right_pressed = True
 
         if self.hero.moving_left:
-            self.world.setspeed(-self.hero.actual_speed, 0)
+            self.world.setspeed(-self.hero.actual_speed, None)
             self.hero.moving_left = False
 
-        self.world.setspeed(-self.hero.actual_speed, 0)
+        self.world.setspeed(-self.hero.actual_speed, None)
         self.hero.moving_right = True
         self.hero.last_motion = 'right'
 
@@ -1131,7 +1131,7 @@ class InGame(GameState):
             self.hero.moving_right = False
 
         if self.left_pressed and not self.hero.moving_left:
-            self.world.setspeed(self.hero.actual_speed, 0)
+            self.world.setspeed(self.hero.actual_speed, None)
             self.hero.moving_left = True
             self.hero.last_motion = 'left'
 
@@ -1516,7 +1516,8 @@ class UpgradeScreen(Menu):
 
     def select_option(self):
         self.values[self.selected](self.game.hero)
-        self.manager.go_to(InGame(seed=self.game.seed, chosen_hero=self.game.hero, loop_count=self.game.loop_count))
+        self.manager.go_to(InGame(seed=self.game.seed, chosen_hero=self.game.hero,
+                                  loop_count=self.game.loop_count, tick=self.game.tick_count))
 
 
 class WinScreen(Menu):

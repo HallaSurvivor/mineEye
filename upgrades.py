@@ -20,10 +20,10 @@ def upgrade(func):
     func_name = func.__name__.replace('_', ' ')
 
     def new_func(hero):
+        func(hero)
         hero.full_heal()
         hero.reset_motion()
         hero.upgrades.append(func_name)
-        func(hero)
 
     upgrades[func_name] = new_func
 
@@ -34,7 +34,7 @@ def double_jump(hero):
     hero.can_doublejump = True
 
 @upgrade
-def melee_increase(hero):
+def melee_damage_increase(hero):
     hero.melee_damage_multiplier = 2
 
 @upgrade
@@ -55,3 +55,7 @@ def long_arms(hero):
 @upgrade
 def speed_boost_on_kill(hero):
     hero.speed_boost_on_kill = True
+
+@upgrade
+def extra_health(hero):
+    hero.base_hp += 50
