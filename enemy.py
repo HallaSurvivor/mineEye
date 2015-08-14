@@ -394,6 +394,10 @@ class Enemy(h.Sprite):
             self.kill()
             hero.increment_bomb_counter()
 
+            if hero.speed_boost_on_kill:
+                hero.actual_speed += 2
+                hero.speed_boost_counter = 1
+
     def draw(self, screen):
         """
         Draw the animated enemy to the screen

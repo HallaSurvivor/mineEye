@@ -519,7 +519,7 @@ class World:
             self.logger.info('Hero damaged by enemy projectile')
             hero.damage(proj.damage)
 
-    def setspeed(self, setx, sety):
+    def setspeed(self, setx=None, sety=None):
         """
         Set a new x and y speed instead of changing the current one.
 

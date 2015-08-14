@@ -1038,14 +1038,13 @@ class InGame(GameState):
             self.hero.rect.y -= 2
 
             if len(hit_list) > 0:
-                self.world.changespeed(0, self.hero.jump_height)
+                self.world.setspeed(None, self.hero.jump_height)
                 self.hero.jumping = True
                 self.hero.start_jump = True
 
         else:
             if self.hero.can_doublejump and not self.hero.double_jumping:
-                self.world.setspeed(None, 0)
-                self.world.changespeed(0, self.hero.double_jump_height)
+                self.world.setspeed(None, self.hero.double_jump_height)
                 self.hero.double_jumping = True
                 self.hero.start_double_jump = True
 
@@ -1064,10 +1063,10 @@ class InGame(GameState):
         self.left_pressed = True
 
         if self.hero.moving_right:
-            self.world.changespeed(self.hero.actual_speed, 0)
+            self.world.setspeed(self.hero.actual_speed, 0)
             self.hero.moving_right = False
 
-        self.world.changespeed(self.hero.actual_speed, 0)
+        self.world.setspeed(self.hero.actual_speed, 0)
         self.hero.moving_left = True
         self.hero.last_motion = 'left'
 
@@ -1084,11 +1083,11 @@ class InGame(GameState):
         self.left_pressed = False
 
         if self.hero.moving_left:
-            self.world.changespeed(-self.hero.actual_speed, 0)
+            self.world.setspeed(0, 0)
             self.hero.moving_left = False
 
         if self.right_pressed and not self.hero.moving_right:
-            self.world.changespeed(-self.hero.actual_speed, 0)
+            self.world.setspeed(-self.hero.actual_speed, 0)
             self.hero.moving_right = True
             self.hero.last_motion = 'right'
 
@@ -1108,10 +1107,10 @@ class InGame(GameState):
         self.right_pressed = True
 
         if self.hero.moving_left:
-            self.world.changespeed(-self.hero.actual_speed, 0)
+            self.world.setspeed(-self.hero.actual_speed, 0)
             self.hero.moving_left = False
 
-        self.world.changespeed(-self.hero.actual_speed, 0)
+        self.world.setspeed(-self.hero.actual_speed, 0)
         self.hero.moving_right = True
         self.hero.last_motion = 'right'
 
@@ -1128,11 +1127,11 @@ class InGame(GameState):
         self.right_pressed = False
 
         if self.hero.moving_right:
-            self.world.changespeed(self.hero.actual_speed, 0)
+            self.world.setspeed(0, None)
             self.hero.moving_right = False
 
         if self.left_pressed and not self.hero.moving_left:
-            self.world.changespeed(self.hero.actual_speed, 0)
+            self.world.setspeed(self.hero.actual_speed, 0)
             self.hero.moving_left = True
             self.hero.last_motion = 'left'
 

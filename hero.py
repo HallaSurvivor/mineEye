@@ -53,6 +53,10 @@ class Hero(pygame.sprite.Sprite):
         self.can_doublejump = False
         self.take_falldamage = True
 
+        self.speed_boost_on_kill = False
+        self.speed_boost_length = 60  # ticks
+        self.speed_boost_counter = 0
+
         self.multiple_weapon_drops = False
         self.weapon_pickup_range = 48
 
@@ -167,6 +171,13 @@ class Hero(pygame.sprite.Sprite):
     def update(self):
         if settings['GOD MODE']:
             self.jump_height = 50
+
+        if self.speed_boost_counter > 0:
+            self.speed_boost_counter += 1
+
+        if self.speed_boost_counter == self.speed_boost_length:
+            self.speed_boost_counter = 0
+            self.actual_speed = self.base_speed
 
     def damage(self, amount):
         """
