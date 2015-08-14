@@ -973,7 +973,7 @@ class InGame(GameState):
                     self.down_button_pressed()  # pick up weapons
 
                 # Enter pause menu
-                elif event.key == settings['PAUSE']:
+                elif event.key == settings['PAUSE'] or event.key == pygame.K_ESCAPE:
                     self.logger.debug('pressed [PAUSE]')
                     self.pause_button_pressed()  # Pause menu or GOD MODE
 

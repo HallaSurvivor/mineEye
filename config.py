@@ -51,7 +51,7 @@ RIGHT = pygame.K_d
 
 BOMB = pygame.K_SPACE
 
-PAUSE = pygame.K_ESCAPE
+PAUSE = pygame.K_p
 
 WIDTH = SCREEN_RESOLUTION[0]
 HEIGHT = SCREEN_RESOLUTION[1]
