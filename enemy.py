@@ -67,6 +67,8 @@ class Enemy(h.Sprite):
     projectile_damage = 3
     attack_period = 16
 
+    death_sound = None
+
     def __init__(self, world):
         """
         create the class.
@@ -392,6 +394,11 @@ class Enemy(h.Sprite):
 
         if self.current_hp <= 0:
             self.kill()
+            try:
+                self.death_sound.play()
+            except AttributeError:
+                pass
+
             hero.increment_bomb_counter()
 
             if hero.speed_boost_on_kill:
@@ -494,6 +501,8 @@ class FireBat(Enemy):
     contact_damage = 4
     flying = True
     name = 'FireBat'
+
+    death_sound = h.load_sound('firebat.wav')
 
     def __init__(self, *args):
         super().__init__(*args)

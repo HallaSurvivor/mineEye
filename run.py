@@ -76,8 +76,6 @@ Source: https://github.com/HallaSurvivor/mineEye
 """
 import logging
 import pygame
-from config import settings
-import gamestates
 
 # Create Logger
 logger = logging.getLogger('mineEye')
@@ -99,6 +97,10 @@ logger.info('Starting Program')
 # Create the game
 pygame.mixer.pre_init(44100, -16, 1, 512)
 pygame.init()
+print('initialized')
+
+from config import settings
+import gamestates
 
 screen = pygame.display.set_mode(settings['SCREEN_RESOLUTION'])
 pygame.display.set_caption("mineEye")
