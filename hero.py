@@ -42,6 +42,7 @@ class Hero(pygame.sprite.Sprite):
         self.double_jump_height = 15
 
         self.max_bombs = 3  # number of bombs in clip
+        self.bomb_damage = 100
 
         self.melee_damage_multiplier = 1
         self.ranged_damage_multiplier = 1
