@@ -258,7 +258,9 @@ class Menu(GameState):
                             f.close()
                             found = True
                     else:
-                        if not found:
+                        if found:
+                            self.manager.go_to(TitleScreen())
+                        else:
                             self.logger.INFO('Tried to add seed {0}, but there were no available slots'.format(self.selections[self.selected][5:]))
                             self.manager.go_to(TitleScreen('Tried to add seed {0}, but there were no available slots'.format(self.selections[self.selected][5:])))
 
