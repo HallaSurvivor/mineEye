@@ -258,8 +258,11 @@ class Menu(GameState):
                             f.close()
                             found = True
                     else:
-                        if not found:
+                        if found:
+                            self.manager.go_to(TitleScreen('Seed will be visible after restarting the game'))
+                        else:
                             self.logger.INFO('Tried to add seed {0}, but there were no available slots'.format(self.selections[self.selected][5:]))
+                            self.manager.go_to(TitleScreen('Tried to add seed {0}, but there were no available slots'.format(self.selections[self.selected][5:])))
 
                 # if it's a settings modifier
                 else:
@@ -349,9 +352,18 @@ class TitleScreen(Menu):
 
     show_back_button = False
 
-    def __init__(self):
+    def __init__(self, error=None):
         super().__init__()
+        self.error = error
         self.selections = [InGame(seed=h.generate_seed()), PlayerMaps(), ChooseReplay(), ChangeSettings(), Quit()]
+
+    def extra_draw(self, screen):
+        """
+        Draw errors to the screen
+        """
+        if self.error is not None:
+            errmsg = h.load_font('melma.ttf', 16).render(self.error, 1, c.BLACK)
+            screen.blit(errmsg, (5, 5))
 
 
 class PlayerMaps(Menu):
@@ -1456,7 +1468,7 @@ class DeathScreen(Menu):
     """
 
     title = "You Died!"
-    options = ["Retry", "Save Seed[WIP]", "Generate New World", "Quit"]
+    options = ["Retry", "Save Seed", "Generate New World", "Quit"]
 
     show_back_button = False
 
@@ -1515,7 +1527,7 @@ class WinScreen(Menu):
     """
 
     title = "You Win!"
-    options = ["Retry", "Save Seed[WIP]", "Generate New World", "Quit"]
+    options = ["Retry", "Save Seed", "Generate New World", "Quit"]
     show_back_button = False
 
     def __init__(self, game):
