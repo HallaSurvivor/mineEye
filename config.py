@@ -42,7 +42,7 @@ DEBUG = True
 SHOW_NODES = False
 
 PLAY_MUSIC = True
-PLAY_SFX = False
+PLAY_SFX = True
 
 UP = pygame.K_w
 LEFT = pygame.K_a
