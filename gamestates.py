@@ -39,18 +39,7 @@ import hero
 import upgrades
 
 module_logger = logging.getLogger('mineEye.gamestates')
-
-try:
-    module_logger.debug('Try to load seeds')
-    f = open('seeds', 'rb')
-    seeds = pickle.loads(f.read())
-    f.close()
-except FileNotFoundError:
-    module_logger.debug('Failed - creating seeds instead')
-    seeds = [''] * 11
-    f = open('seeds', 'wb')
-    f.write(pickle.dumps(seeds))
-    f.close()
+seeds = h.load_seed_file()
 
 
 class GameState:

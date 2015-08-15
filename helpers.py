@@ -6,6 +6,7 @@ import time
 import random
 import logging
 import heapq
+import pickle
 import pygame
 from config import settings
 import constants as c
@@ -360,3 +361,22 @@ def generate_seed():
     :return: random integer
     """
     return random.randint(0, 100000000000)
+
+
+def load_seed_file():
+    """
+    Load the seed file into a dictionary
+    """
+    try:
+        module_logger.debug('Try to load seeds')
+        f = open('seeds', 'rb')
+        seeds = pickle.loads(f.read())
+        f.close()
+    except FileNotFoundError:
+        module_logger.debug('Failed - creating seeds instead')
+        seeds = [''] * 11
+        f = open('seeds', 'wb')
+        f.write(pickle.dumps(seeds))
+        f.close()
+
+    return seeds

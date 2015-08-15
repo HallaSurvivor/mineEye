@@ -39,7 +39,7 @@ class Wall(h.Sprite):
     self.damage_player is True if the player is hurt on contact (spikes) but False otherwise
     """
 
-    def __init__(self, x, y, image, end_timer=False, breakable=False, damage=0):
+    def __init__(self, x, y, image, end_timer=False, breakable=False, damage=0, speed_factor=1):
         """
         Create the wall and its location
         :param x: Int representing the x position of the wall's top left corner
@@ -59,6 +59,7 @@ class Wall(h.Sprite):
         self.rect.x = x
 
         self.damage = damage
+        self.speed_factor = speed_factor
         self.end_timer = end_timer
 
         self.breakable = breakable
