@@ -394,10 +394,11 @@ class Enemy(h.Sprite):
 
         if self.current_hp <= 0:
             self.kill()
-            try:
-                self.death_sound.play()
-            except AttributeError:
-                pass
+            if settings['PLAY_SFX']:
+                try:
+                    self.death_sound.play()
+                except AttributeError:
+                    pass
 
             hero.increment_bomb_counter()
 

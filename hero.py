@@ -93,6 +93,9 @@ class Hero(pygame.sprite.Sprite):
 
         self.create_animation_dict()
 
+        # Sound stuff
+        self.melee_swing_sound = h.load_sound('melee-attack.wav')
+
     def create_animation_dict(self):
         """
         Create an animation object and conductor to run the animations for walking, jumping, standing, etc.
@@ -278,8 +281,9 @@ class Hero(pygame.sprite.Sprite):
                             e.damage(damage)
                     else:
                         e.damage(damage)
-            sound = h.load_sound('melee-attack.wav')
-            sound.play()
+
+            if settings['PLAY_SFX']:
+                self.melee_swing_sound.play()
 
         except AttributeError:
             pass

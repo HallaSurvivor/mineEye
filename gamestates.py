@@ -159,6 +159,8 @@ class Menu(GameState):
 
         self.logger = logging.getLogger('mineEye.gamestates.Menu')
 
+        self.beep = h.load_sound('select.wav')
+
         self.selected = 0
         self.list_size = len(self.options) - 1
 
@@ -247,8 +249,8 @@ class Menu(GameState):
         global seeds
 
         if self.selections is not None:
-            beep = h.load_sound('select.wav')
-            beep.play()
+            if settings['PLAY_SFX']:
+                self.beep.play()
             if type(self.selections[self.selected]) == str:
 
                 # if it's a back button
