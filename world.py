@@ -39,7 +39,7 @@ class Wall(h.Sprite):
     self.damage_player is True if the player is hurt on contact (spikes) but False otherwise
     """
 
-    def __init__(self, x, y, image, damage_player=False, end_timer=False, breakable=False, damage=1):
+    def __init__(self, x, y, image, end_timer=False, breakable=False, damage=0):
         """
         Create the wall and its location
         :param x: Int representing the x position of the wall's top left corner
@@ -59,7 +59,6 @@ class Wall(h.Sprite):
         self.rect.x = x
 
         self.damage = damage
-        self.damage_player = damage_player
         self.end_timer = end_timer
 
         self.breakable = breakable
@@ -287,7 +286,7 @@ class World:
                     sprite.rect.x += x_pos_change
 
             # Damage the player if the block is a spike
-            if block.damage_player:
+            if block.damage:
                 self.logger.info('hero touched spike')
                 hero.damage(block.damage)
 
@@ -343,7 +342,7 @@ class World:
                     sprite.rect.y += y_pos_change
 
             # Damage the player if the block is a spike
-            if block.damage_player:
+            if block.damage:
                 self.logger.info('hero touched spike')
                 hero.damage(block.damage)
 
@@ -593,7 +592,7 @@ class World:
                     self.logger.debug('added wall/timer at {pos}'.format(pos=(x, y)))
 
                 elif col == "P":
-                    wall = Wall(x, y, h.load('spikes.png'), damage_player=True)
+                    wall = Wall(x, y, h.load('spikes.png'), damage=1)
                     self.block_list.add(wall)
                     self.all_sprites.add(wall)
                     self.nodes.add_wall(node)
