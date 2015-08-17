@@ -222,14 +222,18 @@ class Menu(GameState):
         )
         try:
             for index, option in enumerate(self.selections):
-                if settings[option]:
-                    on_rect = on.get_rect()
-                    on_rect.bottomright = self.rect_list[index].bottomleft
-                    screen.blit(on, on_rect)
-                else:
-                    off_rect = off.get_rect()
-                    off_rect.bottomright = self.rect_list[index].bottomleft
-                    screen.blit(off, off_rect)
+                try:
+                    if settings[option]:
+                        on_rect = on.get_rect()
+                        on_rect.bottomright = self.rect_list[index].bottomleft
+                        screen.blit(on, on_rect)
+                    else:
+                        off_rect = off.get_rect()
+                        off_rect.bottomright = self.rect_list[index].bottomleft
+                        screen.blit(off, off_rect)
+                except KeyError:  # GameState classes and other navigation options
+                    pass
+
         except AttributeError:
             self.logger.error('Tried to draw on/off in menu without self.selections: {0}'.format(type(self)))
 
