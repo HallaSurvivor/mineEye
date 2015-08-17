@@ -958,23 +958,23 @@ class InGame(GameState):
             if event.type == pygame.KEYDOWN:
                 if event.key == settings['LEFT']:
                     log_down('Left')
-                    self.move_left()  # move left
+                    self.move_left()
 
                 elif event.key == settings['RIGHT']:
                     log_down('Right')
-                    self.move_right()  # move right
+                    self.move_right()
 
                 elif event.key == settings['UP']:
                     log_down('Up')
-                    self.jump()  # jump/double jump
+                    self.jump()
 
                 elif event.key == settings['BOMB']:
                     log_down('Bomb')
-                    self.throw_bomb()  # throw bomb
+                    self.throw_bomb()
 
                 elif event.key == settings['DOWN']:
                     log_down('Down')
-                    self.pickup_weapon()  # pick up weapons
+                    self.pickup_weapon()
 
                 # Enter pause menu
                 elif event.key == settings['PAUSE'] or event.key == pygame.K_ESCAPE:
@@ -987,11 +987,11 @@ class InGame(GameState):
             elif event.type == pygame.KEYUP:
                 if event.key == settings['LEFT']:
                     log_up('Left')
-                    self.stop_moving_left()  # stop moving left
+                    self.stop_moving_left()
 
                 elif event.key == settings['RIGHT']:
                     log_up('Right')
-                    self.stop_moving_right()  # stop moving right
+                    self.stop_moving_right()
 
                 elif event.key == settings['UP']:
                     log_up('Up')
