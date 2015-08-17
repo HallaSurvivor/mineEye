@@ -488,7 +488,7 @@ class World:
                 for e in self.enemy_list:
                     distance = hypot(e.rect.centerx - bomb.rect.centerx, e.rect.centery - bomb.rect.centery)
                     if distance < bomb.radius:
-                        damage = hero.bomb_damage  # / distance**2
+                        damage = hero.bomb_damage  # / distance**2  # lowers damage, but too much
                         e.damage(damage)
                         self.logger.info('damaged {0} by {1} hp with bomb'.format(e, damage))
 

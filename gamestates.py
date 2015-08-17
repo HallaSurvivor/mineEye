@@ -958,40 +958,40 @@ class InGame(GameState):
             if event.type == pygame.KEYDOWN:
                 if event.key == settings['LEFT']:
                     log_down('Left')
-                    self.left_button_pressed()  # move left
+                    self.move_left()  # move left
 
                 elif event.key == settings['RIGHT']:
                     log_down('Right')
-                    self.right_button_pressed()  # move right
+                    self.move_right()  # move right
 
                 elif event.key == settings['UP']:
                     log_down('Up')
-                    self.up_button_pressed()  # jump/double jump
+                    self.jump()  # jump/double jump
 
                 elif event.key == settings['BOMB']:
                     log_down('Bomb')
-                    self.bomb_button_pressed()  # throw bomb
+                    self.throw_bomb()  # throw bomb
 
                 elif event.key == settings['DOWN']:
                     log_down('Down')
-                    self.down_button_pressed()  # pick up weapons
+                    self.pickup_weapon()  # pick up weapons
 
                 # Enter pause menu
                 elif event.key == settings['PAUSE'] or event.key == pygame.K_ESCAPE:
                     self.logger.debug('pressed [PAUSE]')
-                    self.pause_button_pressed()  # Pause menu or GOD MODE
+                    self.pause()  # Pause menu or GOD MODE
 
                 elif event.key == pygame.K_j:
-                    self.left_click_pressed()
+                    self.melee_attack()
 
             elif event.type == pygame.KEYUP:
                 if event.key == settings['LEFT']:
                     log_up('Left')
-                    self.left_button_released()  # stop moving left
+                    self.stop_moving_left()  # stop moving left
 
                 elif event.key == settings['RIGHT']:
                     log_up('Right')
-                    self.right_button_released()  # stop moving right
+                    self.stop_moving_right()  # stop moving right
 
                 elif event.key == settings['UP']:
                     log_up('Up')
@@ -1005,7 +1005,7 @@ class InGame(GameState):
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:  # Left Click
                     log_m1down(event.pos)
-                    self.left_click_pressed()
+                    self.melee_attack()
 
                 elif event.button == 3:  # Right Click
                     log_m2down(event.pos)
@@ -1026,7 +1026,7 @@ class InGame(GameState):
         if not self.replay:
             f.close()
 
-    def up_button_pressed(self):
+    def jump(self):
         """
         Called upon pressing the UP button
 
@@ -1052,7 +1052,7 @@ class InGame(GameState):
                 self.hero.double_jumping = True
                 self.hero.start_double_jump = True
 
-    def left_button_pressed(self):
+    def move_left(self):
         """
         Called upon pressing the LEFT button
 
@@ -1074,7 +1074,7 @@ class InGame(GameState):
         self.hero.moving_left = True
         self.hero.last_motion = 'left'
 
-    def left_button_released(self):
+    def stop_moving_left(self):
         """
         Called upon releasing the LEFT button
 
@@ -1095,7 +1095,7 @@ class InGame(GameState):
             self.hero.moving_right = True
             self.hero.last_motion = 'right'
 
-    def right_button_pressed(self):
+    def move_right(self):
         """
         Called upon pressing the RIGHT button
 
@@ -1118,7 +1118,7 @@ class InGame(GameState):
         self.hero.moving_right = True
         self.hero.last_motion = 'right'
 
-    def right_button_released(self):
+    def stop_moving_right(self):
         """
         Called upon releasing the RIGHT button
 
@@ -1139,7 +1139,7 @@ class InGame(GameState):
             self.hero.moving_left = True
             self.hero.last_motion = 'left'
 
-    def down_button_pressed(self):
+    def pickup_weapon(self):
         """
         Called upon pressing the DOWN button
 
@@ -1170,7 +1170,7 @@ class InGame(GameState):
                         self.hero.ranged_weapon = drop.drop
                     drop.kill()
 
-    def bomb_button_pressed(self):
+    def throw_bomb(self):
         """
         Called upon pressing the BOMB button
 
@@ -1182,7 +1182,7 @@ class InGame(GameState):
             self.world.bomb_list.add(bomb)
             self.world.all_sprites.add(bomb)
 
-    def pause_button_pressed(self):
+    def pause(self):
         """
         Called upon pressing the PAUSE button
 
@@ -1203,7 +1203,7 @@ class InGame(GameState):
             self.logger.debug('Go to PauseScreen')
             self.manager.go_to(PauseScreen(self.seed))
 
-    def left_click_pressed(self):
+    def melee_attack(self):
         """
         Called when left clicking. Uses the Melee weapon
         """
