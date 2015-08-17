@@ -63,6 +63,17 @@ class GameState:
         """
         raise NotImplementedError
 
+    def draw_cursor(self, screen):
+        """
+        Draw a cursor to the screen
+
+        :param screen: the screen to draw to
+        """
+        cursor = h.load('cursor.png')
+        cursor_rect = cursor.get_rect()
+        cursor_rect.center = pygame.mouse.get_pos()
+        screen.blit(cursor, cursor_rect)
+
     def update(self):
         """
         Will be overwritten by the subclass to update whatever is on the screen.
@@ -141,6 +152,7 @@ class Menu(GameState):
     selections = None
 
     show_back_button = True
+    show_on_off = False
 
     def __init__(self):
         super().__init__()
@@ -171,6 +183,36 @@ class Menu(GameState):
         Draw the title and all the options/descriptions to the screen.
         :param screen: The pygame screen on which to draw
         """
+
+        self.draw_background(screen)
+
+        if not self.rect_list:
+            self.rect_list = h.create_menu(screen, self.title, self.options, self.descriptions)
+        else:
+            h.create_menu(screen, self.title, self.options, self.descriptions)
+
+        if self.show_on_off:
+            self.draw_on_off(screen)
+
+        if self.show_back_button:
+            self.draw_back_button(screen)
+
+        self.draw_selection_indicator(screen)
+        self.extra_draw(screen)
+        self.draw_cursor(screen)  # inherited from GameState
+
+    def draw_background(self, screen):
+        """
+        draw the background
+        """
+        if self.default_background.get_size() != screen.get_size():
+            self.default_background = h.create_background(h.load(self.background_tile))
+        screen.blit(self.default_background, (0, 0))
+
+    def draw_on_off(self, screen):
+        """
+        Draw the on/off labels beside settings
+        """
         on = h.load_font('melma.ttf', 16).render(
             'On', 1, c.BLACK
         )
@@ -178,50 +220,44 @@ class Menu(GameState):
         off = h.load_font('melma.ttf', 16).render(
             'Off', 1, c.BLACK
         )
-        if self.default_background.get_size() != screen.get_size():
-            self.default_background = h.create_background(h.load(self.background_tile))
-        screen.blit(self.default_background, (0, 0))
-
-        if not self.rect_list:
-            self.rect_list = h.create_menu(screen, self.title, self.options, self.descriptions)
-        else:
-            h.create_menu(screen, self.title, self.options, self.descriptions)
-        if self.selections is not None:
+        try:
             for index, option in enumerate(self.selections):
-                if type(option) == str and option != 'go back' and option[:5] != 'seed:':
-                    if settings[option]:
-                        on_rect = on.get_rect()
-                        on_rect.bottomright = self.rect_list[index].bottomleft
-                        screen.blit(on, on_rect)
-                    else:
-                        off_rect = off.get_rect()
-                        off_rect.bottomright = self.rect_list[index].bottomleft
-                        screen.blit(off, off_rect)
+                if settings[option]:
+                    on_rect = on.get_rect()
+                    on_rect.bottomright = self.rect_list[index].bottomleft
+                    screen.blit(on, on_rect)
+                else:
+                    off_rect = off.get_rect()
+                    off_rect.bottomright = self.rect_list[index].bottomleft
+                    screen.blit(off, off_rect)
+        except AttributeError:
+            self.logger.error('Tried to draw on/off in menu without self.selections: {0}'.format(type(self)))
 
+    def draw_selection_indicator(self, screen):
+        """
+        draw the image showing which option is selected to the screen
+        """
         selected_indicator = h.load('pickaxe.png')
         selected_rect = selected_indicator.get_rect()
         selected_rect.bottomleft = self.rect_list[self.selected].bottomright
         screen.blit(selected_indicator, selected_rect)
 
-        if self.show_back_button:
-            back_button = h.load_font('melma.ttf', 20).render(
-                'Back', 1, c.BLACK
-            )
-            back_rect = back_button.get_rect()
-            back_rect.bottomleft = (0, settings['HEIGHT'])
-            if back_rect not in self.rect_list:
-                self.rect_list.append(back_rect)
-                self.list_size += 1
+    def draw_back_button(self, screen):
+        """
+        draw a back button and append 'go back' to the list of options
+        """
+        back_button = h.load_font('melma.ttf', 20).render(
+            'Back', 1, c.BLACK
+        )
+        back_rect = back_button.get_rect()
+        back_rect.bottomleft = (0, settings['HEIGHT'])
 
-                self.selections.append('go back')
-            screen.blit(back_button, back_rect)
+        if back_rect not in self.rect_list:
+            self.rect_list.append(back_rect)
+            self.list_size += 1
+            self.selections.append('go back')
 
-        self.extra_draw(screen)
-
-        cursor = h.load('cursor.png')
-        cursor_rect = cursor.get_rect()
-        cursor_rect.center = pygame.mouse.get_pos()
-        screen.blit(cursor, cursor_rect)
+        screen.blit(back_button, back_rect)
 
     def update(self):
         pass
@@ -522,6 +558,8 @@ class ChangeSettings(Menu):
     title = "Settings"
     options = ["Play Music", "Play Sound Effects", "Change Keybinds"]
 
+    show_on_off = True
+
     def __init__(self):
         super().__init__()
         self.selections = ['PLAY_MUSIC', 'PLAY_SFX', ChangeBinds()]
@@ -796,17 +834,6 @@ class InGame(GameState):
             elapsed_rect.right = settings['WIDTH']
             screen.blit(elapsed_time_display, elapsed_rect)
 
-    def draw_cursor(self, screen):
-        """
-        Draw a cursor to the screen
-
-        :param screen: the screen to draw to
-        """
-        cursor = h.load('cursor.png')
-        cursor_rect = cursor.get_rect()
-        cursor_rect.center = pygame.mouse.get_pos()
-        screen.blit(cursor, cursor_rect)
-
     def draw(self, screen):
         """
         Overwrites draw in the GameState class. Draws all of the blocks and enemies in the levels in this
@@ -818,7 +845,7 @@ class InGame(GameState):
         self.world.draw(screen)
         self.hero.draw(screen)
         self.draw_hud(screen)
-        self.draw_cursor(screen)
+        self.draw_cursor(screen)  # inherited from GameState
 
         if settings['SHOW_NODES']:
             node_sprite = h.load('bullet.png')
