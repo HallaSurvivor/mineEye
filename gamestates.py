@@ -1153,7 +1153,7 @@ class InGame(GameState):
                 if hypot(drop.rect.centerx - self.hero.rect.centerx,
                          drop.rect.centery - self.hero.rect.centery) <= self.hero.weapon_pickup_range:
 
-                    if drop.drop.style == 0: # Melee
+                    if drop.drop.style == c.MELEE:
                         if self.hero.melee_weapon is not None:
                             self.logger.info('dropped old melee weapon ({0})'.format(self.hero.melee_weapon.name))
                             self.world.all_sprites.add(self.hero.melee_weapon.sprite)
@@ -1161,7 +1161,7 @@ class InGame(GameState):
                         self.logger.info('picked up new melee weapon ({0})'.format(drop.drop.name))
                         self.hero.melee_weapon = drop.drop
 
-                    elif drop.drop.style == 1: # Ranged
+                    elif drop.drop.style == c.RANGED:
                         if self.hero.ranged_weapon is not None:
                             self.logger.info('dropped old ranged weapon ({0})'.format(self.hero.ranged_weapon.name))
                             self.world.all_sprites.add(self.hero.ranged_weapon.sprite)
