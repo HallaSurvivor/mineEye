@@ -287,3 +287,49 @@ class Hero(pygame.sprite.Sprite):
 
         except AttributeError:
             pass
+
+    def pickup_melee_weapon(self, weapon):
+        """
+        Add a melee weapon to the hero's inventory, dropping any existing weapons
+        """
+        if self.melee_weapon is not None:
+            self.drop_melee_weapon()
+
+        self.logger.info('picked up new melee weapon ({0})'.format(weapon.drop.name))
+        self.melee_weapon = weapon.drop
+
+    def pickup_ranged_weapon(self, weapon):
+        """
+        Add a ranged weapon to the hero's inventory, dropping any existing weapons
+        """
+        if self.ranged_weapon is not None:
+            self.drop_ranged_weapon()
+
+        self.logger.info('picked up new ranged weapon ({0})'.format(weapon.drop.name))
+        self.ranged_weapon = weapon.drop
+
+    def drop_melee_weapon(self):
+        """
+        Drop the held melee weapon
+        """
+        try:
+            self.melee_weapon.sprite.changex = 0
+            self.world.all_sprites.add(self.melee_weapon.sprite)
+            self.world.drops_list.add(self.melee_weapon.sprite)
+            self.logger.info('dropped melee weapon ({0})'.format(self.melee_weapon.name))
+            self.melee_weapon = None
+        except AttributeError:
+            self.logger.info('no melee weapon to drop')
+
+    def drop_ranged_weapon(self):
+        """
+        Drop the held ranged weapon
+        """
+        try:
+            self.ranged_weapon.sprite.changex = 0
+            self.world.all_sprites.add(self.ranged_weapon.sprite)
+            self.world.drops_sprites.add(self.ranged_weapon.sprite)
+            self.logger.info('dropped ranged weapon ({0})'.format(self.ranged_weapon.name))
+            self.ranged_weapon = None
+        except AttributeError:
+            self.logger.info('no melee weapon to drop')

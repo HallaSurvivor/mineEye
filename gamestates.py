@@ -1148,27 +1148,18 @@ class InGame(GameState):
 
         """
 
-        for drop in self.world.drops_list:
-            if drop.is_weapon:
-                if hypot(drop.rect.centerx - self.hero.rect.centerx,
-                         drop.rect.centery - self.hero.rect.centery) <= self.hero.weapon_pickup_range:
+        for weapon in self.world.drops_list:
+            if weapon.is_weapon:
+                if hypot(weapon.rect.centerx - self.hero.rect.centerx,
+                         weapon.rect.centery - self.hero.rect.centery) <= self.hero.weapon_pickup_range:
 
-                    if drop.drop.style == c.MELEE:
-                        if self.hero.melee_weapon is not None:
-                            self.logger.info('dropped old melee weapon ({0})'.format(self.hero.melee_weapon.name))
-                            self.world.all_sprites.add(self.hero.melee_weapon.sprite)
-                            self.world.drops_list.add(self.hero.melee_weapon.sprite)
-                        self.logger.info('picked up new melee weapon ({0})'.format(drop.drop.name))
-                        self.hero.melee_weapon = drop.drop
+                    if weapon.drop.style == c.MELEE:
+                        self.hero.pickup_melee_weapon(weapon)
 
-                    elif drop.drop.style == c.RANGED:
-                        if self.hero.ranged_weapon is not None:
-                            self.logger.info('dropped old ranged weapon ({0})'.format(self.hero.ranged_weapon.name))
-                            self.world.all_sprites.add(self.hero.ranged_weapon.sprite)
-                            self.world.drops_sprites.add(self.hero.ranged_weapon.sprite)
-                        self.logger.info('picked up new ranged weapon ({0})'.format(drop.drop.name))
-                        self.hero.ranged_weapon = drop.drop
-                    drop.kill()
+                    elif weapon.drop.style == c.RANGED:
+                        self.hero.pickup_ranged_weapon(weapon)
+
+                    weapon.kill()
 
     def throw_bomb(self):
         """
