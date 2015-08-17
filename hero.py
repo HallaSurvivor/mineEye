@@ -43,13 +43,13 @@ class Hero(pygame.sprite.Sprite):
 
         self.max_bombs = 3  # number of bombs in clip
         self.bomb_damage = 100
+        self.bomb_range = 128
+        self.bomb_refill_requirement = 4  # number of kills before being given another bomb
 
         self.melee_damage_multiplier = 1
         self.ranged_damage_multiplier = 1
 
         self.melee_range_multiplier = 1
-
-        self.bomb_refill_requirement = 4  # number of kills before being given another bomb
 
         self.can_doublejump = False
         self.take_falldamage = True
@@ -208,7 +208,7 @@ class Hero(pygame.sprite.Sprite):
             x = -13
         else:
             x = 0
-        bomb = entities.Bomb(h.load('bomb.png'), self.rect.center, x, -20)
+        bomb = entities.Bomb(h.load('bomb.png'), self.rect.center, x, -20, self.bomb_range)
         return bomb
 
     def increment_bomb_counter(self):
