@@ -549,11 +549,15 @@ class ChooseReplay(Menu):
         self.selections = [None]
 
     def select_option(self):
-        p = PathGetter.get()
-        seed = str(p)[str(p).find('seed ') + 5:-5]  # 5 ahead of 'seed ' to compensate for letters,
-                                                    # -5 to compensate for .txt
-        if p:
-            self.manager.go_to(InGame(seed=int(seed), replay_location=p))
+        try:
+            p = PathGetter.get()
+            seed = str(p)[str(p).find('seed ') + 5:-5]  # 5 ahead of 'seed ' to compensate for letters,
+                                                        # -5 to compensate for .txt
+            if p:
+                self.manager.go_to(InGame(seed=int(seed), replay_location=p))
+
+        except FileNotFoundError:
+            self.manager.go_to(TitleScreen('Sorry, Replays seem to be broken on your system. I\'m working on it!'))
 
 
 class ChangeSettings(Menu):
