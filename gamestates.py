@@ -275,58 +275,64 @@ class Menu(GameState):
         """
         Activate the currently highlighted option.
         """
-        global seeds
-
-        if self.selections is not None:
+        try:
+            selected_option = self.selections[self.selected]
             if settings['PLAY_SFX']:
                 self.beep.play()
-            if type(self.selections[self.selected]) == str:
 
-                # if it's a back button
-                if self.selections[self.selected] == 'go back':
-                    self.manager.go_back()
+            if selected_option == 'go back':
+                self.manager.go_back()
 
-                # if it's an add-this-seed
-                elif self.selections[self.selected][:5] == 'seed:':
-                    found = False
-                    for index, seed in enumerate(seeds):
-                        if seed == '' and not found:
-                            seeds[index] = self.selections[self.selected][5:]
-                            self.logger.info('added seed {0} from win/death menu'.format(self.selections[self.selected][5:]))
-                            f = open('seeds', 'wb')
-                            f.write(pickle.dumps(seeds))
-                            f.close()
-                            found = True
-                    else:
-                        if found:
-                            self.manager.go_to(TitleScreen())
-                        else:
-                            self.logger.INFO('Tried to add seed {0}, but there were no available slots'.format(self.selections[self.selected][5:]))
-                            self.manager.go_to(TitleScreen('Tried to add seed {0}, but there were no available slots'.format(self.selections[self.selected][5:])))
-
-                # if it's a settings modifier
+            try:
+                new_seed = int(selected_option[5:])
+                found = False
+                for index, current_seed in enumerate(seeds):
+                    if current_seed == '':
+                        self.add_seed(index, new_seed)
+                        found = True
+                        break
                 else:
-                    if settings[self.selections[self.selected]]:
-                        settings[self.selections[self.selected]] = False
-
+                    if found:
+                        self.manager.go_to(TitleScreen())
                     else:
-                        settings[self.selections[self.selected]] = True
+                        self.logger.INFO('Tried to add seed {0}, but there were no available slots'.format(new_seed))
+                        self.manager.go_to(TitleScreen(
+                            error='Tried to add seed {0}, but there were no available slots'.format(new_seed))
+                        )
 
-                    f = open('settings', 'wb')
-                    f.write(pickle.dumps(settings))
-                    f.close()
+            except ValueError:  # Selected option is a setting
+                self.toggle_setting(selected_option)
 
-            elif type(self.selections[self.selected]) == tuple:
-                # if it's a screen resolution
-                settings['SCREEN_RESOLUTION'] = self.selections[self.selected]
-                settings['WIDTH'] = self.selections[self.selected][0]
-                settings['HEIGHT'] = self.selections[self.selected][1]
+            except TypeError:  # Selected option is not a seed
+                self.manager.go_to(selected_option)
 
-                f = open('settings', 'wb')
-                f.write(pickle.dumps(settings))
-                f.close()
-            else:
-                self.manager.go_to(self.selections[self.selected])
+        except AttributeError:  # Selected option is None
+            pass
+
+    def add_seed(self, index, seed):
+        """
+        Add a seed to the seeds list at a given index and store it
+        """
+        global seeds
+
+        seeds[index] = seed
+        f = open('seeds', 'wb')
+        f.write(pickle.dumps(seeds))
+        f.close()
+
+    def toggle_setting(self, setting):
+        """
+        Toggle a given setting between True and False, then save the dictionary
+        """
+        if settings[setting]:
+            settings[setting] = False
+
+        else:
+            settings[setting] = True
+
+        f = open('settings', 'wb')
+        f.write(pickle.dumps(settings))
+        f.close()
 
     def handle_mouse(self, event):
         """
@@ -539,8 +545,6 @@ class AddSeed(Menu):
 class ChooseReplay(Menu):
     title = 'Choose Replay'
     options = ['Enter']
-
-    show_back_button = False
 
     def __init__(self):
         super().__init__()
