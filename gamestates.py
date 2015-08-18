@@ -1022,6 +1022,7 @@ class InGame(GameState):
                     self.pause()  # Pause menu or GOD MODE
 
                 elif event.key == pygame.K_j:
+                    log_m1down(pygame.mouse.get_pos())
                     self.melee_attack()
 
             elif event.type == pygame.KEYUP:
