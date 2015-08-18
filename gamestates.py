@@ -27,7 +27,7 @@ import os
 import time
 from math import hypot
 import logging
-import pickle
+import json
 import random
 import pygame
 from dependencies.PathGetter import PathGetter
@@ -316,9 +316,8 @@ class Menu(GameState):
         global seeds
 
         seeds[index] = seed
-        f = open('seeds', 'wb')
-        f.write(pickle.dumps(seeds))
-        f.close()
+        with open('seeds.txt', 'w') as f:
+            json.dump(seeds, f)
 
     def toggle_setting(self, setting):
         """
@@ -330,9 +329,8 @@ class Menu(GameState):
         else:
             settings[setting] = True
 
-        f = open('settings', 'wb')
-        f.write(pickle.dumps(settings))
-        f.close()
+        with open('settings.txt', 'w') as f:
+            json.dump(settings, f)
 
     def handle_mouse(self, event):
         """
@@ -500,9 +498,8 @@ class AddSeed(Menu):
                 self.options[0] = self.options[0][1:-1]
 
             seeds[self.index] = self.seed
-            f = open('seeds', 'wb')
-            f.write(pickle.dumps(seeds))
-            f.close()
+            with open('seeds.txt', 'w') as f:
+                json.dump(seeds, f)
             self.manager.go_to(PlayerMaps())
 
     def handle_keyboard(self, event):
@@ -646,7 +643,8 @@ class ChangeBinds(Menu):
                     else:
                         if e.key in valid_options:
                             # If the key is not already bound
-                            if e.key not in [settings[selection] for selection in self.selections if selection != 'go back']:
+                            if e.key not in [settings[selection] for selection in self.selections
+                                             if selection != 'go back']:
                                 settings[self.selections[self.selected]] = e.key
 
                             else:  # If the key is already bound, pick a random key and bind it to the old option
@@ -655,7 +653,8 @@ class ChangeBinds(Menu):
                                         if settings[selection] == e.key:
                                             # Get a list of all the unbound, legal, keys
                                             unbound = [key for key in valid_options if key not in
-                                                       [settings[selection] for selection in self.selections if selection != 'go back']]
+                                                       [settings[selection] for selection in self.selections
+                                                        if selection != 'go back']]
 
                                             new_key = random.choice(unbound)
                                             settings[selection] = new_key
@@ -667,9 +666,8 @@ class ChangeBinds(Menu):
                             self.options[self.selected] = self.options[self.selected][1:-1]
                             self.modifying = False
 
-                            f = open('settings', 'wb')
-                            f.write(pickle.dumps(settings))
-                            f.close()
+                            with open('settings', 'wb') as f:
+                                json.dump(settings, f)
 
             if not self.modifying:
                 if e.type == pygame.MOUSEMOTION:

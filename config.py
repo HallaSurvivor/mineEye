@@ -28,9 +28,8 @@ lets the user go into God Mode
 This is meant to test world generation and enemy effects
 in a way that allows the user to remain alive indefinitely.
 """
-import os
 import logging
-import pickle
+import json
 import pygame
 module_logger = logging.getLogger('mineEye.config')
 
@@ -58,20 +57,18 @@ HEIGHT = SCREEN_RESOLUTION[1]
 
 
 try:
-    f = open('settings', 'rb')
-    settings = pickle.loads(f.read())
-    f.close()
+    with open('settings.txt', 'r') as infile:
+        settings = json.load(infile)
 
-except:
+except FileNotFoundError:
     module_logger.info('Created new settings dictionary')
     settings = {}
     exclude = ['os', 'pickle', 'pygame', 'logging', 'exclude', 'settings', 'module_logger']
     for item in [item for item in dir() if not item.startswith('__') and item not in exclude]:
         settings[item] = locals()[item]
 
-    f = open('settings', 'wb')
-    f.write(pickle.dumps(settings))
-    f.close()
+    with open('settings.txt', 'w') as outfile:
+        json.dump(settings, outfile)
 
 settings['GOD MODE'] = False
 settings['SHOW_NODES'] = SHOW_NODES

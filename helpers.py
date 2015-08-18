@@ -6,7 +6,7 @@ import time
 import random
 import logging
 import heapq
-import pickle
+import json
 import pygame
 from config import settings
 import constants as c
@@ -369,14 +369,13 @@ def load_seed_file():
     """
     try:
         module_logger.debug('Try to load seeds')
-        f = open('seeds', 'rb')
-        seeds = pickle.loads(f.read())
-        f.close()
+        with open('seeds.txt', 'r') as infile:
+            seeds = json.loads(infile.read())
+
     except FileNotFoundError:
         module_logger.debug('Failed - creating seeds instead')
         seeds = [''] * 11
-        f = open('seeds', 'wb')
-        f.write(pickle.dumps(seeds))
-        f.close()
+        with open('seeds.txt', 'w') as outfile:
+            json.dump(seeds, outfile)
 
     return seeds
