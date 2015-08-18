@@ -284,13 +284,13 @@ class Menu(GameState):
                 self.manager.go_back()
 
             try:
-                new_seed = int(selected_option[5:])
+                new_seed = selected_option[5:]
+                int(new_seed)  # Purely to prove that we ARE dealing with a seed and move out of the "try:" if not
                 found = False
                 for index, current_seed in enumerate(seeds):
-                    if current_seed == '':
+                    if current_seed == '' and not found:
                         self.add_seed(index, new_seed)
                         found = True
-                        break
                 else:
                     if found:
                         self.manager.go_to(TitleScreen())
