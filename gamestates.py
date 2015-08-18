@@ -856,9 +856,12 @@ class InGame(GameState):
         self.draw_cursor(screen)  # inherited from GameState
 
         if self.show_circle:
-            pygame.draw.circle(screen, (0, 0, 0, 100), self.hero.rect.center,
-                               int(self.hero.melee_range_multiplier*self.hero.melee_weapon.range))
-            self.show_circle = False
+            try:
+                pygame.draw.circle(screen, (0, 0, 0, 100), self.hero.rect.center,
+                                   int(self.hero.melee_range_multiplier*self.hero.melee_weapon.range))
+                self.show_circle = False
+            except AttributeError:
+                pass
 
         if settings['SHOW_NODES']:
             node_sprite = h.load('bullet.png')
@@ -1538,8 +1541,8 @@ class UpgradeScreen(Menu):
 
     def __init__(self, game):
         super().__init__()
-        all_options = [k for k, v in upgrades.upgrades.items() if k not in game.hero.upgrades]
-
+        all_options = [k for k, v in sorted(upgrades.upgrades.items()) if k not in game.hero.upgrades]
+        random.seed(game.seed + game.loop_count)
         self.options = random.sample(all_options, 3)
         self.values = [upgrades.upgrades[key] for key in self.options]
         self.game = game
