@@ -285,7 +285,7 @@ class Hero(pygame.sprite.Sprite):
             if settings['PLAY_SFX']:
                 self.melee_swing_sound.play()
 
-        except AttributeError:
+        except AttributeError:  # No weapon
             pass
 
     def pickup_melee_weapon(self, weapon):

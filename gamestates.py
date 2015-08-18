@@ -741,6 +741,8 @@ class InGame(GameState):
         self.left_pressed = False
         self.right_pressed = False
 
+        self.show_circle = False
+
         if replay_location:
             self.replay = True
         else:
@@ -854,6 +856,11 @@ class InGame(GameState):
         self.hero.draw(screen)
         self.draw_hud(screen)
         self.draw_cursor(screen)  # inherited from GameState
+
+        if self.show_circle:
+            pygame.draw.circle(screen, (0, 0, 0, 100), self.hero.rect.center,
+                               self.hero.melee_range_multiplier*self.hero.melee_weapon.range)
+            self.show_circle = False
 
         if settings['SHOW_NODES']:
             node_sprite = h.load('bullet.png')
@@ -1234,6 +1241,7 @@ class InGame(GameState):
         Called when left clicking. Uses the Melee weapon
         """
         self.hero.melee_attack()
+        self.show_circle = True
 
     def die(self):
         self.manager.replay = False
