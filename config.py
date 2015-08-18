@@ -63,7 +63,7 @@ try:
 except FileNotFoundError:
     module_logger.info('Created new settings dictionary')
     settings = {}
-    exclude = ['os', 'pickle', 'pygame', 'logging', 'exclude', 'settings', 'module_logger']
+    exclude = ['os', 'json', 'pygame', 'logging', 'exclude', 'settings', 'module_logger']
     for item in [item for item in dir() if not item.startswith('__') and item not in exclude]:
         settings[item] = locals()[item]
 
