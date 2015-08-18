@@ -5,7 +5,7 @@ This file automatically creates a dictionary named settings that
 stores all of the settings that other modules reference.
 
 It also creates a new file named "settings" that stores a
-pickled version of this dictionary.
+version of this dictionary.
 
 The settings file will override the dictionary that is created,
 and is re created every time the user changes settings. This way,
