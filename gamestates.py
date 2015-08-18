@@ -666,7 +666,7 @@ class ChangeBinds(Menu):
                             self.options[self.selected] = self.options[self.selected][1:-1]
                             self.modifying = False
 
-                            with open('settings', 'wb') as f:
+                            with open('settings.txt', 'w') as f:
                                 json.dump(settings, f)
 
             if not self.modifying:
