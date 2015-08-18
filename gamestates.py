@@ -857,7 +857,7 @@ class InGame(GameState):
 
         if self.show_circle:
             pygame.draw.circle(screen, (0, 0, 0, 100), self.hero.rect.center,
-                               self.hero.melee_range_multiplier*self.hero.melee_weapon.range)
+                               int(self.hero.melee_range_multiplier*self.hero.melee_weapon.range))
             self.show_circle = False
 
         if settings['SHOW_NODES']:

@@ -275,7 +275,7 @@ class Hero(pygame.sprite.Sprite):
             for e in self.world.enemy_list:
                 dist = hypot(e.rect.centerx - self.rect.centerx,
                              e.rect.centery - self.rect.centery)
-                if dist <= self.melee_weapon.range:
+                if dist <= self.melee_weapon.range * self.melee_range_multiplier:
                     if not e.clips:  # ghosts
                         if self.melee_weapon.kills_ghosts:
                             e.damage(damage)
