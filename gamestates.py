@@ -284,28 +284,29 @@ class Menu(GameState):
             if selected_option == 'go back':
                 self.manager.go_back()
 
-            try:
-                new_seed = selected_option[5:]
-                int(new_seed)  # Purely to prove that we ARE dealing with a seed and move out of the "try:" if not
-                found = False
-                for index, current_seed in enumerate(seeds):
-                    if current_seed == '' and not found:
-                        self.add_seed(index, new_seed)
-                        found = True
-                else:
-                    if found:
-                        self.manager.go_to(TitleScreen())
+            else:
+                try:
+                    new_seed = selected_option[5:]
+                    int(new_seed)  # Purely to prove that we ARE dealing with a seed and move out of the "try:" if not
+                    found = False
+                    for index, current_seed in enumerate(seeds):
+                        if current_seed == '' and not found:
+                            self.add_seed(index, new_seed)
+                            found = True
                     else:
-                        self.logger.INFO('Tried to add seed {0}, but there were no available slots'.format(new_seed))
-                        self.manager.go_to(TitleScreen(
-                            error='Tried to add seed {0}, but there were no available slots'.format(new_seed))
-                        )
+                        if found:
+                            self.manager.go_to(TitleScreen())
+                        else:
+                            self.logger.INFO('Tried to add seed {0}, but there were no available slots'.format(new_seed))
+                            self.manager.go_to(TitleScreen(
+                                error='Tried to add seed {0}, but there were no available slots'.format(new_seed))
+                            )
 
-            except ValueError:  # Selected option is a setting
-                self.toggle_setting(selected_option)
+                except ValueError:
+                    self.toggle_setting(selected_option)
 
-            except TypeError:  # Selected option is not a seed
-                self.manager.go_to(selected_option)
+                except TypeError:
+                    self.manager.go_to(selected_option)
 
         except AttributeError:  # Selected option is None
             pass

@@ -542,14 +542,18 @@ class World:
                     self.all_sprites.add(new_enemy)
                     self.logger.debug('added firebat at {pos}'.format(pos=(x, y)))
 
-                elif col == "W":
-                    weapon = random.choice(drops.all_weapons)(node)
-                    self.all_sprites.add(weapon.sprite)
-                    self.drops_list.add(weapon.sprite)
-                    self.logger.debug('added weapon at {pos}'.format(pos=(x, y)))
+                else:
+                    if random.randint(0, 2500) <= 3:
+                        weapon = random.choice(drops.all_weapons)(node)
+                        self.all_sprites.add(weapon.sprite)
+                        self.drops_list.add(weapon.sprite)
+                        self.logger.debug('added weapon at {pos}'.format(pos=(x, y)))
 
                 x += 64
             y += 64
             x = xstart
+
+
+        print(len(self.drops_list))
 
         self.array_parsed = True
