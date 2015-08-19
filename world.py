@@ -23,11 +23,10 @@ class Wall(h.Sprite):
     self.damage_player is True if the player is hurt on contact (spikes) but False otherwise
     """
 
-    def __init__(self, x, y, image, end_timer=False, breakable=False, damage=0, speed_factor=1):
+    def __init__(self, center, image, end_timer=False, breakable=False, damage=0, speed_factor=1):
         """
         Create the wall and its location
-        :param x: Int representing the x position of the wall's top left corner
-        :param y: Int representing the y position of the wall's top left corner
+        :param center: the center of the sprite
         :param image: a pygame surface associated with the wall's texture
         :param damage_player: Boolean. True if touching the wall hurts the player
         :param end_timer: Boolean. True if touching the wall ends the game timer.
@@ -39,8 +38,7 @@ class Wall(h.Sprite):
         self.image = image
 
         self.rect = self.image.get_rect()
-        self.rect.y = y
-        self.rect.x = x
+        self.rect.center = center
 
         self.damage = damage
         self.speed_factor = speed_factor
@@ -493,28 +491,28 @@ class World:
                     self.nodes.append(node)
 
                 if col == "S":
-                    wall = Wall(x, y, h.load('stone.png'))
+                    wall = Wall(node, h.load('stone.png'))
                     self.block_list.add(wall)
                     self.all_sprites.add(wall)
                     self.nodes.add_wall(node)
-                    self.logger.debug('added wall at {pos}'.format(pos=(x, y)))
+                    self.logger.debug('added wall at {pos}'.format(pos=node))
 
                 elif col == "R":
-                    wall = Wall(x, y, h.load('stone.png'), end_timer=True)
+                    wall = Wall(node, h.load('stone.png'), end_timer=True)
                     self.block_list.add(wall)
                     self.all_sprites.add(wall)
                     self.nodes.add_wall(node)
                     self.logger.debug('added wall/timer at {pos}'.format(pos=(x, y)))
 
                 elif col == "P":
-                    wall = Wall(x, y, h.load('spikes.png'), damage=1)
+                    wall = Wall(node, h.load('spikes.png'), damage=1)
                     self.block_list.add(wall)
                     self.all_sprites.add(wall)
                     self.nodes.add_wall(node)
                     self.logger.debug('added spikes at {pos}'.format(pos=(x, y)))
 
                 elif col == "B":
-                    wall = Wall(x, y, h.load('broken_stone.png'), breakable=True)
+                    wall = Wall(node, h.load('broken_stone.png'), breakable=True)
                     self.block_list.add(wall)
                     self.all_sprites.add(wall)
                     self.nodes.add_wall(node)
