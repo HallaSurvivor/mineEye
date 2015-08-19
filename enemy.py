@@ -3,7 +3,7 @@ Exports the Enemy classes that the Hero has to battle.
 """
 import os
 import logging
-from math import hypot, sin, cos, tan, atan, pi
+from math import sin, cos, tan, atan, pi
 import pygame
 from dependencies import pyganim
 import helpers as h
@@ -304,7 +304,7 @@ class Enemy(h.Sprite):
         """
         Return the distance from the enemy's center to the Hero's center
         """
-        return hypot(self.rect.centerx - settings['HEIGHT']/2, self.rect.centery - settings['WIDTH']/2)
+        return h.get_node_dist(self.rect.center, settings['CENTER'])
 
     def get_normalized_vec_to_hero(self):
         """
@@ -358,15 +358,14 @@ class Enemy(h.Sprite):
 
         nearest_node = None
         for node in self.world.nodes.nodes:
-            if hypot(node[0] - settings['WIDTH']/2, node[1] - settings['HEIGHT']) <= 1200:
-                if nearest_node is None:
+            if nearest_node is None:
+                nearest_node = node
+                current_dist = h.get_node_dist(self.rect.center, node)
+            else:
+                new_dist = h.get_node_dist(self.rect.center, node)
+                if new_dist < current_dist:
                     nearest_node = node
-                    current_dist = hypot(self.rect.centerx - node[0], self.rect.centery - node[1])
-                else:
-                    new_dist = hypot(self.rect.centerx - node[0], self.rect.centery - node[1])
-                    if new_dist < current_dist:
-                        nearest_node = node
-                        current_dist = new_dist
+                    current_dist = new_dist
 
         self.logger.debug('Nearest node to {enemy}: {node}'.format(enemy=self, node=nearest_node))
         return nearest_node

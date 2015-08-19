@@ -5,7 +5,6 @@ All Heroes subclass Hero, which in turn subclasses pygame Sprites.
 """
 import os
 import logging
-from math import hypot
 import pygame
 from dependencies import pyganim
 import entities
@@ -252,15 +251,14 @@ class Hero(pygame.sprite.Sprite):
 
         nearest_node = None
         for node in self.world.nodes.nodes:
-            if hypot(node[0] - settings['WIDTH']/2, node[1] - settings['HEIGHT']) <= 1200:
-                if nearest_node is None:
+            if nearest_node is None:
+                nearest_node = node
+                current_dist = h.get_node_dist(self.rect.center, node)
+            else:
+                new_dist = h.get_node_dist(self.rect.center, node)
+                if new_dist < current_dist:
                     nearest_node = node
-                    current_dist = hypot(self.rect.centerx - node[0], self.rect.centery - node[1])
-                else:
-                    new_dist = hypot(self.rect.centerx - node[0], self.rect.centery - node[1])
-                    if new_dist < current_dist:
-                        nearest_node = node
-                        current_dist = new_dist
+                    current_dist = new_dist
 
         self.logger.debug('Nearest node to hero: {node}'.format(node=nearest_node))
         return nearest_node
@@ -273,8 +271,7 @@ class Hero(pygame.sprite.Sprite):
             damage = self.melee_weapon.power * self.melee_damage_multiplier
 
             for e in self.world.enemy_list:
-                dist = hypot(e.rect.centerx - self.rect.centerx,
-                             e.rect.centery - self.rect.centery)
+                dist = h.get_node_dist(e.rect.cetner, self.rect.center)
                 if dist <= self.melee_weapon.range * self.melee_range_multiplier:
                     if not e.clips:  # ghosts
                         if self.melee_weapon.kills_ghosts:

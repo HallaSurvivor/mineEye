@@ -25,7 +25,6 @@ the GameState is changed via GameStateManager.
 """
 import os
 import time
-from math import hypot
 import logging
 import json
 import random
@@ -1200,8 +1199,7 @@ class InGame(GameState):
 
         for weapon in self.world.drops_list:
             if weapon.is_weapon:
-                if hypot(weapon.rect.centerx - self.hero.rect.centerx,
-                         weapon.rect.centery - self.hero.rect.centery) <= self.hero.weapon_pickup_range:
+                if h.get_node_dist(weapon.rect, self.hero.rect) <= self.hero.weapon_pickup_range:
 
                     if weapon.drop.style == c.MELEE:
                         self.hero.pickup_melee_weapon(weapon)
