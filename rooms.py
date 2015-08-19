@@ -86,10 +86,10 @@ room_dict = {
         [c.MOVE_RIGHT,
         "SSDDSSSSSSSSSSSSS",
         "S               S",
-        "ST              S",
+        "SV              S",
         "S     SSSSSSS   S",
         "S      S   S    S",
-        "S    S T S      S",
+        "S    S V S      S",
         "SSSSSSSSSSSSSDDSS"
         ],
 
@@ -121,7 +121,7 @@ room_dict = {
         "S    S",
         "S    S",
         "S    S",
-        "ST  TS",
+        "SV  VS",
         "S    S",
         "S BBBS",
         "S    S",
@@ -134,7 +134,7 @@ room_dict = {
     "Room08":
         [c.MOVE_LEFT,
         "SSSSSSSSSSSDDSSS",
-        "S       T      S",
+        "S       V      S",
         "S   B          S",
         "SS  BB         S",
         "SSDDSSSSSSSSSSSS"
@@ -143,7 +143,7 @@ room_dict = {
     "Room09":
         [c.MOVE_RIGHT,
         "SSDDSSSSSSSS",
-        "ST  T      S",
+        "SV  V      S",
         "S          S",
         "SSSSSSDDSSSS"
         ],
@@ -151,7 +151,7 @@ room_dict = {
     "Room10":
         [c.MOVE_RIGHT,
         "SSSSDDSSSSSSSS",
-        "S  B        TS",
+        "S  B        VS",
         "S  B      B  S",
         "S      G BB  S",
         "SSPPSSSSSSSDDS"

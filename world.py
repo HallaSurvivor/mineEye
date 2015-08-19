@@ -529,7 +529,7 @@ class World:
                     self.nodes.add_wall(node)
                     self.logger.debug('added broken wall at {pos}'.format(pos=node))
 
-                elif col == "T":
+                elif col == "V":
                     new_enemy = enemy.Volcano(self)
                     new_enemy.rect.center = node
                     self.enemy_list.add(new_enemy)
@@ -568,5 +568,5 @@ class World:
             y += 64
             x = xstart
 
-        self.logger.warning('number of spawned weapons: {0}'.format(len(self.drops_list)))
+        self.logger.debug('number of spawned weapons: {0}'.format(len(self.drops_list)))
         self.array_parsed = True
