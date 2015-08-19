@@ -115,6 +115,8 @@ class World:
         self.background = h.create_background(h.load(self.background_string))
         self.region = None
 
+        self.weapon_factor = 6  # tenths of a percent chance of spawning a weapon a a given node
+
         self.xspeed = 0
         self.yspeed = 0
 
@@ -552,7 +554,7 @@ class World:
                     self.add_weapon(node)
 
                 else:
-                    if col not in ["&", "D"] and random.randint(0, 2500) <= 15:
+                    if col not in ["&", "D"] and random.randint(0, 1000) <= self.weapon_factor:
                         if len(self.drops_list) == 0:
                             self.add_weapon(node)
                         else:
