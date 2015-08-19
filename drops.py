@@ -175,4 +175,5 @@ class GhostSlayer(Weapon):
     def __init__(self, center):
         super().__init__(center)
 
+
 all_weapons = [Weapon1, Weapon2, GhostSlayer]

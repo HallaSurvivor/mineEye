@@ -500,7 +500,7 @@ class World:
                     self.nodes.add_wall(node)
                     self.logger.debug('added wall at {pos}'.format(pos=(x, y)))
 
-                if col == "R":
+                elif col == "R":
                     wall = Wall(x, y, h.load('stone.png'), end_timer=True)
                     self.block_list.add(wall)
                     self.all_sprites.add(wall)
@@ -546,7 +546,7 @@ class World:
                     weapon = random.choice(drops.all_weapons)(node)
                     self.all_sprites.add(weapon.sprite)
                     self.drops_list.add(weapon.sprite)
-                    self.logger.debug('added weapon chest at {pos}'.format(pos=(x, y)))
+                    self.logger.debug('added weapon at {pos}'.format(pos=(x, y)))
 
                 x += 64
             y += 64
