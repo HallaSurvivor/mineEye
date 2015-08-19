@@ -1322,7 +1322,8 @@ class InGame(GameState):
         """
 
         room_list = []
-        possible_rooms = [v for k, v in sorted(r.room_dict.items()) if k not in ["StartingRoom", "EndingRoom"]]
+        possible_rooms = [v for k, v in sorted(r.room_dict.items())
+                          if k not in ["StartingRoom", "EndingRoom", "TransitionRoom"]]
 
         room_list.append(r.room_dict["StartingRoom"])
 

@@ -31,6 +31,16 @@ room_dict = {
         "SSSSSDDS"
         ],
 
+    "TransitionRoom":
+        [c.MOVE_DOWN,
+         "SDDS",
+         "S  S",
+         "S  S",
+         "S  S",
+         "S  S",
+         "SDDS"
+        ],
+
     "EndingRoom":
         [c.MOVE_DOWN,
         "SSSDDSSS",
