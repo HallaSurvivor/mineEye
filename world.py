@@ -465,6 +465,16 @@ class World:
         self.drops_list.add(weapon.sprite)
         self.logger.debug('added weapon at {pos}'.format(pos=node))
 
+    def add_enemy(self, enemy_, node):
+        """
+        Add a specific enemy to a given node
+        """
+        new_enemy = enemy_(self)
+        new_enemy.rect.center = node
+        self.enemy_list.add(new_enemy)
+        self.all_sprites.add(new_enemy)
+        self.logger.debug('added {enemy} at {pos}'.format(enemy=enemy_.name, pos=node))
+
     def parse_room_array(self):
         """
         Turn a list of strings into an array of walls and enemies.
@@ -530,25 +540,13 @@ class World:
                     self.logger.debug('added broken wall at {pos}'.format(pos=node))
 
                 elif col == "V":
-                    new_enemy = enemy.Volcano(self)
-                    new_enemy.rect.center = node
-                    self.enemy_list.add(new_enemy)
-                    self.all_sprites.add(new_enemy)
-                    self.logger.debug('added turret at {pos}'.format(pos=node))
+                    self.add_enemy(enemy.Volcano, node)
 
                 elif col == "G":
-                    new_enemy = enemy.Ghost(self)
-                    new_enemy.rect.center = node
-                    self.enemy_list.add(new_enemy)
-                    self.all_sprites.add(new_enemy)
-                    self.logger.debug('added ghost at {pos}'.format(pos=node))
+                    self.add_enemy(enemy.Ghost, node)
 
                 elif col == "F":
-                    new_enemy = enemy.FireBat(self)
-                    new_enemy.rect.center = node
-                    self.enemy_list.add(new_enemy)
-                    self.all_sprites.add(new_enemy)
-                    self.logger.debug('added firebat at {pos}'.format(pos=node))
+                    self.add_enemy(enemy.FireBat, node)
 
                 elif col == "W":
                     self.add_weapon(node)
