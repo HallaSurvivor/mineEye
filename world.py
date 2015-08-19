@@ -562,7 +562,5 @@ class World:
             y += 64
             x = xstart
 
-
-        print(len(self.drops_list))
-
+        self.logger.debug('number of spawned weapons: {0}'.format(len(self.drops_list)))
         self.array_parsed = True
