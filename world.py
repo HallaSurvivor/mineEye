@@ -454,6 +454,15 @@ class World:
         self.xspeed += changex
         self.yspeed += changey
 
+    def add_weapon(self, node):
+        """
+        Add a random weapon to a given node
+        """
+        weapon = random.choice(drops.all_weapons)(node)
+        self.all_sprites.add(weapon.sprite)
+        self.drops_list.add(weapon.sprite)
+        self.logger.debug('added weapon at {pos}'.format(pos=node))
+
     def parse_room_array(self):
         """
         Turn a list of strings into an array of walls and enemies.
@@ -502,63 +511,60 @@ class World:
                     self.block_list.add(wall)
                     self.all_sprites.add(wall)
                     self.nodes.add_wall(node)
-                    self.logger.debug('added wall/timer at {pos}'.format(pos=(x, y)))
+                    self.logger.debug('added wall/timer at {pos}'.format(pos=node))
 
                 elif col == "P":
                     wall = Wall(node, h.load('spikes.png'), damage=1)
                     self.block_list.add(wall)
                     self.all_sprites.add(wall)
                     self.nodes.add_wall(node)
-                    self.logger.debug('added spikes at {pos}'.format(pos=(x, y)))
+                    self.logger.debug('added spikes at {pos}'.format(pos=node))
 
                 elif col == "B":
                     wall = Wall(node, h.load('broken_stone.png'), breakable=True)
                     self.block_list.add(wall)
                     self.all_sprites.add(wall)
                     self.nodes.add_wall(node)
-                    self.logger.debug('added broken wall at {pos}'.format(pos=(x, y)))
+                    self.logger.debug('added broken wall at {pos}'.format(pos=node))
 
                 elif col == "T":
                     new_enemy = enemy.Volcano(self)
                     new_enemy.rect.center = node
                     self.enemy_list.add(new_enemy)
                     self.all_sprites.add(new_enemy)
-                    self.logger.debug('added turret at {pos}'.format(pos=(x, y)))
+                    self.logger.debug('added turret at {pos}'.format(pos=node))
 
                 elif col == "G":
                     new_enemy = enemy.Ghost(self)
                     new_enemy.rect.center = node
                     self.enemy_list.add(new_enemy)
                     self.all_sprites.add(new_enemy)
-                    self.logger.debug('added ghost at {pos}'.format(pos=(x, y)))
+                    self.logger.debug('added ghost at {pos}'.format(pos=node))
 
                 elif col == "F":
                     new_enemy = enemy.FireBat(self)
                     new_enemy.rect.center = node
                     self.enemy_list.add(new_enemy)
                     self.all_sprites.add(new_enemy)
-                    self.logger.debug('added firebat at {pos}'.format(pos=(x, y)))
+                    self.logger.debug('added firebat at {pos}'.format(pos=node))
+
+                elif col == "W":
+                    self.add_weapon(node)
 
                 else:
                     if col not in ["&", "D"] and random.randint(0, 2500) <= 15:
                         if len(self.drops_list) == 0:
-                            weapon = random.choice(drops.all_weapons)(node)
-                            self.all_sprites.add(weapon.sprite)
-                            self.drops_list.add(weapon.sprite)
-                            self.logger.debug('added weapon at {pos}'.format(pos=(x, y)))
+                            self.add_weapon(node)
                         else:
                             done = False
                             for existing_weapon in self.drops_list:
                                 if h.get_node_dist(existing_weapon.rect.center, node) < 10000 and not done:
-                                    weapon = random.choice(drops.all_weapons)(node)
-                                    self.all_sprites.add(weapon.sprite)
-                                    self.drops_list.add(weapon.sprite)
-                                    self.logger.debug('added weapon at {pos}'.format(pos=(x, y)))
+                                    self.add_weapon(node)
                                     done = True
 
                 x += 64
             y += 64
             x = xstart
 
-        self.logger.debug('number of spawned weapons: {0}'.format(len(self.drops_list)))
+        self.logger.warning('number of spawned weapons: {0}'.format(len(self.drops_list)))
         self.array_parsed = True
