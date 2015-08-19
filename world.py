@@ -22,15 +22,6 @@ import helpers as h
 
 module_logger = logging.getLogger('mineEye.rooms')
 
-MoveRight = 0
-MoveLeft = 1
-MoveDown = 2
-
-with open('room_options.txt', 'r') as raw_room_string:
-    room_string = "".join([line.replace("\n", " ") for line in raw_room_string if not line.startswith("#")])
-    module_logger.debug(room_string)
-    room_dict = json.loads(room_string)
-
 
 class Wall(h.Sprite):
     """

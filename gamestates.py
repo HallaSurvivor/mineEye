@@ -33,6 +33,7 @@ import pygame
 from dependencies.PathGetter import PathGetter
 from config import settings
 import constants as c
+import rooms as r
 import helpers as h
 import world
 import hero
@@ -1321,9 +1322,9 @@ class InGame(GameState):
         """
 
         room_list = []
-        possible_rooms = [v for k, v in sorted(world.room_dict.items()) if k not in ["StartingRoom", "EndingRoom"]]
+        possible_rooms = [v for k, v in sorted(r.room_dict.items()) if k not in ["StartingRoom", "EndingRoom"]]
 
-        room_list.append(world.room_dict["StartingRoom"])
+        room_list.append(r.room_dict["StartingRoom"])
 
         move_down_counter = 0
         move_left_counter = 0
@@ -1340,7 +1341,7 @@ class InGame(GameState):
                 for row in possible_next_room:
                     self.logger.debug(row)
 
-                if possible_next_room[0] == world.MoveDown:
+                if possible_next_room[0] == c.MOVE_DOWN:
                     if move_down_counter <= 2:
                         if possible_next_room == room_list[-1]:
                             test = random.randint(0, 10)
@@ -1366,7 +1367,7 @@ class InGame(GameState):
                     else:
                         self.logger.debug('DQ: too many down in a row')
 
-                elif possible_next_room[0] == world.MoveLeft:
+                elif possible_next_room[0] == c.MOVE_LEFT:
                     if move_left_counter <= 4:
                         if possible_next_room == room_list[-1]:
                             test = random.randint(0, 10)
@@ -1392,7 +1393,7 @@ class InGame(GameState):
                     else:
                         self.logger.debug('DQ: too many left in a row')
 
-                elif possible_next_room[0] == world.MoveRight:
+                elif possible_next_room[0] == c.MOVE_RIGHT:
                     if move_right_counter <= 4:
                         if possible_next_room == room_list[-1]:
                             test = random.randint(0, 10)
@@ -1423,7 +1424,7 @@ class InGame(GameState):
 
             self.logger.debug('=======found room {i}======'.format(i=i))
 
-        room_list.append(world.room_dict["EndingRoom"])
+        room_list.append(r.room_dict["EndingRoom"])
         self.logger.debug('===============WorldGen Complete===============')
 
         return room_list

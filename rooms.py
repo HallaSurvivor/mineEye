@@ -1,28 +1,30 @@
-# A dictionary of all the rooms to randomly select from.
-# Each entry takes the form:
-# ROOM_NAME: [PrimaryPlayerMotion, *room_layout]
-#
-#
-#PrimaryPlayerMotion is a variable that tells the game what direction
-#the player is moving in through the room.
-#    0 is moving to the right
-#    1 is moving to the left
-#    2 is moving down
-#
-#
-# StartingRoom and EndingRoom must exist somewhere
-#    KEY for room_array:
-#        S is stone
-#        P is spike
-#        B is a breakable wall
-#        R is a turret
-#        T is a block that stops the timer
-#        W is a weapon chest
-#        D is door <- IMPORTANT, you need a door at the top and bottom to make the logic work
+"""
+Define the rooms in the world.
 
-{
+A dictionary of all the rooms to randomly select from.
+Each entry takes the form:
+ROOM_NAME: [PrimaryPlayerMotion, *room_layout]
+
+
+PrimaryPlayerMotion is a variable that tells the game what direction
+the player is moving in through the room.
+
+StartingRoom and EndingRoom must exist somewhere
+   KEY for room_array:
+       S is stone
+       P is spike
+       B is a breakable wall
+       R is a turret
+       T is a block that stops the timer
+       W is a weapon chest
+       D is door <- IMPORTANT, you need a door at the top and bottom to make the logic work
+"""
+
+import constants as c
+
+room_dict = {
     "StartingRoom":
-        [0,
+        [c.MOVE_RIGHT,
         "SSSSSSSS",
         "S      S",
         "SW     S",
@@ -30,7 +32,7 @@
         ],
 
     "EndingRoom":
-        [2,
+        [c.MOVE_DOWN,
         "SSSDDSSS",
         "S      S",
         "S      S",
@@ -40,7 +42,7 @@
         ],
 
     "Room01":
-        [2,
+        [c.MOVE_DOWN,
         "SSDDSS",
         "SF   S",
         "S    S",
@@ -55,7 +57,7 @@
         ],
 
     "Room02":
-        [1,
+        [c.MOVE_LEFT,
         "SSSSSSSSSDDS",
         "P          P",
         "P      WS  P",
@@ -63,7 +65,7 @@
         ],
 
     "Room03":
-        [0,
+        [c.MOVE_RIGHT,
         "SSDDSSSSSSSS",
         "S          P",
         "S     B    P",
@@ -71,7 +73,7 @@
         ],
 
     "Room04":
-        [0,
+        [c.MOVE_RIGHT,
         "SSDDSSSSSSSSSSSSS",
         "S               S",
         "ST              S",
@@ -82,7 +84,7 @@
         ],
 
     "Room05":
-        [1,
+        [c.MOVE_LEFT,
         "SSSSSSSSSSSSSSSDDS",
         "S                S",
         "S                S",
@@ -94,7 +96,7 @@
         ],
 
     "Room06":
-        [0,
+        [c.MOVE_RIGHT,
         "SSDDSSSSSSSS",
         "S          S",
         "S      B   S",
@@ -103,7 +105,7 @@
         ],
 
     "Room07":
-        [2,
+        [c.MOVE_DOWN,
         "SSDDSS",
         "S    S",
         "S    S",
@@ -120,7 +122,7 @@
         ],
 
     "Room08":
-        [1,
+        [c.MOVE_LEFT,
         "SSSSSSSSSSSDDSSS",
         "S       T      S",
         "S   B          S",
@@ -129,7 +131,7 @@
         ],
 
     "Room09":
-        [0,
+        [c.MOVE_RIGHT,
         "SSDDSSSSSSSS",
         "ST  T      S",
         "S         WS",
@@ -137,7 +139,7 @@
         ],
 
     "Room10":
-        [0,
+        [c.MOVE_RIGHT,
         "SSSSDDSSSSSSSS",
         "S  B        TS",
         "S  B      B  S",
@@ -146,7 +148,7 @@
         ],
 
     "Room11":
-        [0,
+        [c.MOVE_RIGHT,
         "SSDDSSSSSSSS",
         "SF         S",
         "S          S",
