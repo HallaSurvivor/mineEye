@@ -5,7 +5,6 @@ Exports 2 lists, all_weapons and all_items that are used
 to randomly generate chests inside of rooms.py
 """
 
-import random
 import helpers as h
 import constants as c
 
@@ -112,7 +111,7 @@ class DropSprite(h.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = center
 
-        self.changex = random.randint(-5, 5)
+        self.changex = 0
         self.changey = 0
 
 

@@ -406,15 +406,6 @@ class World:
         Cause gravity for drops and stop any dropping items/weapons from falling through the floor.
         """
         for drop in self.drops_list:
-            drop.movex(drop.changex)
-            hit_list = pygame.sprite.spritecollide(drop, self.block_list, False)
-            for block in hit_list:
-                if drop.changex > 0:
-                    drop.rect.right = block.rect.left
-                elif drop.changex < 0:
-                    drop.rect.left = block.rect.right
-                drop.changex = 0
-
             if drop.changey == 0:
                 drop.changey = -self.base_y_gravity
             else:
@@ -428,7 +419,6 @@ class World:
                 elif drop.changey < 0:
                     drop.rect.top = block.rect.bottom
                 drop.changey = 0
-                drop.changex = 0
 
     def cause_ranged_attacks(self, hero):
         """
