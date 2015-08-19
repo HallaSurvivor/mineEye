@@ -191,7 +191,6 @@ class World:
             e.draw(screen)
 
         self.block_list.draw(screen)
-        self.chest_list.draw(screen)
         self.drops_list.draw(screen)
         self.enemy_projectile_list.draw(screen)
         self.hero_projectile_list.draw(screen)
@@ -408,11 +407,11 @@ class World:
                         e.damage(damage)
                         self.logger.info('damaged {0} by {1} hp with bomb'.format(e, damage))
 
-                for chest in self.chest_list:
-                    distance = hypot(chest.rect.centerx - bomb.rect.centerx, chest.rect.centery - bomb.rect.centery)
+                for drop in self.drops_list:
+                    distance = hypot(drop.rect.centerx - bomb.rect.centerx, drop.rect.centery - bomb.rect.centery)
                     if distance < bomb.radius:
-                        self.logger.info('destroyed chest at {0} with bomb'.format((chest.rect.x, chest.rect.y)))
-                        chest.kill()
+                        self.logger.info('destroyed {0} at {1} with bomb'.format(drop, (drop.rect.x, drop.rect.y)))
+                        drop.kill()
 
                 bomb.kill()
 
@@ -523,7 +522,7 @@ class World:
                     self.logger.debug('added broken wall at {pos}'.format(pos=(x, y)))
 
                 elif col == "T":
-                    new_enemy = enemy.Turret(self)
+                    new_enemy = enemy.Volcano(self)
                     new_enemy.rect.center = node
                     self.enemy_list.add(new_enemy)
                     self.all_sprites.add(new_enemy)

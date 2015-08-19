@@ -422,7 +422,7 @@ class Enemy(h.Sprite):
             self.animation_obj['move_right'].blit(screen, self.rect)
 
 
-class Turret(Enemy):
+class Volcano(Enemy):
     """
     A stationary turret that fires projectiles at the player.
     """
@@ -430,7 +430,7 @@ class Turret(Enemy):
     is_ranged = True
     contact_damage = 0
     attack_period = 16
-    name = 'Turret'
+    name = 'Volcano'
 
     def __init__(self, *args):
         super().__init__(*args)

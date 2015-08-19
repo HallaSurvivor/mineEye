@@ -88,8 +88,6 @@ class DropSprite(h.Sprite):
         booleans showing the nature of the drop.
         The appropriate flag is set to True when created.
     """
-    is_weapon = False
-    is_item = False
 
     def __init__(self, image, center, drop):
         """
