@@ -1,17 +1,11 @@
 """
-Adds the room_dict dictionary, storing the room layouts, as well as the Room() class, which parses those layouts
+Stores the World and everything that takes place within it
 
-room_dict is a dictionary of lists of strings, where each list begins
-with a header describing the direction of motion in the room.
-This list of strings is then parsed character by character to create the
-walls, enemies, and chests that make up the world.
-
-World is a Room created by putting groups of room_dict items next to each other.
-This larger room, comprised of a semi-random selection of the rooms inside room_dict,
-is what makes up the Hero's world. The semi-random generation takes place inside gamestates.py
+World is created by putting rooms next to each other.
+The semirandom selection for this generation takes place in
+gamestates.InGame.generate_world()
 """
 import random
-import json
 import logging
 from math import hypot
 import pygame
@@ -54,46 +48,6 @@ class Wall(h.Sprite):
         self.end_timer = end_timer
 
         self.breakable = breakable
-
-
-class Chest(h.Sprite):
-    """
-    A chest that can hold either items or weapons.
-    """
-
-    def __init__(self, x, y, item=False, weapon=False):
-        """
-        Create the chest.
-        :param x: Int representing the x position of the chest's top left corner
-        :param y: Int representing the y position of the chest's top left corner
-        :param item: Bool. True if the chest has an item. False by default
-        :param weapon: Bool. True of the chest has a weapon. False by default
-        """
-        super().__init__()
-
-        self.image = h.load('chest.png')
-        self.rect = self.image.get_rect()
-
-        self.rect.x = x
-        self.rect.y = y
-
-        self.is_item_chest = item
-        self.is_weapon_chest = weapon
-
-    def generate_contents(self, hero):
-        """
-        Generate an item/weapon when the chest is opened. Called in Room.check_chests()
-        :param hero: The hero opening the chest. Hero could have attributes modifying item drops.
-        :returns contents: A list of sprites representing the items/weapons in the chest.
-        """
-        contents = []
-        if self.is_weapon_chest:
-            contents.append(random.choice(drops.all_weapons)(self.rect.center))
-            if hero.multiple_weapon_drops:
-                contents.append(random.choice(drops.all_weapons)(self.rect.center))
-        elif self.is_item_chest:
-            pass
-        return contents
 
 
 class World:
@@ -152,7 +106,6 @@ class World:
 
         self.all_sprites = pygame.sprite.Group()
         self.block_list = pygame.sprite.Group()
-        self.chest_list = pygame.sprite.Group()
         self.drops_list = pygame.sprite.Group()
         self.enemy_list = pygame.sprite.Group()
         self.enemy_projectile_list = pygame.sprite.Group()
@@ -202,9 +155,6 @@ class World:
 
         # Update all the blocks in the room
         self.block_list.update()
-
-        # Check if the player hit a chest
-        self.check_chests(hero)
 
         # Make the chest's drops follow gravity
         self.cause_dropped_item_gravity()
@@ -376,21 +326,6 @@ class World:
             self.yspeed = self.base_y_gravity
         else:
             self.yspeed += self.gravity_acceleration
-
-    def check_chests(self, hero):
-        """
-        Check for a collision between the chest and a hero and spawn the proper item if a collision happens.
-
-        :param hero: The hero to check against.
-        """
-        hit_list = pygame.sprite.spritecollide(hero, self.chest_list, False)
-        for chest in hit_list:
-            contents = chest.generate_contents(hero)
-            for thing in contents:
-                self.all_sprites.add(thing.sprite)
-                self.drops_list.add(thing.sprite)
-
-            chest.kill()
 
     def cause_dropped_item_gravity(self):
         """
@@ -609,11 +544,9 @@ class World:
                     self.logger.debug('added firebat at {pos}'.format(pos=(x, y)))
 
                 elif col == "W":
-                    chest = Chest(x, y, weapon=True)
-                    chest.rect.x += 8
-                    chest.rect.y += 16
-                    self.chest_list.add(chest)
-                    self.all_sprites.add(chest)
+                    weapon = random.choice(drops.all_weapons)(node)
+                    self.all_sprites.add(weapon.sprite)
+                    self.drops_list.add(weapon.sprite)
                     self.logger.debug('added weapon chest at {pos}'.format(pos=(x, y)))
 
                 x += 64
