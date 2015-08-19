@@ -3,6 +3,7 @@ Exports a variety of helper functions to cut down on repetitive code.
 """
 import os
 import time
+import math
 import random
 import logging
 import heapq
@@ -379,3 +380,10 @@ def load_seed_file():
             json.dump(seeds, outfile)
 
     return seeds
+
+
+def get_node_dist(node1, node2):
+    """
+    Return the absolute distance between two nodes
+    """
+    return math.hypot(node1[0] - node2[0], node1[1] - node2[1])

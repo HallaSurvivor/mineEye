@@ -7,7 +7,6 @@ gamestates.InGame.generate_world()
 """
 import random
 import logging
-from math import hypot
 import pygame
 from config import settings
 import enemy
@@ -352,7 +351,7 @@ class World:
         :param hero: The hero to target
         """
         for e in self.enemy_list:
-            distance = hypot(e.rect.centerx - hero.rect.centerx, e.rect.centery - hero.rect.centery)
+            distance = h.get_node_dist(hero.rect.center, e.rect.center)
             if e.is_ranged and distance <= e.attack_range:
                 if e.cooldown == 0:
                     proj_list = e.ranged_attack(hero)
@@ -394,21 +393,21 @@ class World:
             hit_list = pygame.sprite.spritecollide(bomb, self.block_list, False)
             if len(hit_list) > 0:
                 for block in self.block_list:
-                    distance = hypot(block.rect.centerx - bomb.rect.centerx, block.rect.centery - bomb.rect.centery)
+                    distance = h.get_node_dist(block.rect.center, bomb.rect.center)
                     if distance < bomb.radius and block.breakable:
                         self.logger.info('destroyed block at {0} with bomb'.format((block.rect.x, block.rect.y)))
                         self.nodes.make_passable((block.rect.centerx, block.rect.centery))
                         block.kill()
 
                 for e in self.enemy_list:
-                    distance = hypot(e.rect.centerx - bomb.rect.centerx, e.rect.centery - bomb.rect.centery)
+                    distance = h.get_node_dist(e.rect.center, bomb.rect.center)
                     if distance < bomb.radius:
                         damage = hero.bomb_damage  # / distance**2  # lowers damage, but too much
                         e.damage(damage)
                         self.logger.info('damaged {0} by {1} hp with bomb'.format(e, damage))
 
                 for drop in self.drops_list:
-                    distance = hypot(drop.rect.centerx - bomb.rect.centerx, drop.rect.centery - bomb.rect.centery)
+                    distance = h.get_node_dist(drop.rect.center, bomb.rect.center)
                     if distance < bomb.radius:
                         self.logger.info('destroyed {0} at {1} with bomb'.format(drop, (drop.rect.x, drop.rect.y)))
                         drop.kill()
@@ -543,11 +542,21 @@ class World:
                     self.logger.debug('added firebat at {pos}'.format(pos=(x, y)))
 
                 else:
-                    if random.randint(0, 2500) <= 3:
-                        weapon = random.choice(drops.all_weapons)(node)
-                        self.all_sprites.add(weapon.sprite)
-                        self.drops_list.add(weapon.sprite)
-                        self.logger.debug('added weapon at {pos}'.format(pos=(x, y)))
+                    if col not in ["&", "D"] and random.randint(0, 2500) <= 15:
+                        if len(self.drops_list) == 0:
+                            weapon = random.choice(drops.all_weapons)(node)
+                            self.all_sprites.add(weapon.sprite)
+                            self.drops_list.add(weapon.sprite)
+                            self.logger.debug('added weapon at {pos}'.format(pos=(x, y)))
+                        else:
+                            done = False
+                            for existing_weapon in self.drops_list:
+                                if h.get_node_dist(existing_weapon.rect.center, node) < 10000 and not done:
+                                    weapon = random.choice(drops.all_weapons)(node)
+                                    self.all_sprites.add(weapon.sprite)
+                                    self.drops_list.add(weapon.sprite)
+                                    self.logger.debug('added weapon at {pos}'.format(pos=(x, y)))
+                                    done = True
 
                 x += 64
             y += 64
