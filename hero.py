@@ -1,7 +1,5 @@
 """
-Exports the Heroes that the User can control as a list.
-
-All Heroes subclass Hero, which in turn subclasses pygame Sprites.
+Exports the Hero that the User can control
 """
 import os
 import logging

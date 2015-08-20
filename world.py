@@ -566,5 +566,7 @@ class World:
             y += 64
             x = xstart
 
-        self.logger.debug('number of spawned weapons: {0}'.format(len(self.drops_list)))
+        self.logger.debug('number of created enemies: {0}'.format(len(self.enemy_list)))
+        self.logger.debug('number of created nodes: {0}'.format(len(self.nodes.nodes)))
+        self.logger.debug('number of created weapons: {0}'.format(len(self.drops_list)))
         self.array_parsed = True
