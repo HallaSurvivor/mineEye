@@ -13,7 +13,7 @@ import enemy
 import drops
 import helpers as h
 
-module_logger = logging.getLogger('mineEye.rooms')
+module_logger = logging.getLogger('mineEye.world')
 
 
 class Wall(h.Sprite):
@@ -94,7 +94,7 @@ class World:
             about a room.
         """
 
-        self.logger = logging.getLogger('mineEye.rooms.Room')
+        self.logger = logging.getLogger('mineEye.world.World')
 
         self.seed = seed
         random.seed(self.seed)
