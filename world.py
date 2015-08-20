@@ -18,12 +18,10 @@ module_logger = logging.getLogger('mineEye.world')
 
 class Wall(h.Sprite):
     """
-    Wall the Hero can collide with.
-
-    self.damage_player is True if the player is hurt on contact (spikes) but False otherwise
+    A wall that makes up the world.
     """
 
-    def __init__(self, center, image, end_timer=False, breakable=False, damage=0, speed_factor=1):
+    def __init__(self, center, end_timer=False, breakable=False, damage=0):
         """
         Create the wall and its location
         :param center: the center of the sprite
@@ -35,16 +33,19 @@ class Wall(h.Sprite):
         """
         super().__init__()
 
-        self.image = image
+        self.end_timer = end_timer
+        self.breakable = breakable
+        self.damage = damage
+
+        if breakable:
+            self.image = h.load('broken_stone.png')
+        elif damage:
+            self.image = h.load('spikes.png')
+        else:
+            self.image = h.load('stone.png')
 
         self.rect = self.image.get_rect()
         self.rect.center = center
-
-        self.damage = damage
-        self.speed_factor = speed_factor
-        self.end_timer = end_timer
-
-        self.breakable = breakable
 
 
 class World:
@@ -103,6 +104,7 @@ class World:
 
         self.all_sprites = pygame.sprite.Group()
         self.block_list = pygame.sprite.Group()
+        self.spikes_list = pygame.sprite.Group()
         self.drops_list = pygame.sprite.Group()
         self.enemy_list = pygame.sprite.Group()
         self.enemy_projectile_list = pygame.sprite.Group()
@@ -152,6 +154,9 @@ class World:
         # Control the world via user input and gravity
         self.move_world(hero, self.xspeed, self.yspeed)
 
+        # Cause spike damage
+        self.cause_spike_damage(hero)
+
         # Update all the blocks in the room
         self.block_list.update()
 
@@ -190,6 +195,7 @@ class World:
             e.draw(screen)
 
         self.block_list.draw(screen)
+        self.spikes_list.draw(screen)
         self.drops_list.draw(screen)
         self.enemy_projectile_list.draw(screen)
         self.hero_projectile_list.draw(screen)
@@ -224,11 +230,6 @@ class World:
             for sprite in self.all_sprites:
                 if sprite != block:
                     sprite.rect.x += x_pos_change
-
-            # Damage the player if the block is a spike
-            if block.damage:
-                self.logger.info('hero touched spike')
-                hero.damage(block.damage)
 
             # End the game timer if the block is the end
             if block.end_timer:
@@ -281,11 +282,6 @@ class World:
                 if sprite != block:
                     sprite.rect.y += y_pos_change
 
-            # Damage the player if the block is a spike
-            if block.damage:
-                self.logger.info('hero touched spike')
-                hero.damage(block.damage)
-
             # End the game timer if the block is the end
             if block.end_timer:
                 self.run_timer = False
@@ -315,6 +311,15 @@ class World:
             if e.contact_damage:
                 self.logger.info('contact damage - {0}'.format(e))
                 hero.damage(e.contact_damage)
+
+    def cause_spike_damage(self, hero):
+        """
+        Cause damage if the Hero is touching a spike
+        """
+        spike_hit_list = pygame.sprite.spritecollide(hero, self.spikes_list, False)
+        if len(spike_hit_list) > 0:
+            self.logger.info('hero touched spike')
+            hero.damage(spike_hit_list[0].damage)
 
     def calc_gravity(self):
         """
@@ -475,6 +480,28 @@ class World:
         self.all_sprites.add(new_enemy)
         self.logger.debug('added {enemy} at {pos}'.format(enemy=enemy_.name, pos=node))
 
+    def add_wall(self, node, **kwargs):
+        """
+        add a wall with a given modifier
+        """
+        if 'damage' in kwargs:
+            self.logger.debug('added spikes at {pos}'.format(pos=node))
+        elif 'breakable' in kwargs:
+            self.logger.debug('added broken wall at {pos}'.format(pos=node))
+        elif 'end_timer' in kwargs:
+            self.logger.debug('added wall/end_timer at {pos}'.format(pos=node))
+        else:
+            self.logger.debug('added wall at {pos}'.format(pos=node))
+
+        wall = Wall(node, **kwargs)
+        self.all_sprites.add(wall)
+
+        if 'damage' not in kwargs:
+            self.block_list.add(wall)
+            self.nodes.add_wall(node)
+        else:
+            self.spikes_list.add(wall)
+
     def parse_room_array(self):
         """
         Turn a list of strings into an array of walls and enemies.
@@ -504,6 +531,7 @@ class World:
         x -= 64 * len(blanks)
 
         xstart = x
+        self.logger.info('Parsing the room into entities')
         for row in self.room_array:
             for col in row:
                 node = (x+32, y+32)
@@ -512,32 +540,16 @@ class World:
                     self.nodes.append(node)
 
                 if col == "S":
-                    wall = Wall(node, h.load('stone.png'))
-                    self.block_list.add(wall)
-                    self.all_sprites.add(wall)
-                    self.nodes.add_wall(node)
-                    self.logger.debug('added wall at {pos}'.format(pos=node))
+                    self.add_wall(node)
 
                 elif col == "R":
-                    wall = Wall(node, h.load('stone.png'), end_timer=True)
-                    self.block_list.add(wall)
-                    self.all_sprites.add(wall)
-                    self.nodes.add_wall(node)
-                    self.logger.debug('added wall/timer at {pos}'.format(pos=node))
+                    self.add_wall(node, end_timer=True)
 
                 elif col == "P":
-                    wall = Wall(node, h.load('spikes.png'), damage=1)
-                    self.block_list.add(wall)
-                    self.all_sprites.add(wall)
-                    self.nodes.add_wall(node)
-                    self.logger.debug('added spikes at {pos}'.format(pos=node))
+                    self.add_wall(node, damage=1)
 
                 elif col == "B":
-                    wall = Wall(node, h.load('broken_stone.png'), breakable=True)
-                    self.block_list.add(wall)
-                    self.all_sprites.add(wall)
-                    self.nodes.add_wall(node)
-                    self.logger.debug('added broken wall at {pos}'.format(pos=node))
+                    self.add_wall(node, breakable=True)
 
                 elif col == "V":
                     self.add_enemy(enemy.Volcano, node)
@@ -569,4 +581,6 @@ class World:
         self.logger.debug('number of created enemies: {0}'.format(len(self.enemy_list)))
         self.logger.debug('number of created nodes: {0}'.format(len(self.nodes.nodes)))
         self.logger.debug('number of created weapons: {0}'.format(len(self.drops_list)))
+
+        self.logger.info('World parsed successfully')
         self.array_parsed = True
