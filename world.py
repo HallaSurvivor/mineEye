@@ -190,6 +190,7 @@ class World:
 
         if not self.array_parsed:
             self.parse_room_array()
+            self.add_weapons_to_world()
 
         for e in self.enemy_list:
             e.draw(screen)
@@ -563,17 +564,6 @@ class World:
                 elif col == "W":
                     self.add_weapon(node)
 
-                else:
-                    if col not in ["&", "D"] and random.randint(0, 1000) <= self.weapon_factor:
-                        if len(self.drops_list) == 0:
-                            self.add_weapon(node)
-                        else:
-                            done = False
-                            for existing_weapon in self.drops_list:
-                                if h.get_node_dist(existing_weapon.rect.center, node) < 10000 and not done:
-                                    self.add_weapon(node)
-                                    done = True
-
                 x += 64
             y += 64
             x = xstart
@@ -584,3 +574,23 @@ class World:
 
         self.logger.info('World parsed successfully')
         self.array_parsed = True
+
+    def add_weapons_to_world(self):
+        """
+        After the world is parsed into entities, add weapons to it
+        """
+        self.logger.debug('Adding weapons to the world')
+
+        for node in self.nodes.nodes:
+            if self.nodes.passable(node):
+                if random.randint(0, 1000) <= self.weapon_factor:
+                    if len(self.drops_list) == 0:
+                        self.add_weapon(node)
+                    else:
+                        done = False
+                        for existing_weapon in self.drops_list:
+                            if h.get_node_dist(existing_weapon.rect.center, node) < 10000 and not done:
+                                self.add_weapon(node)
+                                done = True
+
+        self.logger.debug('{0} weapons added'.format(len(self.drops_list)))
