@@ -70,7 +70,7 @@ room_dict = {
         [c.MOVE_LEFT,
         "SSSSSSSSSDDS",
         "S          S",
-        "SP    PPS PS",
+        "SP     PS PS",
         "SSDDSSSSSSSS"
         ],
 
