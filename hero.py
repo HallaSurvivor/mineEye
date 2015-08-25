@@ -170,9 +170,6 @@ class Hero(pygame.sprite.Sprite):
                 self.animation_obj['stand_left'].blit(screen, self.rect)
 
     def update(self):
-        if settings['GOD MODE']:
-            self.jump_height = 50
-
         if self.speed_boost_counter > 0:
             self.speed_boost_counter += 1
 
